@@ -1,8 +1,9 @@
+import { getLocalTimeZone, parseDate } from '@internationalized/date';
 import { describe, expect, it } from 'vitest';
 import { makePlant, NOW } from '@test/vitest/data/plant.mock';
 
 // Helpers
-import { allTasks, DAY_MS, DAYS_PER_MONTH, dueTasks, formatDue, nextDue } from './index';
+import { allTasks, DAY_MS, DAYS_PER_MONTH, dueTasks, formatDue, nextDue, resolveLastCare, toDateValue } from './index';
 
 // Types
 import { CareKind } from '@/types';
@@ -25,6 +26,12 @@ const lastCareAt = (at: number): Record<CareKind, number> => {
         [CareKind.Fertilize]: at,
         [CareKind.Repot]: at
     };
+};
+
+const startOfLocalDay = (timestamp: number): number => {
+    const date = new Date(timestamp);
+
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 };
 
 const FORMAT_DUE_CASES: [number, string][] = [
@@ -122,5 +129,71 @@ describe('allTasks', () => {
             return task.plant.id;
         })).toEqual(['plant-soon', 'plant-later']);
         expect(first.daysUntil).toBeLessThan(second.daysUntil);
+    });
+});
+
+describe('resolveLastCare', () => {
+    it('defaults every kind to the start of today when all dates are blank', () => {
+        const resolved = resolveLastCare({}, NOW);
+
+        expect(resolved).toEqual({
+            [CareKind.Water]: startOfLocalDay(NOW),
+            [CareKind.Fertilize]: startOfLocalDay(NOW),
+            [CareKind.Repot]: startOfLocalDay(NOW)
+        });
+    });
+
+    it('treats an empty string like a missing date', () => {
+        const resolved = resolveLastCare({
+            [CareKind.Water]: '',
+            [CareKind.Fertilize]: '',
+            [CareKind.Repot]: ''
+        }, NOW);
+
+        expect(resolved).toEqual({
+            [CareKind.Water]: startOfLocalDay(NOW),
+            [CareKind.Fertilize]: startOfLocalDay(NOW),
+            [CareKind.Repot]: startOfLocalDay(NOW)
+        });
+    });
+
+    it('honours a supplied date for its own kind without affecting the others', () => {
+        const resolved = resolveLastCare({
+            [CareKind.Water]: '2023-08-15'
+        }, NOW);
+
+        expect(resolved[CareKind.Water]).toBe(new Date(2023, 7, 15).getTime());
+        expect(resolved[CareKind.Fertilize]).toBe(startOfLocalDay(NOW));
+        expect(resolved[CareKind.Repot]).toBe(startOfLocalDay(NOW));
+    });
+});
+
+describe('toDateValue', () => {
+    it('renders the local day of a local-midnight instant', () => {
+        expect(toDateValue(new Date(2026, 8, 6).getTime())).toBe('2026-09-06');
+    });
+
+    it('renders the same local day for a late-evening instant', () => {
+        expect(toDateValue(new Date(2026, 8, 6, 21, 34).getTime())).toBe('2026-09-06');
+    });
+
+    it('round-trips a resolved last-care date', () => {
+        const resolved = resolveLastCare({
+            [CareKind.Water]: '2026-09-06'
+        }, NOW);
+
+        expect(toDateValue(resolved[CareKind.Water])).toBe('2026-09-06');
+    });
+});
+
+describe('parseDate', () => {
+    it('returns the local midnight of a padded ISO date', () => {
+        expect(parseDate('2026-09-01').toDate(getLocalTimeZone()).getTime()).toBe(new Date(2026, 8, 1).getTime());
+    });
+
+    it.each(['2026-9-1', '2026-02-30', '2026-13-45', ''])('throws for %j', (value) => {
+        expect(() => {
+            return parseDate(value);
+        }).toThrow();
     });
 });

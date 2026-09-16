@@ -27,7 +27,9 @@ export interface PlantInput {
     species: string;
     commonName: string;
     care: CareSchedule;
-    /** Captured photo; stored as bytea on the server. */
     photo?: Blob;
     acquiredAt: number;
+    lastCare?: Partial<Record<CareKind, number>>;
 }
+
+export type LastCareDates = Partial<Record<CareKind, string>>;

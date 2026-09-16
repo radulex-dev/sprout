@@ -57,10 +57,6 @@ export const requestNotificationPermission = async (): Promise<NotificationPermi
     return perm;
 };
 
-/**
- * Check all plants for due care and show one notification per due task,
- * at most once per day per task.
- */
 export const checkAndNotify = async (): Promise<number> => {
     if (!isNotificationsSupported() || Notification.permission !== 'granted') {
         return 0;
@@ -94,10 +90,6 @@ export const checkAndNotify = async (): Promise<number> => {
     return pendingTasks.length;
 };
 
-/**
- * Run care checks: on load, when the tab regains focus, and hourly while open.
- * Returns a cleanup that detaches every listener and interval it created.
- */
 export const startCareWatcher = (): (() => void) => {
     void checkAndNotify();
 

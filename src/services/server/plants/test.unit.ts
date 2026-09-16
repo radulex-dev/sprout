@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { PLANT_ID_SCHEMA } from '@/lib/db/constants';
 
 // Services
-import { CareKindSchema, CareScheduleSchema, NotifiedAtSchema, PlantInputSchema, UpdatePlantSchema } from './schema';
+import { CareKindSchema, CareScheduleSchema, LastCareSchema, NotifiedAtSchema, PlantInputSchema, UpdatePlantSchema } from './schema';
 
 // Types
 import { CareKind } from '@/types';
@@ -173,6 +173,61 @@ describe('PlantInputSchema', () => {
 
         expect(parsed).toEqual(VALID_INPUT);
         expect(parsed).not.toHaveProperty('extra');
+    });
+
+    it('accepts an omitted lastCare', () => {
+        expect(PlantInputSchema.parse(VALID_INPUT)).not.toHaveProperty('lastCare');
+    });
+
+    it('accepts a lastCare map', () => {
+        const lastCare = {
+            [CareKind.Water]: 1_700_000_000_000
+        };
+
+        expect(PlantInputSchema.parse({
+            ...VALID_INPUT,
+            lastCare
+        }).lastCare).toEqual(lastCare);
+    });
+});
+
+describe('LastCareSchema', () => {
+    it('accepts a full triple', () => {
+        const lastCare = {
+            [CareKind.Water]: 1_700_000_000_000,
+            [CareKind.Fertilize]: 1_700_000_000_000,
+            [CareKind.Repot]: 1_700_000_000_000
+        };
+
+        expect(LastCareSchema.parse(lastCare)).toEqual(lastCare);
+    });
+
+    it('accepts a partial map', () => {
+        expect(LastCareSchema.parse({
+            [CareKind.Water]: 1_700_000_000_000
+        })).toEqual({
+            [CareKind.Water]: 1_700_000_000_000
+        });
+    });
+
+    it('accepts an empty object', () => {
+        expect(LastCareSchema.parse({})).toEqual({});
+    });
+
+    it('rejects a future timestamp', () => {
+        expect(() => {
+            return LastCareSchema.parse({
+                [CareKind.Water]: Date.now() + 1000
+            });
+        }).toThrow();
+    });
+
+    it('rejects a string timestamp', () => {
+        expect(() => {
+            return LastCareSchema.parse({
+                [CareKind.Water]: '2023-11-14'
+            });
+        }).toThrow();
     });
 });
 

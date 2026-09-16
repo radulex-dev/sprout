@@ -167,6 +167,17 @@ const config = configure([{
     rules: {
         'unicorn/prefer-string-raw': 'off'
     }
+}, {
+    files: ['src/**/test.unit.{ts,tsx}', 'test/**/*.{ts,tsx}'],
+    rules: {
+        'no-restricted-imports': ['error', {
+            paths: [{
+                name: '@testing-library/react',
+                importNames: ['fireEvent'],
+                message: 'Use userEvent: `const user = userEvent.setup()` then `await user.click(...)` / `await user.type(...)` / `await user.keyboard(...)`. If userEvent genuinely cannot drive it, disable this rule and state the reason.'
+            }]
+        }]
+    }
 }, eslintPluginBetterTailwindcss.configs.recommended, {
     settings: {
         'better-tailwindcss': {

@@ -7,11 +7,16 @@ import { Sprout } from 'lucide-react';
 // Constants
 import { NICKNAME_LABEL, NICKNAME_PLACEHOLDER } from './constants';
 import { FREQUENCY_TITLE } from '@/components/CareScheduleFields/constants';
+import { LAST_CARE_HINT, LAST_CARE_TITLE } from '@/components/LastCareFields/constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
 
 // Components
 import Button from '@/design-system/Button';
 import CareScheduleFields from '@/components/CareScheduleFields';
+import LastCareFields from '@/components/LastCareFields';
+
+// Helpers
+import { resolveLastCare } from '@/helpers/care';
 
 // Hooks
 import { useObjectUrl } from '@/hooks';
@@ -23,7 +28,7 @@ import type { IdentifyResult } from '@/services/identify';
 import styles from './styles.module.css';
 
 // Types
-import type { CareSchedule, PlantInput } from '@/types';
+import type { CareSchedule, LastCareDates, PlantInput } from '@/types';
 
 export interface Props extends React.ComponentProps<'div'> {
     photo: Blob;
@@ -40,11 +45,16 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
     const [care, setCare] = useState<CareSchedule>(() => {
         return result.defaultCare;
     });
+    const [lastCareDates, setLastCareDates] = useState<LastCareDates>({});
     const photoUrl = useObjectUrl(photo);
     const nicknameId = useId();
 
     const handleNicknameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         setNickname(event.target.value);
+    }, []);
+
+    const handleLastCareChange = useCallback((dates: LastCareDates) => {
+        setLastCareDates(dates);
     }, []);
 
     const handleSave = useCallback(() => {
@@ -54,9 +64,10 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
             commonName: result.commonName,
             photo,
             care,
-            acquiredAt: Date.now()
+            acquiredAt: Date.now(),
+            lastCare: resolveLastCare(lastCareDates, Date.now())
         });
-    }, [nickname, result, photo, care, onSave]);
+    }, [nickname, result, photo, care, lastCareDates, onSave]);
 
     return (
         <div className={classes} {...props}>
@@ -81,6 +92,11 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
                     </label>
                     <input id={nicknameId} value={nickname} onChange={handleNicknameChange} placeholder={NICKNAME_PLACEHOLDER} />
                 </div>
+
+                <h2 className={styles.sectionTitle}>
+                    {LAST_CARE_TITLE}
+                </h2>
+                <LastCareFields value={lastCareDates} onChange={handleLastCareChange} hint={LAST_CARE_HINT} />
 
                 <h2 className={styles.sectionTitle}>
                     {FREQUENCY_TITLE}

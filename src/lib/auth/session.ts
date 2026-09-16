@@ -5,7 +5,6 @@ import { cache } from 'react';
 // Auth
 import { auth } from '@/lib/auth';
 
-/** Redirect to /login when unauthenticated; returns the active session otherwise. */
 export const requireUser = cache(async () => {
     const session = await auth.api.getSession({
         headers: await headers()

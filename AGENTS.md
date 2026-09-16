@@ -3,17 +3,17 @@
 ## Roadmap
 
 - [ ] **Add a `useMemo`/`useCallback` optimisation pass**: audit components for values that can be memoised with `useMemo` and ensure every computed value / handler is as stable as the conventions already enforce for handlers.
-- [ ] **Move the production database to Neon**: swap the `pg` driver for `@neondatabase/serverless` and update `DATABASE_URL` (see ADR-0002 in `README.md`).
+- [ ] **Move the production database to Neon**: swap the `pg` driver for `@neondatabase/serverless` and update `DATABASE_URL`.
 - [ ] **Add Web Push (VAPID)** for reliable reminders while the app is closed (see the README limitation note).
 - [ ] **Expand unit-test coverage**: the Vitest + React Testing Library + jsdom harness is in place (`vitest.config.ts`, `test/vitest/setup.ts`, `test:coverage` in the pre-push hook and CI) with suites under `src/**/test.unit.ts*`; remaining work is broader component coverage (`handle*` handlers, `classNames` conditionals) and ratcheting the coverage thresholds.
 - [ ] **Integration tests**: recommended tool is **Vitest** (single runner shared with unit tests) + **`next-test-api-route-handler`** for `/api/*` route handlers and `lib/db` queries against the Docker Postgres. Run them against a test database to avoid clobbering dev data. (Alternative if a separate HTTP layer is preferred: `supertest` against `bun run start:prod`.)
 - [ ] **E2E tests**: add Playwright (already available via the Playwright MCP server). Cover the critical journey: sign-up → identify (mocked PlantNet response) → add plant → care due → mark done.
 - [ ] **Confirm and close the React #418 hydration warning** (pinned 2026-09-12): the `<div>`-inside-`<button>` nesting in `TaskRow` is fixed and the production build showed no console errors on the authenticated routes exercised during Phase 9 QA. The remaining suspect is `useClock`'s `Date.now()` differing between server and client — reproduce in a dev build for the component stack.
-- [ ] **Migrate Better Auth → Keycloak**: replace Better Auth (ADR-0003) with Keycloak as the authentication/authorization layer, per the global `frontend-code-conventions` skill. Needs a superseding ADR (ADR-0003 is immutable) and touches `src/lib/auth/index.ts`, `src/lib/auth/auth-client.ts`, `src/proxy.ts`, the generated auth schema, and the sign-in/sign-up UI.
+- [ ] **Migrate Better Auth → Keycloak**: replace Better Auth with Keycloak as the authentication/authorization layer, per the global `frontend-code-conventions` skill. Touches `src/lib/auth/index.ts`, `src/lib/auth/auth-client.ts`, `src/proxy.ts`, the generated auth schema, and the sign-in/sign-up UI.
 
 ## Done
 
-- [X] **Migrate Vite PWA → Next.js 16 App Router** (in place). Routes, server actions, auth (Better Auth), Postgres (Drizzle), PWA hardening, Dockerized local dev. See the ADRs in `README.md`.
+- [X] **Migrate Vite PWA → Next.js 16 App Router** (in place). Routes, server actions, auth (Better Auth), Postgres (Drizzle), PWA hardening, Dockerized local dev.
 - [X] **Auth** — Better Auth with Google OAuth + email/password; per-user scoping on every query.
 - [X] **Dockerized local dev** — `docker compose up -d db` + `bun run start`, or `docker compose up -d --build` for both containers.
 - [X] **Handlers & style conventions enforced by lint** — all event handlers are `handle*` arrow functions wrapped in `useCallback` (no inline handlers), all class names come from `*.module.css` via `styles.x`, no single-line object literals, blank line before every `return`, curly braces on all blocks. Enforced by custom rules in `eslint-rules/` (`no-literal-classname`, `no-inline-object-literal`, `no-inline-handlers`) + `@stylistic/padding-line-between-statements` + `curly`.
@@ -22,7 +22,7 @@
 - [X] **CI with GitHub Actions** — `.github/workflows/ci.yml` runs `build:rules` → `lint` → `test:coverage` → `build` → `test:size` on pushes to `master` and on pull requests.
 - [X] **Accessibility pass** — layout-owned `<main>` + skip link, accessible names on icon-only controls, `:focus-visible` styling, reduced-motion support, and browser zoom across every screen. See the Phase 8 entry in `.omo/plans/plant-app-normalization.md`.
 - [X] **Conventional commits enforced** — Husky hooks (`pre-commit` → `lint:staged`, `commit-msg` → commitlint, `pre-push` → lint + `test:coverage` + build + `test:size`) with `@commitlint/config-conventional`.
-- [X] **Design-system blocks** — `Button` (union button/anchor; `Default`/`Primary`/`Secondary`/`Danger`/`Soft`/`Outline`/`Bare`), plus Base UI-backed `Select` and `AlertDialog`, all in `src/design-system/`. See ADR-0011 in `README.md`.
+- [X] **Design-system blocks** — `Button` (union button/anchor; `Default`/`Primary`/`Secondary`/`Danger`/`Soft`/`Outline`/`Bare`), `Select`, `AlertDialog`, `DatePicker` and `Popover`, all in `src/design-system/`. Every block wraps a Base UI primitive except `Button`'s anchor branch, which stays `next/link`: Base UI's Button enforces button semantics and its docs say it should not be used for links.
 
 ## Notes
 
@@ -32,8 +32,8 @@
 - The proxy matcher in `src/proxy.ts` must stay a plain string constant (Turbopack requirement); `unicorn/prefer-string-raw` is disabled for that file in `eslint.config.mjs`.
 - `src/lib/db/auth-schema.ts` is generated by Better Auth CLI and lint-ignored; don't edit by hand.
 - Server actions need `bodySizeLimit` (5 MB) for photo uploads — configured in `next.config.ts`.
-- The plant photo Route Handler lives at `src/app/(app)/plants/[id]/photo/route.ts`, not under `/api`. That path is the stored `Plant.photo` URL produced by `queries.rowToPlant` and recorded in ADR-0004; route groups scope layouts, not Route Handlers.
-- **No `next/image`** (deliberate deviation, see ADR-0010 in `README.md`): the `requireUser()`-gated `bytea` photo route can't be read by the Image Optimizer because it forwards no cookies, and the two capture-preview `<img>` sites use unsupported `blob:` URLs. Keep `PlantPhoto` and the previews as plain `<img>`.
+- The plant photo Route Handler lives at `src/app/(app)/plants/[id]/photo/route.ts`, not under `/api`. That path is the stored `Plant.photo` URL produced by `queries.rowToPlant`; route groups scope layouts, not Route Handlers.
+- **No `next/image`** (deliberate deviation): the `requireUser()`-gated `bytea` photo route can't be read by the Image Optimizer because it forwards no cookies, and the two capture-preview `<img>` sites use unsupported `blob:` URLs. Keep `PlantPhoto` and the previews as plain `<img>`.
 - **Font** is self-hosted Manrope via `next/font/local` in `src/app/layout.tsx` (loader inlined there, not `next/font/google`): `--font-manrope` is wired to `--font-sans` in the `@theme static` block. Never add a runtime Google font request.
 - **Boundary model:** `(app)/error.tsx` does not catch `(app)/layout.tsx` errors (they reach the root `error.tsx`); `src/app/global-error.tsx` covers root-layout failures; `(app)/loading.tsx` covers the page's data fetch but not the auth gate (`requireUser()` reads `headers()`, which blocks navigation before the loading boundary).
 
@@ -61,7 +61,7 @@ Reference for the toolchain. Each entry: what it is, why we chose it, and the go
 | Postgres               | 16 (`postgres:16-alpine`) | Data store               | Runs in Docker (`db` compose service).                                                     |
 | Drizzle ORM            | 0.45.x                      | Query builder + types    | Schema in`src/lib/db/schema.ts`; queries in `src/lib/db/queries.ts`.                     |
 | drizzle-kit            | 0.31.x                      | Migrations + studio      | `db:generate`, `db:migrate`, `db:studio`.                                              |
-| `pg` (node-postgres) | 8.x                         | Postgres driver          | Maps`bytea` ↔ `Buffer` natively. Prod swaps to `@neondatabase/serverless` (ADR-0002). |
+| `pg` (node-postgres) | 8.x                         | Postgres driver          | Maps`bytea` ↔ `Buffer` natively. Prod swaps to `@neondatabase/serverless`. |
 | Neon                   | (planned)                   | Serverless prod Postgres | Not used yet — see roadmap.                                                                 |
 
 Gotchas: Drizzle's pg driver has **no binary column type** — `schema.ts` defines a custom `bytea` type via `customType`. The database is `sprout` (user/pass `sprout/sprout` locally).
@@ -116,7 +116,7 @@ Gotchas: inside compose the DB hostname is `db`, not `localhost` (`DATABASE_URL=
 
 | Tool             | Used for                | Notes                                                                                                                                                                                    |
 | ---------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Service worker   | `public/sw.js`        | Cache`sprout-v2`: cache-first for a static allowlist only; **never** caches documents or `/api` (ADR-0006). Handles notification clicks + periodic sync `sprout-care-check`. |
+| Service worker   | `public/sw.js`        | Cache`sprout-v2`: cache-first for a static allowlist only; **never** caches documents or `/api`. Handles notification clicks + periodic sync `sprout-care-check`. |
 | Web App Manifest | `src/app/manifest.ts` | Generated route (`MetadataRoute.Manifest`) replacing the static `manifest.webmanifest`.                                                                                              |
 | Notification API | —                      | Permission,`showNotification`, periodic background sync (Chromium/Android installed PWAs only).                                                                                        |
 

@@ -9,10 +9,11 @@ import { ButtonSize, ButtonVariant } from '@/design-system/Button/constants';
 
 // Components
 import Button from '@/design-system/Button';
+import Popover from '@/design-system/Popover';
 
 // Helpers
 import { formatDaysAgo } from './helpers';
-import { CARE_META, DAY_MS } from '@/helpers/care';
+import { CARE_META, DAY_MS, toDateValue } from '@/helpers/care';
 
 // Styles
 import styles from './styles.module.css';
@@ -47,9 +48,9 @@ const CareLogRow: React.FunctionComponent<Props> = ({ plant, kind, now, onDone, 
                 <div className={styles.title}>
                     {meta.label}
                 </div>
-                <div className={styles.when}>
-                    {`Last ${meta.verb} ${formatDaysAgo(daysAgo)}`}
-                </div>
+                <Popover trigger={`Last ${meta.verb} ${formatDaysAgo(daysAgo)}`} className={styles.when}>
+                    {toDateValue(last)}
+                </Popover>
             </div>
             <Button variant={ButtonVariant.Soft} size={ButtonSize.Sm} onClick={handleDone} icon={Check} className={styles.done}>
                 {`${capitalize(meta.verb)} today`}

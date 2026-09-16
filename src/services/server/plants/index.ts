@@ -32,9 +32,9 @@ export const createPlant = async (userId: string, input: PlantInput): Promise<st
             acquiredAt: input.acquiredAt,
             care: input.care,
             lastCare: {
-                [CareKind.Water]: now,
-                [CareKind.Fertilize]: now,
-                [CareKind.Repot]: now
+                [CareKind.Water]: input.lastCare?.[CareKind.Water] ?? now,
+                [CareKind.Fertilize]: input.lastCare?.[CareKind.Fertilize] ?? now,
+                [CareKind.Repot]: input.lastCare?.[CareKind.Repot] ?? now
             },
             lastNotified: {},
             notes: '',

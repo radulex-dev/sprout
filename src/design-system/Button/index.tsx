@@ -3,6 +3,7 @@
 import classNames from 'classnames';
 import Link from 'next/link';
 import React from 'react';
+import { Button as BaseButton } from '@base-ui/react/button';
 
 // Constants
 import { ButtonSize, ButtonVariant } from './constants';
@@ -41,9 +42,9 @@ const Button: React.FunctionComponent<Props> = ({ variant = ButtonVariant.Defaul
     }
 
     return (
-        <button {...props} type={props.type ?? 'button'} className={classes}>
+        <BaseButton className={classes} {...props} type={props.type ?? 'button'}>
             {renderContent()}
-        </button>
+        </BaseButton>
     );
 };
 

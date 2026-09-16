@@ -1,0 +1,9 @@
+@reference "../../app/globals.css";
+
+.root {
+    @apply ui-field;
+}
+
+.hint {
+    @apply ui-field-hint mb-0;
+}

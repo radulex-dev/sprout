@@ -1,0 +1,24 @@
+@reference "../../app/globals.css";
+
+.positioner {
+    @apply z-50;
+}
+
+.popup {
+    @apply rounded-card bg-surface px-3 py-2 text-note text-ink shadow-card;
+
+    transition:
+        opacity var(--dur-base) var(--ease-out),
+        transform var(--dur-base) var(--ease-out);
+}
+
+.popup[data-starting-style],
+.popup[data-ending-style] {
+    @apply scale-95 opacity-0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .popup {
+        @apply transition-none;
+    }
+}

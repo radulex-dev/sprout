@@ -1,8 +1,10 @@
+import { fromAbsolute, fromDate, getLocalTimeZone, parseDate, toCalendarDate } from '@internationalized/date';
+
 // Constants
 import { DAY_MS, DAYS_PER_MONTH } from './constants';
 
 // Types
-import { CareKind, type Plant } from '@/types';
+import { CareKind, type LastCareDates, type Plant } from '@/types';
 import type { CareTask } from './types';
 
 // Constants
@@ -56,7 +58,6 @@ const tasksForPlant = (plant: Plant, now: number): CareTask[] => {
     }, []);
 };
 
-/** All tasks across plants, soonest first. */
 export const allTasks = (plants: Plant[], now = Date.now()): CareTask[] => {
     const tasks = plants.flatMap((plant) => {
         return tasksForPlant(plant, now);
@@ -71,6 +72,33 @@ export const dueTasks = (plants: Plant[], now = Date.now()): CareTask[] => {
     return allTasks(plants, now).filter((task) => {
         return task.dueAt <= now;
     });
+};
+
+const startOfLocalDay = (timestamp: number, timeZone: string): number => {
+    return toCalendarDate(fromDate(new Date(timestamp), timeZone)).toDate(timeZone).getTime();
+};
+
+const localMidnightOf = (value: string | undefined, fallback: number, timeZone: string): number => {
+    if (!value) {
+        return fallback;
+    }
+
+    return parseDate(value).toDate(timeZone).getTime();
+};
+
+export const resolveLastCare = (dates: LastCareDates, now = Date.now()): Record<CareKind, number> => {
+    const timeZone = getLocalTimeZone();
+    const startOfToday = startOfLocalDay(now, timeZone);
+
+    return {
+        [CareKind.Water]: localMidnightOf(dates[CareKind.Water], startOfToday, timeZone),
+        [CareKind.Fertilize]: localMidnightOf(dates[CareKind.Fertilize], startOfToday, timeZone),
+        [CareKind.Repot]: localMidnightOf(dates[CareKind.Repot], startOfToday, timeZone)
+    };
+};
+
+export const toDateValue = (timestamp: number): string => {
+    return toCalendarDate(fromAbsolute(timestamp, getLocalTimeZone())).toString();
 };
 
 export const formatDue = (daysUntil: number): string => {

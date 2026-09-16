@@ -1,0 +1,13 @@
+@reference "../../app/globals.css";
+
+.root {
+    @apply min-w-0;
+}
+
+.fieldRow {
+    @apply flex flex-col;
+}
+
+.hint {
+    @apply ui-field-hint;
+}

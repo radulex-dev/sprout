@@ -25,13 +25,22 @@ const photoSchema = z.custom<Blob>((value) => {
     message: 'Photo must be a Blob no larger than 5 MB.'
 });
 
+const LastCareDateSchema = z.int().nonnegative().refine((value) => {
+    return value <= Date.now();
+}, {
+    message: 'Last care cannot be in the future.'
+});
+
+export const LastCareSchema = z.partialRecord(CareKindSchema, LastCareDateSchema);
+
 export const PlantInputSchema = z.object({
     nickname: z.string().trim().min(1).max(MAX_TEXT_LENGTH),
     species: z.string().trim().min(1).max(MAX_TEXT_LENGTH),
     commonName: z.string().trim().max(MAX_TEXT_LENGTH),
     care: CareScheduleSchema,
     photo: photoSchema.optional(),
-    acquiredAt: z.int().nonnegative()
+    acquiredAt: z.int().nonnegative(),
+    lastCare: LastCareSchema.optional()
 });
 
 /** Compile-time assertion that the schema output still matches the shared client contract. */

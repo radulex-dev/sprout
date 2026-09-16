@@ -83,6 +83,23 @@ describe('createPlant', () => {
         expect(id).toBe('plant-1');
         expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
     });
+
+    it('forwards lastCare timestamps to the service', async () => {
+        const lastCare = {
+            [CareKind.Water]: 1_699_000_000_000,
+            [CareKind.Fertilize]: 1_699_000_000_000
+        };
+
+        await createPlant({
+            ...VALID_INPUT,
+            lastCare
+        });
+
+        expect(serviceCreatePlant).toHaveBeenCalledWith('user-1', {
+            ...VALID_INPUT,
+            lastCare
+        });
+    });
 });
 
 describe('updatePlant', () => {
