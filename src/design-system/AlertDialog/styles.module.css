@@ -28,7 +28,7 @@
 }
 
 .title {
-    @apply m-0 text-lg font-bold text-green-900;
+    @apply m-0 text-lg font-bold wrap-anywhere text-green-900;
 }
 
 .description {

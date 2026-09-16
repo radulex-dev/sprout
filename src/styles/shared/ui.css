@@ -27,14 +27,14 @@
     @apply flex items-center justify-between pt-2 pb-4;
 
     h1 {
-        @apply m-0 text-h1 tracking-[-0.0313rem] text-green-900;
+        @apply m-0 text-h1 tracking-[-0.0313rem] wrap-anywhere text-green-900;
 
         text-wrap: balance;
     }
 }
 
 @utility ui-app-sub {
-    @apply mt-0.5 text-sm text-ink-soft;
+    @apply mt-0.5 text-sm wrap-anywhere text-ink-soft;
 }
 
 @utility ui-field {
@@ -102,11 +102,11 @@
 }
 
 @utility ui-title {
-    @apply text-sm font-[650];
+    @apply text-sm font-[650] wrap-anywhere;
 }
 
 @utility ui-when {
-    @apply mt-px text-xs text-ink-soft;
+    @apply mt-px text-xs wrap-anywhere text-ink-soft;
 }
 
 @utility ui-when-overdue {
@@ -150,11 +150,11 @@
 }
 
 @utility ui-sci {
-    @apply text-note text-ink-soft italic;
+    @apply text-note wrap-anywhere text-ink-soft italic;
 }
 
 @utility ui-common {
-    @apply text-[0.9375rem] font-[650];
+    @apply text-[0.9375rem] font-[650] wrap-anywhere;
 }
 
 @utility ui-notice {
