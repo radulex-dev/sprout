@@ -5,7 +5,7 @@
 }
 
 .popup {
-    @apply rounded-card bg-surface px-3 py-2 text-note text-ink shadow-card;
+    @apply rounded-card bg-green-900 px-3 py-2 text-note text-white shadow-card;
 
     transition:
         opacity var(--dur-base) var(--ease-out),

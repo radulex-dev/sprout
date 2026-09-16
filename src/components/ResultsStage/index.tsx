@@ -11,7 +11,7 @@ import Button from '@/design-system/Button';
 import IdentifyResultCard from './IdentifyResultCard';
 
 // Services
-import type { IdentifyResult } from '@/services/identify';
+import type { IdentifyResult } from '@/services/identify/types';
 
 // Styles
 import styles from './styles.module.css';

@@ -1,0 +1,14 @@
+@reference "../../../app/globals.css";
+
+.root {
+    @apply mt-0.75 block w-full text-center text-note font-[650] text-ink;
+    @apply border-none bg-transparent p-0;
+}
+
+.root.overdue {
+    @apply text-red-ink;
+}
+
+.root.due {
+    @apply text-amber-ink;
+}

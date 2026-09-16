@@ -2,8 +2,11 @@ import { getLocalTimeZone, parseDate } from '@internationalized/date';
 import { describe, expect, it } from 'vitest';
 import { makePlant, NOW } from '@test/vitest/data/plant.mock';
 
+// Constants
+import { DAY_MS, DAYS_PER_MONTH } from './constants';
+
 // Helpers
-import { allTasks, DAY_MS, DAYS_PER_MONTH, dueTasks, formatDue, nextDue, resolveLastCare, toDateValue } from './index';
+import { allTasks, dueTasks, formatDue, nextDue, resolveLastCare, toDateValue } from './index';
 
 // Types
 import { CareKind } from '@/types';

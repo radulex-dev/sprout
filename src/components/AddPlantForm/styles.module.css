@@ -1,6 +1,6 @@
 @reference "../../app/globals.css";
 
-.form {
+.root {
     @media (width >= 64rem) {
         display: grid;
         grid-template-columns: minmax(0, 17rem) minmax(0, 1fr);

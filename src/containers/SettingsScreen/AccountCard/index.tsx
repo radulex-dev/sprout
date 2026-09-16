@@ -10,21 +10,21 @@ import { ButtonVariant } from '@/design-system/Button/constants';
 import Button from '@/design-system/Button';
 
 // Styles
-import styles from '../styles.module.css';
+import styles from './styles.module.css';
 
 // Types
 import type { SettingsUser } from '../types';
 
-export interface Props {
+export interface Props extends React.ComponentProps<'div'> {
     user: SettingsUser;
     onSignOut: () => void;
 }
 
-const AccountCard: React.FunctionComponent<Props> = ({ user, onSignOut }) => {
-    const classes = classNames(styles.settingsCard, styles.accountCard);
+const AccountCard: React.FunctionComponent<Props> = ({ user, onSignOut, className, ...props }) => {
+    const classes = classNames(styles.root, styles.accountCard, className);
 
     return (
-        <div className={classes}>
+        <div className={classes} {...props}>
             <h2>
                 <User size="1.125rem" aria-hidden />
                 Account

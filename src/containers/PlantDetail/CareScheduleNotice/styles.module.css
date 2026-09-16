@@ -1,6 +1,6 @@
 @reference "../../../app/globals.css";
 
-.notice {
+.root {
     @apply ui-notice flex flex-col items-start gap-1;
 }
 

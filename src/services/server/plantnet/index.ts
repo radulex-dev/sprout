@@ -1,11 +1,9 @@
 // Constants
 import { ERROR_BAD_IMAGE, ERROR_BAD_KEY, ERROR_NO_IMAGE, ERROR_NO_KEY, ERROR_NOT_RECOGNISED, ERROR_UNAVAILABLE, ERROR_UNREACHABLE, HTTP_BAD_GATEWAY, HTTP_BAD_REQUEST, PLANTNET_API_URL, PLANTNET_NB_RESULTS } from './constants';
-
-// Helpers
-import { FALLBACK_CARE } from '@/helpers/care';
+import { FALLBACK_CARE } from '@/helpers/care/constants';
 
 // Services
-import type { IdentifyResult } from '@/services/identify';
+import type { IdentifyResult } from '@/services/identify/types';
 
 // Types
 import type { PlantNetErrorBody, PlantNetResponse } from './types';

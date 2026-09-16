@@ -26,7 +26,7 @@ export interface Props extends React.ComponentProps<'div'> {
 const PlantsScreen: React.FunctionComponent<Props> = ({ plants, className, ...props }) => {
     useClock();
 
-    const classes = classNames(styles.screen, className);
+    const classes = classNames(styles.root, className);
 
     const renderContent = () => {
         if (plants.length === 0) {

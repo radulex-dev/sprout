@@ -1,8 +1,9 @@
 // Constants
 import { CARE_CHECK_INTERVAL_MS, PERIODIC_SYNC_MIN_INTERVAL_MS } from './constants';
+import { CARE_META, DAY_MS } from '@/helpers/care/constants';
 
 // Helpers
-import { CARE_META, DAY_MS, dueTasks } from '@/helpers/care';
+import { dueTasks } from '@/helpers/care';
 
 // Database
 import { recordNotified } from '@/lib/db/actions';

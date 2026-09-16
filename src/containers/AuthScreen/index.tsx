@@ -1,5 +1,6 @@
 'use client';
 
+import classNames from 'classnames';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useId, useState } from 'react';
@@ -21,7 +22,9 @@ export interface Props extends React.ComponentProps<'main'> {
     mode: 'login' | 'signup';
 }
 
-const AuthScreen: React.FunctionComponent<Props> = ({ mode, ...props }) => {
+const AuthScreen: React.FunctionComponent<Props> = ({ mode, className, ...props }) => {
+    const classes = classNames(styles.root, className);
+
     const router = useRouter();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -90,7 +93,7 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, ...props }) => {
     }, []);
 
     return (
-        <main className={styles.root} {...props}>
+        <main className={classes} {...props}>
             <div className={styles.hero}>
                 <div className={styles.logo}>
                     <Sprout size="2.75rem" aria-hidden />

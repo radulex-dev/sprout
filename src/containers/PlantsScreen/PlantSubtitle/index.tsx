@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import { EMPTY_COLLECTION_TEXT } from './constants';
 
 // Styles
-import styles from '../styles.module.css';
+import styles from './styles.module.css';
 
 // Types
 import type { Plant } from '@/types';
@@ -15,7 +15,7 @@ export interface Props extends React.ComponentProps<'div'> {
 }
 
 const PlantSubtitle: React.FunctionComponent<Props> = ({ plants, className, ...props }) => {
-    const classes = classNames(styles.sub, className);
+    const classes = classNames(styles.root, className);
 
     const renderText = () => {
         return plants.length === 0 ? EMPTY_COLLECTION_TEXT : `${plants.length} plant${plants.length === 1 ? '' : 's'} in your care`;

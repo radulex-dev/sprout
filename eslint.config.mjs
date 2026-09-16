@@ -160,9 +160,6 @@ const config = configure([{
         }]
     }
 }, {
-    // Turbopack requires the proxy matcher to be a static string constant; the
-    // rule would force a String.raw template literal (a runtime call) which
-    // breaks `next build`.
     files: ['src/proxy.ts'],
     rules: {
         'unicorn/prefer-string-raw': 'off'
@@ -174,7 +171,7 @@ const config = configure([{
             paths: [{
                 name: '@testing-library/react',
                 importNames: ['fireEvent'],
-                message: 'Use userEvent: `const user = userEvent.setup()` then `await user.click(...)` / `await user.type(...)` / `await user.keyboard(...)`. If userEvent genuinely cannot drive it, disable this rule and state the reason.'
+                message: 'Using userEvent is preferred over fireEvent since it simulates user\'s behaviour as close as possible to reality'
             }]
         }]
     }

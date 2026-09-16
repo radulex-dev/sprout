@@ -18,7 +18,9 @@ export interface Props extends React.ComponentProps<'nav'> {
     dueCount: number;
 }
 
-const BottomNav: React.FunctionComponent<Props> = ({ dueCount, ...props }) => {
+const BottomNav: React.FunctionComponent<Props> = ({ dueCount, className, ...props }) => {
+    const classes = classNames(styles.root, className);
+
     const pathname = usePathname();
 
     const isActive = useCallback((tab: Tab): boolean => {
@@ -55,7 +57,7 @@ const BottomNav: React.FunctionComponent<Props> = ({ dueCount, ...props }) => {
     }, [isActive, dueCount]);
 
     return (
-        <nav className={styles.root} aria-label="Primary" {...props}>
+        <nav className={classes} aria-label="Primary" {...props}>
             <ul className={styles.list}>
                 {navLinks}
             </ul>

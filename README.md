@@ -66,7 +66,7 @@ Copy `.env.example` to `.env.local` and set:
 | Identification | `src/services/server/plantnet/` | Server-only PlantNet client; `/api/identify/` is a thin handler that keeps the key out of the browser |
 | Server services | `src/services/server/plants/` | Validation + plant mutations; thin server actions live in `src/lib/db/actions/` |
 | Notifications | `src/services/notifications/` | Permission, de-duplicated due-task notifications, watcher |
-| Service worker | `public/sw.js` | Cache-first for static assets only; never caches documents |
+| Service worker | `public/sw.js` | Cache-first for a small static allowlist (icons, manifest) only; never caches documents, `/api`, RSC payloads or `/_next/static`; dev unregisters any existing worker and purges its caches |
 | UI | `src/containers/` | My Plants / Identify / Care / Detail / Settings screens |
 | Design system | `src/design-system/` | Owned building blocks: `Button` (union button/anchor), `Select`, `AlertDialog`, `DatePicker` and `Popover` — all Base UI-backed except `Button`'s anchor branch, which stays `next/link`; feature code imports these, never a Base UI primitive directly |
 | Styling | `src/app/globals.css` + `src/styles/shared/ui.css` + co-located `styles.module.css` | Tailwind v4 (`@theme static` tokens, preflight omitted) + `@utility ui-*` atoms applied via `@apply`; no inline utility strings |

@@ -4,19 +4,23 @@ import classNames from 'classnames';
 import React, { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+// Constants
+import { ERROR_UNREADABLE_IMAGE } from '@/helpers/image/constants';
+
 // Components
 import AddPlantForm from '@/components/AddPlantForm';
 import CaptureStage from '@/components/CaptureStage';
 import ResultsStage from '@/components/ResultsStage';
 
 // Helpers
-import { compressPhoto, ERROR_UNREADABLE_IMAGE } from '@/helpers/image';
+import { compressPhoto } from '@/helpers/image';
 
 // Hooks
 import { useObjectUrl } from '@/hooks';
 
 // Services
-import { identifyPlant, type IdentifyResult } from '@/services/identify';
+import { identifyPlant } from '@/services/identify';
+import type { IdentifyResult } from '@/services/identify/types';
 
 // Database
 import { createPlant } from '@/lib/db/actions';
@@ -31,7 +35,7 @@ import type { Phase } from './types';
 export interface Props extends React.ComponentProps<'div'> {}
 
 const IdentifyScreen: React.FunctionComponent<Props> = ({ className, ...props }) => {
-    const classes = classNames(styles.screen, className);
+    const classes = classNames(styles.root, className);
     const errorNoticeClasses = classNames(styles.notice, styles.error);
     const router = useRouter();
     const [phase, setPhase] = useState<Phase>('capture');

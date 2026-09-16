@@ -1,6 +1,6 @@
 @reference "../../app/globals.css";
 
-.taskRow {
+.root {
     @apply ui-task-row;
 }
 
@@ -17,7 +17,7 @@
 }
 
 .when {
-    @apply ui-when block font-normal;
+    @apply ui-when block border-none bg-transparent p-0 text-left;
 }
 
 .done {

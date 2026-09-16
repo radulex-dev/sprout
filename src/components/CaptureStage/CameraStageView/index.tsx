@@ -1,5 +1,6 @@
 'use client';
 
+import classNames from 'classnames';
 import React from 'react';
 import { Leaf } from 'lucide-react';
 
@@ -12,7 +13,9 @@ export interface Props extends React.ComponentProps<'div'> {
     videoRef: React.RefObject<HTMLVideoElement | null>;
 }
 
-const CameraStageView: React.FunctionComponent<Props> = ({ photoUrl, isStreaming, videoRef, ...props }) => {
+const CameraStageView: React.FunctionComponent<Props> = ({ photoUrl, isStreaming, videoRef, className, ...props }) => {
+    const classes = classNames(styles.root, className);
+
     const renderPlantImage = () => {
         return <img src={photoUrl} alt="Preview of the photo you just captured" />;
     };
@@ -39,7 +42,7 @@ const CameraStageView: React.FunctionComponent<Props> = ({ photoUrl, isStreaming
     };
 
     return (
-        <div className={styles.root} {...props}>
+        <div className={classes} {...props}>
             {renderContent()}
         </div>
     );

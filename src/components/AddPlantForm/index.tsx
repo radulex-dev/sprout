@@ -22,7 +22,7 @@ import { resolveLastCare } from '@/helpers/care';
 import { useObjectUrl } from '@/hooks';
 
 // Services
-import type { IdentifyResult } from '@/services/identify';
+import type { IdentifyResult } from '@/services/identify/types';
 
 // Styles
 import styles from './styles.module.css';
@@ -38,7 +38,7 @@ export interface Props extends React.ComponentProps<'div'> {
 }
 
 const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel, onSave, className, ...props }) => {
-    const classes = classNames(styles.form, className);
+    const classes = classNames(styles.root, className);
     const resultCardClasses = classNames(styles.resultCard, styles.selected);
 
     const [nickname, setNickname] = useState(result.commonName || result.species);

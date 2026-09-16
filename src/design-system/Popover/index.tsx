@@ -23,7 +23,7 @@ const Popover: React.FunctionComponent<Props> = ({ trigger, children, ...props }
 
     return (
         <BasePopover.Root>
-            <BasePopover.Trigger {...props} id={triggerId} render={<Button variant={ButtonVariant.Bare} />}>
+            <BasePopover.Trigger id={triggerId} render={<Button variant={ButtonVariant.Unstyled} {...props} />}>
                 {trigger}
             </BasePopover.Trigger>
             <BasePopover.Portal>

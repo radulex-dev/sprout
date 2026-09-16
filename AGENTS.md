@@ -22,7 +22,7 @@
 - [X] **CI with GitHub Actions** — `.github/workflows/ci.yml` runs `build:rules` → `lint` → `test:coverage` → `build` → `test:size` on pushes to `master` and on pull requests.
 - [X] **Accessibility pass** — layout-owned `<main>` + skip link, accessible names on icon-only controls, `:focus-visible` styling, reduced-motion support, and browser zoom across every screen. See the Phase 8 entry in `.omo/plans/plant-app-normalization.md`.
 - [X] **Conventional commits enforced** — Husky hooks (`pre-commit` → `lint:staged`, `commit-msg` → commitlint, `pre-push` → lint + `test:coverage` + build + `test:size`) with `@commitlint/config-conventional`.
-- [X] **Design-system blocks** — `Button` (union button/anchor; `Default`/`Primary`/`Secondary`/`Danger`/`Soft`/`Outline`/`Bare`), `Select`, `AlertDialog`, `DatePicker` and `Popover`, all in `src/design-system/`. Every block wraps a Base UI primitive except `Button`'s anchor branch, which stays `next/link`: Base UI's Button enforces button semantics and its docs say it should not be used for links.
+- [X] **Design-system blocks** — `Button` (union button/anchor; `Default`/`Primary`/`Secondary`/`Danger`/`Soft`/`Outline`/`Unstyled`), `Select`, `AlertDialog`, `DatePicker` and `Popover`, all in `src/design-system/`. Every block wraps a Base UI primitive except `Button`'s anchor branch, which stays `next/link`: Base UI's Button enforces button semantics and its docs say it should not be used for links.
 
 ## Notes
 
@@ -116,7 +116,7 @@ Gotchas: inside compose the DB hostname is `db`, not `localhost` (`DATABASE_URL=
 
 | Tool             | Used for                | Notes                                                                                                                                                                                    |
 | ---------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Service worker   | `public/sw.js`        | Cache`sprout-v2`: cache-first for a static allowlist only; **never** caches documents or `/api`. Handles notification clicks + periodic sync `sprout-care-check`. |
+| Service worker   | `public/sw.js`        | Cache`sprout-v4`: cache-first for a small static allowlist (icons, manifest) only; **never** caches documents, `/api`, RSC payloads or `/_next/static`. Dev unregisters any existing worker and purges caches (`SiteCore`). Handles notification clicks + periodic sync `sprout-care-check`. |
 | Web App Manifest | `src/app/manifest.ts` | Generated route (`MetadataRoute.Manifest`) replacing the static `manifest.webmanifest`.                                                                                              |
 | Notification API | —                      | Permission,`showNotification`, periodic background sync (Chromium/Android installed PWAs only).                                                                                        |
 

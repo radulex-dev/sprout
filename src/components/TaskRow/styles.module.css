@@ -1,6 +1,6 @@
 @reference "../../app/globals.css";
 
-.taskRow {
+.root {
     @apply ui-task-row;
 }
 
@@ -13,7 +13,7 @@
 }
 
 .select {
-    @apply flex ui-info text-left;
+    @apply flex ui-info border-none bg-transparent p-0 text-left;
 }
 
 .content {
@@ -29,7 +29,7 @@
 }
 
 .when {
-    @apply ui-when block;
+    @apply ui-when block font-[650];
 
     &.overdue {
         @apply ui-when-overdue;

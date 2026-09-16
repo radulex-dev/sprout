@@ -1,10 +1,7 @@
 @reference "../../app/globals.css";
 
 .root {
-    @apply
-        inline-flex cursor-pointer items-center justify-center gap-2 rounded-btn border-none px-5
-        py-3.25 ui-common
-    ;
+    @apply cursor-pointer;
 
     text-decoration: none;
     transition:
@@ -14,12 +11,21 @@
         color var(--dur-base) var(--ease-out),
         opacity var(--dur-base) var(--ease-out);
 
-    &:active {
-        @apply scale-[0.97];
-    }
-
     &:disabled {
         @apply cursor-default opacity-50;
+    }
+}
+
+.default,
+.primary,
+.secondary,
+.danger,
+.soft,
+.outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-btn border-none px-5 py-3.25 ui-common;
+
+    &:active {
+        @apply scale-[0.97];
     }
 }
 
@@ -33,7 +39,14 @@
 }
 
 .danger {
-    @apply bg-transparent text-red;
+    @apply border border-solid border-red-ink text-red-ink;
+
+    background-color: var(--color-red-100);
+}
+
+.danger:focus-visible {
+    outline: 0.125rem solid var(--color-red-ink);
+    outline-offset: 0.125rem;
 }
 
 .soft {
@@ -42,14 +55,6 @@
 
 .outline {
     @apply border border-ink-soft/20 bg-surface text-ink;
-}
-
-.bare {
-    @apply gap-0 rounded-none border-none bg-transparent p-0 text-left;
-
-    &:active {
-        @apply scale-100;
-    }
 }
 
 .block {
@@ -83,14 +88,21 @@
     }
 
     .danger:hover {
-        background-color: color-mix(in oklab, var(--color-red) 6%, transparent);
+        background-color: color-mix(in oklab, var(--color-red-100) 90%, var(--color-red));
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .root {
         @apply transition-none;
+    }
 
+    .default,
+    .primary,
+    .secondary,
+    .danger,
+    .soft,
+    .outline {
         &:active {
             @apply scale-100;
         }

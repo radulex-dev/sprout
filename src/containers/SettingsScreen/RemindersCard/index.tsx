@@ -10,18 +10,18 @@ import { ButtonVariant } from '@/design-system/Button/constants';
 import Button from '@/design-system/Button';
 
 // Styles
-import styles from '../styles.module.css';
+import styles from './styles.module.css';
 
-export interface Props {
+export interface Props extends React.ComponentProps<'div'> {
     isSupported: boolean | undefined;
     perm: NotificationPermission;
     onEnable: () => void;
     onTest: () => void;
 }
 
-const RemindersCard: React.FunctionComponent<Props> = ({ isSupported, perm, onEnable, onTest }) => {
+const RemindersCard: React.FunctionComponent<Props> = ({ isSupported, perm, onEnable, onTest, className, ...props }) => {
     const warnNoticeClasses = classNames(styles.notice, styles.warn);
-    const classes = styles.settingsCard;
+    const classes = classNames(styles.root, className);
 
     const renderUnsupported = () => {
         return (
@@ -82,7 +82,7 @@ const RemindersCard: React.FunctionComponent<Props> = ({ isSupported, perm, onEn
     };
 
     return (
-        <div className={classes}>
+        <div className={classes} {...props}>
             <h2>
                 <Bell size="1.125rem" aria-hidden />
                 Care reminders

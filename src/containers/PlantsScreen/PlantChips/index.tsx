@@ -1,11 +1,14 @@
 import React from 'react';
 import classNames from 'classnames';
 
+// Constants
+import { CARE_META } from '@/helpers/care/constants';
+
 // Helpers
-import { allTasks, CARE_META, formatDue } from '@/helpers/care';
+import { allTasks, formatDue } from '@/helpers/care';
 
 // Styles
-import styles from '../styles.module.css';
+import styles from './styles.module.css';
 
 // Types
 import type { Plant } from '@/types';
@@ -15,7 +18,7 @@ export interface Props extends React.ComponentProps<'div'> {
 }
 
 const PlantChips: React.FunctionComponent<Props> = ({ plant, className, ...props }) => {
-    const classes = classNames(styles.chips, className);
+    const classes = classNames(styles.root, className);
     const tasks = allTasks([plant]);
     const urgent = tasks.filter((task) => {
         return task.daysUntil <= 0;

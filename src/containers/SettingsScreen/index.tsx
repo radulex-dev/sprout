@@ -39,7 +39,7 @@ const handleTestNotification = async (): Promise<void> => {
 };
 
 const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, className, ...props }) => {
-    const classes = classNames(styles.screen, className);
+    const classes = classNames(styles.root, className);
 
     const router = useRouter();
     const { isSupported, permission, requestPermission } = useNotifications();

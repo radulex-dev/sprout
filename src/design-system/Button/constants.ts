@@ -5,7 +5,7 @@ export enum ButtonVariant {
     Danger = 'danger',
     Soft = 'soft',
     Outline = 'outline',
-    Bare = 'bare'
+    Unstyled = 'unstyled'
 }
 
 export enum ButtonSize {

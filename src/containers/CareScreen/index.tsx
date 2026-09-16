@@ -10,7 +10,8 @@ import CareEmptyState from './CareEmptyState';
 import CareTaskSection from './CareTaskSection';
 
 // Helpers
-import { allTasks, type CareTask } from '@/helpers/care';
+import { allTasks } from '@/helpers/care';
+import type { CareTask } from '@/helpers/care/types';
 
 // Hooks
 import { useClock } from '@/hooks';
@@ -29,7 +30,7 @@ export interface Props extends React.ComponentProps<'div'> {
 }
 
 const CareScreen: React.FunctionComponent<Props> = ({ plants, className, ...props }) => {
-    const classes = classNames(styles.screen, className);
+    const classes = classNames(styles.root, className);
     const router = useRouter();
 
     const now = useClock(); // re-render tick; tasks computed against fresh Date.now()

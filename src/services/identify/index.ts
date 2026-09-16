@@ -22,5 +22,3 @@ export const identifyPlant = async (photo: Blob): Promise<IdentifyResult[]> => {
 
     return (await response.json()) as IdentifyResult[];
 };
-
-export { type IdentifyResult } from './types';

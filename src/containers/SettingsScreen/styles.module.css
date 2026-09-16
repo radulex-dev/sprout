@@ -1,6 +1,6 @@
 @reference "../../app/globals.css";
 
-.screen {
+.root {
     @apply ui-screen;
 }
 
@@ -14,43 +14,4 @@
 
 .cards {
     @apply md:grid md:grid-cols-2 md:items-start md:gap-3.5;
-}
-
-.notice {
-    @apply ui-notice flex items-start gap-1.5;
-}
-
-.warn {
-    @apply ui-notice-warn;
-}
-
-.settingsCard {
-    @apply
-        mb-3.5 rounded-card bg-surface p-4 shadow-card
-        md:mb-0
-    ;
-
-    h2 {
-        @apply m-0 mb-1.5 flex items-center gap-1.5 text-base;
-    }
-
-    p {
-        @apply m-0 mb-3 max-w-prose text-note/normal text-ink-soft;
-    }
-}
-
-.accountCard {
-    @apply md:col-span-2;
-}
-
-.accountLine {
-    @apply flex flex-wrap items-center gap-x-1;
-}
-
-.hint {
-    @apply flex items-start gap-1.5;
-}
-
-.hint strong {
-    @apply ml-1;
 }

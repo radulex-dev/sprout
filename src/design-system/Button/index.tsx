@@ -18,7 +18,7 @@ export type Props = ButtonProps | AnchorProps;
 
 const Button: React.FunctionComponent<Props> = ({ variant = ButtonVariant.Default, size = ButtonSize.Md, block = false, grow = false, className, icon: Icon, children, ...props }) => {
     const classes = classNames(styles.root, {
-        [styles[variant]]: variant,
+        [styles[variant]]: variant !== ButtonVariant.Unstyled,
         [styles.block]: block,
         [styles.grow]: grow,
         [styles.sm]: size === ButtonSize.Sm

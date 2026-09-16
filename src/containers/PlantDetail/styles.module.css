@@ -1,6 +1,6 @@
 @reference "../../app/globals.css";
 
-.screen {
+.root {
     @apply ui-screen;
 }
 
@@ -69,16 +69,4 @@
 
 .label {
     @apply mt-1 text-[0.6875rem] font-bold tracking-[0.0313rem] text-ink-soft uppercase;
-}
-
-.root {
-    @apply mt-0.75 text-note font-[650];
-}
-
-.root.overdue {
-    @apply text-red-ink;
-}
-
-.root.due {
-    @apply text-amber-ink;
 }

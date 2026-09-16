@@ -10,7 +10,7 @@ import PlantChips from '../PlantChips';
 import { displayName } from '@/helpers/plant';
 
 // Styles
-import styles from '../styles.module.css';
+import styles from './styles.module.css';
 
 // Types
 import type { Plant } from '@/types';
@@ -20,7 +20,7 @@ export interface Props extends React.ComponentProps<'ul'> {
 }
 
 const PlantGrid: React.FunctionComponent<Props> = ({ plants, className, ...props }) => {
-    const classes = classNames(styles.plantGrid, className);
+    const classes = classNames(styles.root, className);
 
     return (
         <ul className={classes} {...props}>

@@ -1,0 +1,17 @@
+@reference "../../../app/globals.css";
+
+.root {
+    @apply mt-2 flex flex-wrap gap-1;
+}
+
+.chip {
+    @apply ui-chip;
+}
+
+.chip.overdue {
+    @apply ui-chip-overdue;
+}
+
+.chip.due {
+    @apply ui-chip-due;
+}

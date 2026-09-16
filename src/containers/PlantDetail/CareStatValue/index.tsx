@@ -1,16 +1,23 @@
 import React from 'react';
 import classNames from 'classnames';
 
+// Constants
+import { NO_DUE_DATE_TEXT } from './constants';
+
+// Components
+import Popover from '@/design-system/Popover';
+
 // Helpers
-import { DAY_MS, formatDue, nextDue } from '@/helpers/care';
+import { daysUntilDue } from './helpers';
+import { formatDue, nextDue, toDateValue } from '@/helpers/care';
 
 // Styles
-import styles from '../styles.module.css';
+import styles from './styles.module.css';
 
 // Types
 import type { CareKind, Plant } from '@/types';
 
-export interface Props extends React.ComponentProps<'div'> {
+export interface Props extends Omit<React.ComponentPropsWithoutRef<'button'>, 'children'> {
     plant: Plant;
     kind: CareKind;
     now: number;
@@ -18,21 +25,25 @@ export interface Props extends React.ComponentProps<'div'> {
 
 const CareStatValue: React.FunctionComponent<Props> = ({ plant, kind, now, ...props }) => {
     const due = nextDue(plant, kind);
-    const daysUntil = due === undefined ? undefined : Math.ceil((due - now) / DAY_MS);
 
-    const renderValue = () => {
-        return daysUntil === undefined ? '—' : formatDue(daysUntil);
-    };
+    if (due === undefined) {
+        return (
+            <span className={styles.root}>
+                {NO_DUE_DATE_TEXT}
+            </span>
+        );
+    }
 
+    const daysUntil = daysUntilDue(due, now);
     const valueClasses = classNames(styles.root, {
-        [styles.overdue]: daysUntil !== undefined && daysUntil < 0,
-        [styles.due]: daysUntil !== undefined && daysUntil <= 0
+        [styles.overdue]: daysUntil < 0,
+        [styles.due]: daysUntil <= 0
     });
 
     return (
-        <div className={valueClasses} {...props}>
-            {renderValue()}
-        </div>
+        <Popover {...props} trigger={formatDue(daysUntil)} className={valueClasses}>
+            {toDateValue(due)}
+        </Popover>
     );
 };
 

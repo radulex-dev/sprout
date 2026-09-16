@@ -5,11 +5,11 @@ import React, { useCallback, useMemo } from 'react';
 import { getLocalTimeZone, today } from '@internationalized/date';
 import { capitalize } from 'lodash-es';
 
+// Constants
+import { CARE_META } from '@/helpers/care/constants';
+
 // Components
 import DatePicker from '@/design-system/DatePicker';
-
-// Helpers
-import { CARE_META } from '@/helpers/care';
 
 // Styles
 import styles from './styles.module.css';

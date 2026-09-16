@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import React from 'react';
 import { Info } from 'lucide-react';
 
@@ -5,17 +6,17 @@ import { Info } from 'lucide-react';
 import { NO_MARGIN_STYLE } from '../constants';
 
 // Styles
-import styles from '../styles.module.css';
+import styles from './styles.module.css';
 
-export interface Props {
+export interface Props extends React.ComponentProps<'div'> {
     plantCount: number;
 }
 
-const AboutCard: React.FunctionComponent<Props> = ({ plantCount }) => {
-    const classes = styles.settingsCard;
+const AboutCard: React.FunctionComponent<Props> = ({ plantCount, className, ...props }) => {
+    const classes = classNames(styles.root, className);
 
     return (
-        <div className={classes}>
+        <div className={classes} {...props}>
             <h2>
                 <Info size="1.125rem" aria-hidden />
                 About

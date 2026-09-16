@@ -8,7 +8,7 @@ import styles from './styles.module.css';
 export interface Props extends React.ComponentProps<'div'> {}
 
 const CareEmptyState: React.FunctionComponent<Props> = ({ className, ...props }) => {
-    const classes = classNames(styles.empty, className);
+    const classes = classNames(styles.root, className);
 
     return (
         <div className={classes} {...props}>

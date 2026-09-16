@@ -1,6 +1,6 @@
 @reference "../../app/globals.css";
 
-.screen {
+.root {
     @apply ui-screen;
 }
 

@@ -177,7 +177,7 @@
 }
 
 @utility ui-chip-overdue {
-    @apply bg-[#f7e3de] text-red-ink;
+    @apply bg-red-100 text-red-ink;
 }
 
 @utility ui-chip-due {

@@ -7,12 +7,12 @@ import { Camera, Sprout } from 'lucide-react';
 import Button from '@/design-system/Button';
 
 // Styles
-import styles from '../styles.module.css';
+import styles from './styles.module.css';
 
 export interface Props extends React.ComponentProps<'div'> {}
 
 const PlantsEmptyState: React.FunctionComponent<Props> = ({ className, ...props }) => {
-    const classes = classNames(styles.empty, className);
+    const classes = classNames(styles.root, className);
 
     return (
         <div className={classes} {...props}>

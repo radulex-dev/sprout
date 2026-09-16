@@ -1,6 +1,6 @@
 @reference "../../../app/globals.css";
 
-.section {
+.root {
     @apply mt-5.5;
 }
 

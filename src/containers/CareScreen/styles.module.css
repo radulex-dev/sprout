@@ -1,6 +1,6 @@
 @reference "../../app/globals.css";
 
-.screen {
+.root {
     @apply
         ui-screen
         lg:flex lg:min-h-[calc(100dvh-3.625rem)] lg:flex-col

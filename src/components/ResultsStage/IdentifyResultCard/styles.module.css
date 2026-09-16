@@ -1,7 +1,7 @@
 @reference "../../../app/globals.css";
 
-.select {
-    @apply flex w-full text-left;
+.root {
+    @apply flex w-full border-none bg-transparent p-0;
 }
 
 .resultCard {
@@ -17,7 +17,7 @@
 }
 
 .sci {
-    @apply block ui-sci;
+    @apply block ui-sci font-[650];
 }
 
 .common {

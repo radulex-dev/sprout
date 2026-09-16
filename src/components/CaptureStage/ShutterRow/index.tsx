@@ -1,5 +1,6 @@
 'use client';
 
+import classNames from 'classnames';
 import React from 'react';
 import { Aperture, Camera, ImageUp } from 'lucide-react';
 
@@ -13,7 +14,7 @@ import ShutterActions from './ShutterActions';
 // Styles
 import styles from './styles.module.css';
 
-export interface Props {
+export interface Props extends React.ComponentProps<'div'> {
     photoUrl?: string;
     isStreaming: boolean;
     isIdentifying: boolean;
@@ -25,7 +26,8 @@ export interface Props {
     onUpload: () => void;
 }
 
-const ShutterRow: React.FunctionComponent<Props> = ({ photoUrl, isStreaming, isIdentifying, onReset, onIdentify, onStopCamera, onCapture, onStartCamera, onUpload }) => {
+const ShutterRow: React.FunctionComponent<Props> = ({ photoUrl, isStreaming, isIdentifying, onReset, onIdentify, onStopCamera, onCapture, onStartCamera, onUpload, className, ...props }) => {
+    const classes = classNames(styles.root, className);
     const renderIdentifyActions = () => {
         return <IdentifyActions isIdentifying={isIdentifying} onReset={onReset} onIdentify={onIdentify} />;
     };
@@ -78,7 +80,7 @@ const ShutterRow: React.FunctionComponent<Props> = ({ photoUrl, isStreaming, isI
     };
 
     return (
-        <div className={styles.shutterRow}>
+        <div className={classes} {...props}>
             {renderContent()}
         </div>
     );

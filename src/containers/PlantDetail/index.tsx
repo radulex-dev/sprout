@@ -9,6 +9,7 @@ import { ArrowLeft } from 'lucide-react';
 // Constants
 import { HEADER_STYLE, SUB_STYLE } from './constants';
 import { FREQUENCY_TITLE } from '@/components/CareScheduleFields/constants';
+import { CARE_META } from '@/helpers/care/constants';
 
 // Components
 import PlantPhoto from '@/components/PlantPhoto';
@@ -20,7 +21,6 @@ import CareStatValue from './CareStatValue';
 import CareScheduleNotice from './CareScheduleNotice';
 
 // Helpers
-import { CARE_META } from '@/helpers/care';
 import { displayName } from '@/helpers/plant';
 
 // Hooks
@@ -40,7 +40,7 @@ export interface Props extends React.ComponentProps<'div'> {
 }
 
 const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...props }) => {
-    const classes = classNames(styles.root, styles.screen, className);
+    const classes = classNames(styles.root, className);
     const errorNoticeClasses = classNames(styles.notice, styles.error);
 
     const router = useRouter();

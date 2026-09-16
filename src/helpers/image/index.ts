@@ -3,9 +3,6 @@ import Compressor from 'compressorjs';
 // Constants
 import { ERROR_UNREADABLE_IMAGE, JPEG_MIME_TYPE, JPEG_QUALITY, MAX_IMAGE_DIMENSION } from './constants';
 
-// Constants
-export { ERROR_UNREADABLE_IMAGE, MAX_IMAGE_DIMENSION } from './constants';
-
 export const compressPhoto = (photo: Blob): Promise<Blob> => {
     return new Promise((resolve, reject) => {
         new Compressor(photo, {

@@ -7,8 +7,8 @@
  * client router: the page segment never arrives and the route-level
  * loading.tsx boundary resolves to its skeleton forever, with no error.
  */
-const CACHE = 'sprout-v3';
-const SHELL = ['/', '/icon.svg', '/icon-192.png', '/icon-512.png', '/manifest.webmanifest'];
+const CACHE = 'sprout-v4';
+const SHELL = ['/icon.svg', '/icon-192.png', '/icon-512.png', '/manifest.webmanifest'];
 const SHELL_PATHS = new Set(SHELL);
 
 globalThis.addEventListener('install', (e) => {
@@ -40,8 +40,9 @@ globalThis.addEventListener('fetch', (e) => {
     // dropping this guard reintroduces that bug.
     if (e.request.headers.get('RSC') === '1') return;
     if (url.pathname.startsWith('/api/')) return;
-    // Static allowlist only; see ADR-0006.
-    if (!SHELL_PATHS.has(url.pathname) && !url.pathname.startsWith('/_next/static/')) return;
+    // Never add /_next/static here: the browser already revalidates it, and a
+    // copy cached here outlives every rebuild (dev chunk names are stable).
+    if (!SHELL_PATHS.has(url.pathname)) return;
 
     e.respondWith(
         caches.match(e.request).then((hit) => {

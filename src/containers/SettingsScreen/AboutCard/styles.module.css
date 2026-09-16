@@ -1,0 +1,16 @@
+@reference "../../../app/globals.css";
+
+.root {
+    @apply
+        mb-3.5 rounded-card bg-surface p-4 shadow-card
+        md:mb-0
+    ;
+
+    h2 {
+        @apply m-0 mb-1.5 flex items-center gap-1.5 text-base;
+    }
+
+    p {
+        @apply m-0 mb-3 max-w-prose text-note/normal text-ink-soft;
+    }
+}

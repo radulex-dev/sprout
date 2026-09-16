@@ -1,11 +1,13 @@
 'use client';
 
+import classNames from 'classnames';
 import React, { useCallback } from 'react';
 import { capitalize } from 'lodash-es';
 import { Check } from 'lucide-react';
 
 // Constants
 import { ButtonSize, ButtonVariant } from '@/design-system/Button/constants';
+import { CARE_META, DAY_MS } from '@/helpers/care/constants';
 
 // Components
 import Button from '@/design-system/Button';
@@ -13,7 +15,7 @@ import Popover from '@/design-system/Popover';
 
 // Helpers
 import { formatDaysAgo } from './helpers';
-import { CARE_META, DAY_MS, toDateValue } from '@/helpers/care';
+import { toDateValue } from '@/helpers/care';
 
 // Styles
 import styles from './styles.module.css';
@@ -28,7 +30,9 @@ export interface Props extends React.ComponentProps<'div'> {
     onDone: (kind: CareKind) => void;
 }
 
-const CareLogRow: React.FunctionComponent<Props> = ({ plant, kind, now, onDone, ...props }) => {
+const CareLogRow: React.FunctionComponent<Props> = ({ plant, kind, now, onDone, className, ...props }) => {
+    const classes = classNames(styles.root, className);
+
     const meta = CARE_META[kind];
     const last = plant.lastCare[kind];
     const daysAgo = Math.floor((now - last) / DAY_MS);
@@ -37,10 +41,8 @@ const CareLogRow: React.FunctionComponent<Props> = ({ plant, kind, now, onDone, 
         onDone(kind);
     }, [onDone, kind]);
 
-    const rootClasses = styles.taskRow;
-
     return (
-        <div className={rootClasses} {...props}>
+        <div className={classes} {...props}>
             <div className={styles.thumb}>
                 <meta.icon size="1.125rem" aria-hidden />
             </div>

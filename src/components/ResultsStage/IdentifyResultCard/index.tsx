@@ -10,7 +10,7 @@ import { ButtonVariant } from '@/design-system/Button/constants';
 import Button from '@/design-system/Button';
 
 // Services
-import type { IdentifyResult } from '@/services/identify';
+import type { IdentifyResult } from '@/services/identify/types';
 
 // Styles
 import styles from './styles.module.css';
@@ -21,8 +21,9 @@ export interface Props extends Omit<React.ComponentProps<'button'>, 'onClick' | 
     onSelect: (result: IdentifyResult) => void;
 }
 
-const IdentifyResultCard: React.FunctionComponent<Props> = ({ result, selected, onSelect, ...props }) => {
-    const classes = classNames(styles.resultCard, {
+const IdentifyResultCard: React.FunctionComponent<Props> = ({ result, selected, onSelect, className, ...props }) => {
+    const classes = classNames(styles.root, className);
+    const cardClasses = classNames(styles.resultCard, {
         [styles.selected]: selected
     });
 
@@ -35,8 +36,8 @@ const IdentifyResultCard: React.FunctionComponent<Props> = ({ result, selected, 
     }, [onSelect, result]);
 
     return (
-        <Button variant={ButtonVariant.Bare} className={styles.select} onClick={handleSelect} {...props}>
-            <span className={classes}>
+        <Button variant={ButtonVariant.Unstyled} className={classes} onClick={handleSelect} {...props}>
+            <span className={cardClasses}>
                 <span>
                     <span className={styles.common}>
                         {result.commonName || result.species}
