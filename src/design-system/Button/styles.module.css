@@ -54,7 +54,7 @@
 }
 
 .outline {
-    @apply border border-ink-soft/20 bg-surface text-ink;
+    @apply border border-solid border-ink-soft/20 bg-surface text-ink;
 }
 
 .block {
