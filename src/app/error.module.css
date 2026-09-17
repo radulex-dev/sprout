@@ -11,3 +11,7 @@
 .message {
     @apply m-0 max-w-xs text-sm/normal text-ink-soft;
 }
+
+.actions {
+    @apply flex w-full max-w-xs flex-col gap-2;
+}

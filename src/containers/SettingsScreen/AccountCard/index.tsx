@@ -3,7 +3,6 @@ import React from 'react';
 import { User } from 'lucide-react';
 
 // Constants
-import { NO_MARGIN_STYLE } from '../constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
 
 // Components
@@ -21,7 +20,7 @@ export interface Props extends React.ComponentProps<'div'> {
 }
 
 const AccountCard: React.FunctionComponent<Props> = ({ user, onSignOut, className, ...props }) => {
-    const classes = classNames(styles.root, styles.accountCard, className);
+    const classes = classNames(styles.root, className);
 
     return (
         <div className={classes} {...props}>
@@ -29,18 +28,20 @@ const AccountCard: React.FunctionComponent<Props> = ({ user, onSignOut, classNam
                 <User size="1.125rem" aria-hidden />
                 Account
             </h2>
-            <p className={styles.accountLine} style={NO_MARGIN_STYLE}>
+            <p className={styles.identity}>
                 Signed in as
-                <strong>
+                <strong className={styles.name}>
                     {user.name}
                 </strong>
-                <span>
+                <span className={styles.email}>
                     {user.email}
                 </span>
             </p>
-            <Button variant={ButtonVariant.Secondary} block onClick={onSignOut}>
-                Sign out
-            </Button>
+            <div className={styles.actions}>
+                <Button variant={ButtonVariant.Secondary} block onClick={onSignOut}>
+                    Log out
+                </Button>
+            </div>
         </div>
     );
 };

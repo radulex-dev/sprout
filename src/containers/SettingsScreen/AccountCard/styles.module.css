@@ -15,10 +15,18 @@
     }
 }
 
-.accountCard {
-    @apply md:col-span-2;
+.identity {
+    @apply flex flex-wrap items-center gap-x-1;
 }
 
-.accountLine {
-    @apply flex flex-wrap items-center gap-x-1;
+.name {
+    @apply text-ink;
+}
+
+.email {
+    @apply mt-0.5 block w-full break-all;
+}
+
+.actions {
+    @apply border-x-0 border-t border-b-0 border-solid border-ink-soft/20 pt-3;
 }

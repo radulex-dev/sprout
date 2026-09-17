@@ -1,7 +1,7 @@
 @reference "../../app/globals.css";
 
 .root {
-    @media (width >= 64rem) {
+    @variant desktop {
         display: grid;
         grid-template-columns: minmax(0, 17rem) minmax(0, 1fr);
         column-gap: 2rem;
@@ -29,7 +29,7 @@
 .thumb {
     @apply size-14 shrink-0 rounded-xl object-cover;
 
-    @media (width >= 64rem) {
+    @variant desktop {
         @apply aspect-3/4 h-auto w-full rounded-card;
     }
 }
@@ -50,7 +50,7 @@
     @apply ui-shutter-row;
 }
 
-@media (width >= 64rem) {
+@variant desktop {
     .resultCard {
         flex-direction: column;
         align-items: stretch;

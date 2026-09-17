@@ -49,13 +49,13 @@
     @apply text-green-700;
 }
 
-@media (width >= 48rem) {
+@variant tablet {
     .root {
         max-width: 42rem;
     }
 }
 
-@media (width >= 64rem) {
+@variant desktop {
     .root {
         position: sticky;
         top: 0;

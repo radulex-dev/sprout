@@ -9,14 +9,14 @@
     margin: 0;
     padding: 0;
 
-    @media (width >= 48rem) {
+    @variant tablet {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 0.625rem;
     }
 }
 
-@media (width >= 48rem) {
+@variant tablet {
     .resultsList > li {
         display: grid;
     }
@@ -29,7 +29,7 @@
 .shutterRow {
     @apply ui-shutter-row;
 
-    @media (width >= 64rem) {
+    @variant desktop {
         max-width: 32rem;
         margin-inline: auto;
     }

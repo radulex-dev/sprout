@@ -55,13 +55,15 @@
     @apply mt-2 flex flex-wrap gap-1;
 }
 
-@media (hover: hover) and (width >= 48rem) {
-    .plantCard:hover {
-        transform: translateY(-0.125rem);
-        box-shadow: var(--shadow-card-hover);
-    }
+@variant tablet {
+    @media (hover: hover) {
+        .plantCard:hover {
+            transform: translateY(-0.125rem);
+            box-shadow: var(--shadow-card-hover);
+        }
 
-    .plantCard:hover .photo {
-        transform: scale(1.03);
+        .plantCard:hover .photo {
+            transform: scale(1.03);
+        }
     }
 }

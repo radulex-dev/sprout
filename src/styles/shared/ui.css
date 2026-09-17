@@ -14,7 +14,7 @@
     padding-bottom: calc(var(--nav-h) + 1.5rem + env(safe-area-inset-bottom));
     animation: fade-in var(--dur-base) var(--ease-out);
 
-    @media (width >= 64rem) {
+    @variant desktop {
         padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
     }
 

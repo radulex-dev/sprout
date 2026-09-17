@@ -9,7 +9,7 @@
 
     padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom));
 
-    @media (width >= 64rem) {
+    @variant desktop {
         padding-bottom: 0;
     }
 }

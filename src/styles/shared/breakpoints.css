@@ -1,0 +1,7 @@
+@theme static {
+    --breakpoint-md: 48rem;
+    --breakpoint-lg: 64rem;
+}
+
+@custom-variant tablet (@media (width >= theme(--breakpoint-md)));
+@custom-variant desktop (@media (width >= theme(--breakpoint-lg)));

@@ -16,7 +16,7 @@
 
     color: #cfe0cb;
 
-    @media (width >= 64rem) {
+    @variant desktop {
         @apply gap-3 p-10 text-base;
     }
 }
@@ -28,7 +28,7 @@
     ;
 }
 
-@media (width >= 64rem) {
+@variant desktop {
     .root {
         max-height: calc(100dvh - 14rem);
     }

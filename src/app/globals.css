@@ -2,6 +2,7 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 @import "../styles/shared/ui.css";
+@import "../styles/shared/breakpoints.css";
 
 @theme static {
     --color-bg: #f4f1e8;
