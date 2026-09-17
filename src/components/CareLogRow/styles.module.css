@@ -5,11 +5,11 @@
 }
 
 .thumb {
-    @apply ui-thumb;
+    @apply ui-thumb size-11;
 }
 
 .info {
-    @apply ui-info;
+    @apply flex ui-info flex-col justify-between self-stretch;
 }
 
 .title {
@@ -17,7 +17,13 @@
 }
 
 .when {
-    @apply ui-when block border-none bg-transparent p-0 text-left;
+    @apply relative ui-when flex border-none bg-transparent p-0 text-left;
+}
+
+.when::after {
+    @apply absolute inset-x-0 -inset-y-3.5;
+
+    content: "";
 }
 
 .done {

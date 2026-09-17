@@ -25,21 +25,21 @@ import type { CareKind, Plant } from '@/types';
 
 export interface Props extends React.ComponentProps<'div'> {
     plant: Plant;
-    kind: CareKind;
+    label: CareKind;
     now: number;
     onDone: (kind: CareKind) => void;
 }
 
-const CareLogRow: React.FunctionComponent<Props> = ({ plant, kind, now, onDone, className, ...props }) => {
+const CareLogRow: React.FunctionComponent<Props> = ({ plant, label, now, onDone, className, ...props }) => {
     const classes = classNames(styles.root, className);
 
-    const meta = CARE_META[kind];
-    const last = plant.lastCare[kind];
+    const meta = CARE_META[label];
+    const last = plant.lastCare[label];
     const daysAgo = Math.floor((now - last) / DAY_MS);
 
     const handleDone = useCallback(() => {
-        onDone(kind);
-    }, [onDone, kind]);
+        onDone(label);
+    }, [onDone, label]);
 
     return (
         <div className={classes} {...props}>
@@ -50,7 +50,7 @@ const CareLogRow: React.FunctionComponent<Props> = ({ plant, kind, now, onDone, 
                 <div className={styles.title}>
                     {meta.label}
                 </div>
-                <Popover trigger={`Last ${meta.verb} ${formatDaysAgo(daysAgo)}`} className={styles.when}>
+                <Popover trigger={`Last: ${formatDaysAgo(daysAgo)}`} className={styles.when}>
                     {toDateValue(last)}
                 </Popover>
             </div>

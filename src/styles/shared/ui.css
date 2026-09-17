@@ -11,6 +11,7 @@
         lg:px-8
     ;
 
+    padding-top: calc(1rem + env(safe-area-inset-top));
     padding-bottom: calc(var(--nav-h) + 1.5rem + env(safe-area-inset-bottom));
     animation: fade-in var(--dur-base) var(--ease-out);
 
@@ -48,7 +49,7 @@
     input,
     select,
     textarea {
-        @apply w-full rounded-xl bg-surface px-3 py-2.75 text-[0.9375rem] text-ink;
+        @apply w-full rounded-xl bg-surface px-3 py-2.75 text-base text-ink;
 
         border: 1.5px solid rgb(28 37 32 / 14%);
 
@@ -171,8 +172,8 @@
 
 @utility ui-chip {
     @apply
-        inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.75 text-[0.6875rem]
-        font-semibold whitespace-nowrap text-green-700
+        inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.75 text-xs font-semibold
+        whitespace-nowrap text-green-700
     ;
 }
 

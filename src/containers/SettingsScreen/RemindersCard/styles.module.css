@@ -3,7 +3,7 @@
 .root {
     @apply
         mb-3.5 rounded-card bg-surface p-4 shadow-card
-        md:mb-0
+        md:mb-0 md:flex md:flex-col
     ;
 
     h2 {
@@ -24,7 +24,10 @@
 }
 
 .hint {
-    @apply flex items-start gap-1.5;
+    @apply
+        flex items-start gap-1.5
+        md:mt-auto
+    ;
 }
 
 .hint strong {

@@ -23,10 +23,10 @@ describe('CareLogRow', () => {
         const plant = makePlant();
         const handleDone = vi.fn();
 
-        render(<CareLogRow plant={plant} kind={CareKind.Water} now={NOW} onDone={handleDone} />);
+        render(<CareLogRow plant={plant} label={CareKind.Water} now={NOW} onDone={handleDone} />);
 
         expect(screen.getByText('Water')).toBeInTheDocument();
-        expect(screen.getByText('Last watered today')).toBeInTheDocument();
+        expect(screen.getByText('Last: today')).toBeInTheDocument();
         expect(screen.getByRole('button', {
             name: 'Watered today'
         })).toBeInTheDocument();
@@ -37,7 +37,7 @@ describe('CareLogRow', () => {
         const handleDone = vi.fn();
         const user = userEvent.setup();
 
-        render(<CareLogRow plant={plant} kind={CareKind.Water} now={NOW} onDone={handleDone} />);
+        render(<CareLogRow plant={plant} label={CareKind.Water} now={NOW} onDone={handleDone} />);
         await user.click(screen.getByRole('button', {
             name: 'Watered today'
         }));
@@ -52,10 +52,10 @@ describe('CareLogRow', () => {
         const handleDone = vi.fn();
         const user = userEvent.setup();
 
-        render(<CareLogRow plant={plant} kind={CareKind.Water} now={TEN_DAYS_LATER} onDone={handleDone} />);
+        render(<CareLogRow plant={plant} label={CareKind.Water} now={TEN_DAYS_LATER} onDone={handleDone} />);
 
         const trigger = screen.getByRole('button', {
-            name: 'Last watered 10 days ago'
+            name: 'Last: 10 days ago'
         });
 
         expect(trigger).toHaveAttribute('aria-expanded', 'false');
@@ -64,7 +64,7 @@ describe('CareLogRow', () => {
 
         expect(trigger).toHaveAttribute('aria-expanded', 'true');
         expect(screen.getByRole('dialog', {
-            name: 'Last watered 10 days ago'
+            name: 'Last: 10 days ago'
         })).toHaveTextContent('2026-07-06');
     });
 
@@ -75,9 +75,9 @@ describe('CareLogRow', () => {
         const handleDone = vi.fn();
         const user = userEvent.setup();
 
-        render(<CareLogRow plant={plant} kind={CareKind.Water} now={TEN_DAYS_LATER} onDone={handleDone} />);
+        render(<CareLogRow plant={plant} label={CareKind.Water} now={TEN_DAYS_LATER} onDone={handleDone} />);
         await user.click(screen.getByRole('button', {
-            name: 'Last watered 10 days ago'
+            name: 'Last: 10 days ago'
         }));
         await user.keyboard('{Escape}');
 

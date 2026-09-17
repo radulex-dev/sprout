@@ -5,3 +5,4 @@
 
 @custom-variant tablet (@media (width >= theme(--breakpoint-md)));
 @custom-variant desktop (@media (width >= theme(--breakpoint-lg)));
+@custom-variant short (@media (height <= 45rem));

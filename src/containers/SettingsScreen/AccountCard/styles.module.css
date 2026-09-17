@@ -3,7 +3,7 @@
 .root {
     @apply
         mb-3.5 rounded-card bg-surface p-4 shadow-card
-        md:mb-0
+        md:mb-0 md:flex md:flex-col
     ;
 
     h2 {
@@ -28,5 +28,8 @@
 }
 
 .actions {
-    @apply border-x-0 border-t border-b-0 border-solid border-ink-soft/20 pt-3;
+    @apply
+        border-x-0 border-t border-b-0 border-solid border-ink-soft/20 pt-3
+        md:mt-auto
+    ;
 }

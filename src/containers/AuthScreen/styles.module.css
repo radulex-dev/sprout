@@ -20,6 +20,14 @@
     @apply m-0 text-ink-soft;
 }
 
+.googleSlot {
+    @apply flex justify-center;
+}
+
+.notice {
+    @apply text-center text-sm text-amber-ink;
+}
+
 .form {
     @apply flex flex-col gap-3.5;
 }

@@ -73,7 +73,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
 
     const renderAboutCard = () => {
         return (
-            <AboutCard plantCount={plants.length} />
+            <AboutCard className={styles.about} plantCount={plants.length} />
         );
     };
 

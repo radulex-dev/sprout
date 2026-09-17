@@ -13,5 +13,9 @@
 }
 
 .cards {
-    @apply md:grid md:grid-cols-2 md:items-start md:gap-3.5;
+    @apply md:grid md:grid-cols-2 md:gap-3.5;
+}
+
+.about {
+    @apply md:col-span-2;
 }

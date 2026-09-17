@@ -68,5 +68,5 @@
 }
 
 .label {
-    @apply mt-1 text-[0.6875rem] font-bold tracking-[0.0313rem] text-ink-soft uppercase;
+    @apply ui-field-hint font-bold tracking-[0.0313rem] uppercase;
 }

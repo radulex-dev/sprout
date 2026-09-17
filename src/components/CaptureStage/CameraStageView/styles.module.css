@@ -33,3 +33,10 @@
         max-height: calc(100dvh - 14rem);
     }
 }
+
+@variant short {
+    .root {
+        max-height: calc(100dvh - 14rem);
+        margin-inline: auto;
+    }
+}

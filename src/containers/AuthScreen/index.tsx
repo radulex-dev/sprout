@@ -2,11 +2,13 @@
 
 import classNames from 'classnames';
 import Link from 'next/link';
+import { GoogleLogin, GoogleOAuthProvider, type CredentialResponse } from '@react-oauth/google';
 import { useRouter } from 'next/navigation';
-import { useCallback, useId, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Sprout } from 'lucide-react';
 
 // Constants
+import { ERROR_GOOGLE_SIGN_IN, GIS_RENDER_TIMEOUT_MS, GOOGLE_BUTTON_WIDTH } from './constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
 
 // Components
@@ -20,9 +22,10 @@ import styles from './styles.module.css';
 
 export interface Props extends React.ComponentProps<'main'> {
     mode: 'login' | 'signup';
+    clientId: string;
 }
 
-const AuthScreen: React.FunctionComponent<Props> = ({ mode, className, ...props }) => {
+const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, className, ...props }) => {
     const classes = classNames(styles.root, className);
 
     const router = useRouter();
@@ -31,7 +34,27 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, className, ...props 
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isGoogleUnavailable, setIsGoogleUnavailable] = useState(!clientId);
+    const googleSlotRef = useRef<HTMLDivElement>(null);
     const errorId = useId();
+
+    useEffect(() => {
+        if (isGoogleUnavailable) {
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            const frame = googleSlotRef.current?.querySelector('iframe');
+
+            if (!frame || frame.getBoundingClientRect().height < 10) {
+                setIsGoogleUnavailable(true);
+            }
+        }, GIS_RENDER_TIMEOUT_MS);
+
+        return () => {
+            clearTimeout(timer);
+        };
+    }, [isGoogleUnavailable]);
 
     const isSignup = mode === 'signup';
 
@@ -85,12 +108,55 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, className, ...props 
         router.refresh();
     }, [name, email, password, isSignup, router]);
 
-    const handleGoogle = useCallback(() => {
-        void authClient.signIn.social({
+    const handleGoogleCredential = useCallback(async (response: CredentialResponse) => {
+        if (!response.credential) {
+            setError(ERROR_GOOGLE_SIGN_IN);
+
+            return;
+        }
+
+        const result = await authClient.signIn.social({
             provider: 'google',
-            callbackURL: '/'
+            idToken: {
+                token: response.credential
+            }
         });
+
+        if (result.error) {
+            setError(result.error.message ?? ERROR_GOOGLE_SIGN_IN);
+
+            return;
+        }
+
+        router.push('/');
+        router.refresh();
+    }, [router]);
+
+    const handleGoogleError = useCallback(() => {
+        setError(ERROR_GOOGLE_SIGN_IN);
     }, []);
+
+    const handleGoogleUnavailable = useCallback(() => {
+        setIsGoogleUnavailable(true);
+    }, []);
+
+    const renderGooglePlaceholder = () => {
+        return (
+            <div className={styles.notice} role="status">
+                Google sign-in is unavailable right now.
+            </div>
+        );
+    };
+
+    const renderGoogleButton = () => {
+        return (
+            <GoogleOAuthProvider clientId={clientId} onScriptLoadError={handleGoogleUnavailable}>
+                <div className={styles.googleSlot} ref={googleSlotRef}>
+                    <GoogleLogin type="standard" theme="outline" size="large" shape="pill" text="continue_with" logo_alignment="left" width={GOOGLE_BUTTON_WIDTH} onSuccess={handleGoogleCredential} onError={handleGoogleError} />
+                </div>
+            </GoogleOAuthProvider>
+        );
+    };
 
     return (
         <main className={classes} {...props}>
@@ -141,9 +207,7 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, className, ...props 
                 </span>
             </div>
 
-            <Button variant={ButtonVariant.Outline} block onClick={handleGoogle}>
-                Continue with Google
-            </Button>
+            {isGoogleUnavailable ? renderGooglePlaceholder() : renderGoogleButton()}
 
             <p className={styles.switch}>
                 {`${isSignup ? 'Already have an account?' : 'New to Sprout?'} `}

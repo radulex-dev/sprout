@@ -7,6 +7,7 @@
       "dependencies": {
         "@base-ui/react": "^1.8.0",
         "@internationalized/date": "^3.12.4",
+        "@react-oauth/google": "^0.13.5",
         "better-auth": "^1.6.29",
         "classnames": "^2.5.1",
         "compressorjs": "^1.3.0",
@@ -478,6 +479,8 @@
     "@pkgr/core": ["@pkgr/core@0.3.6", "", {}, "sha512-SEeaJLb3qBNF/OaXnaR1NmmBbFYk1zC0ZH/52fATcRPLFg/p791YrcyFFy44Bo9sLaGuSuLp5Q6axbb/O+v/RA=="],
 
     "@prisma/client": ["@prisma/client@5.22.0", "", { "peerDependencies": { "prisma": "*" }, "optionalPeers": ["prisma"] }, "sha512-M0SVXfyHnQREBKxCgyo7sffrKttwE6R8PMq330MIUF0pTwjUhLbW84pFDlf06B27XyCR++VtjugEnIHdr07SVA=="],
+
+    "@react-oauth/google": ["@react-oauth/google@0.13.5", "", { "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0" } }, "sha512-xQWri2s/3nNekZJ4uuov2aAfQYu83bN3864KcFqw2pK1nNbFurQIjPFDXhWaKH3IjYJ2r/9yyIIpsn5lMqrheQ=="],
 
     "@rolldown/binding-android-arm-eabi": ["@rolldown/binding-android-arm-eabi@1.2.8", "", { "os": "android", "cpu": "arm" }, "sha512-tN5aztYkKCte4i5SIrrz5yK/HMjEuCqCSCJa418jOV8tZ1cBY3YF2otxB1ktPxzsLA1BeTqwapK0bfjxNvHJVw=="],
 

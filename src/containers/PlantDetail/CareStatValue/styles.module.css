@@ -1,7 +1,10 @@
 @reference "../../../app/globals.css";
 
 .root {
-    @apply mt-0.75 block w-full text-center text-note font-[650] text-ink;
+    @apply
+        mt-0.75 flex min-h-11 w-full items-center justify-center text-center text-note font-[650]
+        text-ink
+    ;
     @apply border-none bg-transparent p-0;
 }
 

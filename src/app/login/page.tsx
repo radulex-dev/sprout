@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 const LoginPage = () => {
-    return <AuthScreen mode="login" />;
+    return <AuthScreen mode="login" clientId={process.env.GOOGLE_CLIENT_ID ?? ''} />;
 };
 
 export default LoginPage;

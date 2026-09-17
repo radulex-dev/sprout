@@ -169,7 +169,7 @@ const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...prop
                         {[CareKind.Water, CareKind.Fertilize, CareKind.Repot].map((kind) => {
                             return (
                                 <li key={kind}>
-                                    <CareLogRow plant={plant} kind={kind} now={now} onDone={handleMarkDone} />
+                                    <CareLogRow plant={plant} label={kind} now={now} onDone={handleMarkDone} />
                                 </li>
                             );
                         })}
