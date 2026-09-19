@@ -9,10 +9,20 @@ import { Sprout } from 'lucide-react';
 
 // Constants
 import { ERROR_GOOGLE_SIGN_IN, GIS_RENDER_TIMEOUT_MS, GOOGLE_BUTTON_WIDTH } from './constants';
+import { CONFIRM_LABEL, INSTALL_GUIDE_CONTENT } from '@/containers/SettingsScreen/InstallGuide/constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
 
 // Components
+import InstallButton from './InstallButton';
+import InstallGuide from '@/containers/SettingsScreen/InstallGuide';
+import AlertDialog from '@/design-system/AlertDialog';
 import Button from '@/design-system/Button';
+
+// Hooks
+import { useInstall } from '@/hooks';
+
+// Services
+import { InstallPlatform } from '@/services/install';
 
 // Auth
 import { authClient } from '@/lib/auth/auth-client';
@@ -29,12 +39,14 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, className,
     const classes = classNames(styles.root, className);
 
     const router = useRouter();
+    const { isStandalone, isPhone, platform, canPrompt, promptInstall } = useInstall();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isGoogleUnavailable, setIsGoogleUnavailable] = useState(!clientId);
+    const [isInstallGuideOpen, setIsInstallGuideOpen] = useState(false);
     const googleSlotRef = useRef<HTMLDivElement>(null);
     const errorId = useId();
 
@@ -57,6 +69,8 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, className,
     }, [isGoogleUnavailable]);
 
     const isSignup = mode === 'signup';
+    const guidePlatform = platform ?? InstallPlatform.Other;
+    const guideContent = INSTALL_GUIDE_CONTENT[guidePlatform];
 
     const handleNameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
@@ -140,6 +154,20 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, className,
         setIsGoogleUnavailable(true);
     }, []);
 
+    const handleInstall = useCallback(async () => {
+        if (canPrompt) {
+            await promptInstall();
+
+            return;
+        }
+
+        setIsInstallGuideOpen(true);
+    }, [canPrompt, promptInstall]);
+
+    const handleCloseInstallGuide = useCallback(() => {
+        setIsInstallGuideOpen(false);
+    }, []);
+
     const renderGooglePlaceholder = () => {
         return (
             <div className={styles.notice} role="status">
@@ -158,6 +186,24 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, className,
         );
     };
 
+    const renderInstallButton = () => {
+        if (isStandalone !== false || isPhone !== true) {
+            return;
+        }
+
+        return (
+            <InstallButton isPromptAvailable={canPrompt} onInstall={handleInstall} />
+        );
+    };
+
+    const renderInstallGuide = () => {
+        return (
+            <AlertDialog isOpen={isInstallGuideOpen} title={guideContent.title} description={guideContent.description} confirmLabel={CONFIRM_LABEL} confirmVariant={ButtonVariant.Primary} hideCancel onConfirm={handleCloseInstallGuide} onCancel={handleCloseInstallGuide}>
+                <InstallGuide platform={guidePlatform} />
+            </AlertDialog>
+        );
+    };
+
     return (
         <main className={classes} {...props}>
             <div className={styles.hero}>
@@ -171,6 +217,8 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, className,
                     Track your plants, never miss a watering.
                 </p>
             </div>
+
+            {renderInstallButton()}
 
             <form className={styles.form} onSubmit={handleSubmit}>
                 {isSignup && (
@@ -215,6 +263,8 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, className,
                     {isSignup ? 'Sign in' : 'Create account'}
                 </Link>
             </p>
+
+            {renderInstallGuide()}
         </main>
     );
 };

@@ -2,10 +2,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { pwaInstallHandler } from 'pwa-install-handler';
 
 // Services
-import { getInstallPlatform, isStandalone, type InstallPlatform } from '@/services/install';
+import { getInstallPlatform, isPhoneBrowser, isStandalone, type InstallPlatform } from '@/services/install';
 
 export interface InstallState {
     isStandalone: boolean | undefined;
+    isPhone: boolean | undefined;
     platform: InstallPlatform | undefined;
     canPrompt: boolean;
     promptInstall: () => Promise<void>;
@@ -13,11 +14,13 @@ export interface InstallState {
 
 export const useInstall = (): InstallState => {
     const [standalone, setStandalone] = useState<boolean | undefined>(undefined);
+    const [isPhone, setIsPhone] = useState<boolean | undefined>(undefined);
     const [platform, setPlatform] = useState<InstallPlatform | undefined>(undefined);
     const [canPrompt, setCanPrompt] = useState(false);
 
     useEffect(() => {
         setStandalone(isStandalone());
+        setIsPhone(isPhoneBrowser());
         setPlatform(getInstallPlatform());
 
         const handleCanInstallChange = (canInstall: boolean) => {
@@ -37,6 +40,7 @@ export const useInstall = (): InstallState => {
 
     return {
         isStandalone: standalone,
+        isPhone,
         platform,
         canPrompt,
         promptInstall: requestInstall

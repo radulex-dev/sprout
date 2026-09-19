@@ -1,4 +1,4 @@
 [{
     "path": ".next/static/chunks/**/*.js",
-    "limit": "325 kB"
+    "limit": "350 kB"
 }]

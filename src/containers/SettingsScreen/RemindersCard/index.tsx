@@ -15,18 +15,20 @@ import styles from './styles.module.css';
 export interface Props extends React.ComponentProps<'div'> {
     isSupported: boolean | undefined;
     perm: NotificationPermission;
-    needsInstall: boolean;
+    isStandalone: boolean | undefined;
     onEnable: () => void;
     onInstall: () => void;
     onTest: () => void;
+    testStatus: string;
 }
 
-const RemindersCard: React.FunctionComponent<Props> = ({ isSupported, perm, needsInstall, onEnable, onInstall, onTest, className, ...props }) => {
+const RemindersCard: React.FunctionComponent<Props> = ({ isSupported, perm, isStandalone, onEnable, onInstall, onTest, testStatus, className, ...props }) => {
+    const isInstallRequired = isSupported === false && isStandalone === false;
     const warnNoticeClasses = classNames(styles.notice, styles.warn);
     const classes = classNames(styles.root, className);
 
     const renderUnsupported = () => {
-        if (needsInstall) {
+        if (isInstallRequired) {
             return (
                 <Button block onClick={onInstall}>
                     Install the app to enable reminders
@@ -51,6 +53,11 @@ const RemindersCard: React.FunctionComponent<Props> = ({ isSupported, perm, need
                 <Button variant={ButtonVariant.Secondary} block onClick={onTest}>
                     Send a test notification
                 </Button>
+                {testStatus !== '' && (
+                    <div className={styles.notice} role="status">
+                        {testStatus}
+                    </div>
+                )}
             </React.Fragment>
         );
     };
@@ -102,7 +109,7 @@ const RemindersCard: React.FunctionComponent<Props> = ({ isSupported, perm, need
                 when the app is open or in the background (installed app on Android/Chrome).
             </p>
             {renderStatus()}
-            {!needsInstall && (
+            {!isInstallRequired && (
                 <p className={styles.hint} style={IPHONE_HINT_STYLE}>
                     <Lightbulb size="1rem" aria-hidden />
                     <span>

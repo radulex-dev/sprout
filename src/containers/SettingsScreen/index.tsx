@@ -11,7 +11,6 @@ import { ButtonVariant } from '@/design-system/Button/constants';
 // Components
 import AboutCard from './AboutCard';
 import AccountCard from './AccountCard';
-import InstallCard from './InstallCard';
 import InstallGuide from './InstallGuide';
 import RemindersCard from './RemindersCard';
 import AlertDialog from '@/design-system/AlertDialog';
@@ -39,14 +38,6 @@ export interface Props extends React.ComponentProps<'div'> {
     user: SettingsUser;
 }
 
-const handleTestNotification = async (): Promise<void> => {
-    const reg = await navigator.serviceWorker.ready;
-    await reg.showNotification('Sprout is ready', {
-        body: 'You\'ll get a reminder here when a plant needs watering, fertilising or repotting.',
-        icon: '/icon-192.png'
-    });
-};
-
 const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, className, ...props }) => {
     const classes = classNames(styles.root, className);
 
@@ -54,6 +45,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
     const { isSupported, permission, requestPermission } = useNotifications();
     const { isStandalone, platform, canPrompt, promptInstall } = useInstall();
     const [isGuideOpen, setIsGuideOpen] = useState(false);
+    const [testStatus, setTestStatus] = useState('');
 
     const guidePlatform = platform ?? InstallPlatform.Other;
     const guideContent = INSTALL_GUIDE_CONTENT[guidePlatform];
@@ -66,12 +58,41 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
     }, [router]);
 
     const handleEnableNotifications = useCallback(async () => {
+        setTestStatus('');
+
         const granted = await requestPermission();
 
         if (granted === 'granted') {
             await checkAndNotify();
         }
     }, [requestPermission]);
+
+    const handleTestNotification = useCallback(async () => {
+        const registration = await navigator.serviceWorker.getRegistration();
+
+        if (!registration?.active) {
+            setTestStatus('Test notifications are unavailable because the app\'s service worker is not running.');
+
+            return;
+        }
+
+        try {
+            await registration.showNotification('Sprout is ready', {
+                body: 'You\'ll get a reminder here when a plant needs watering, fertilising or repotting.',
+                icon: '/icon-192.png'
+            });
+
+            const shown = await registration.getNotifications();
+
+            if (shown.length > 0) {
+                setTestStatus('Test notification sent.');
+            } else {
+                setTestStatus('The system did not display the test notification.');
+            }
+        } catch (error) {
+            setTestStatus(error instanceof Error ? error.message : 'The test notification could not be sent.');
+        }
+    }, []);
 
     const handleInstall = useCallback(async () => {
         if (canPrompt) {
@@ -87,10 +108,6 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
         setIsGuideOpen(false);
     }, []);
 
-    const handleShowInstallGuide = useCallback(() => {
-        setIsGuideOpen(true);
-    }, []);
-
     const renderAccountCard = () => {
         return (
             <AccountCard user={user} onSignOut={handleSignOut} />
@@ -99,17 +116,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
 
     const renderRemindersCard = () => {
         return (
-            <RemindersCard isSupported={isSupported} perm={permission} needsInstall={isSupported === false && isStandalone === false} onEnable={handleEnableNotifications} onInstall={handleShowInstallGuide} onTest={handleTestNotification} />
-        );
-    };
-
-    const renderInstallCard = () => {
-        if (isStandalone !== false) {
-            return;
-        }
-
-        return (
-            <InstallCard onInstall={handleInstall} />
+            <RemindersCard isSupported={isSupported} perm={permission} isStandalone={isStandalone} onEnable={handleEnableNotifications} onInstall={handleInstall} onTest={handleTestNotification} testStatus={testStatus} />
         );
     };
 
@@ -124,7 +131,6 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
             <div className={styles.cards}>
                 {renderAccountCard()}
                 {renderRemindersCard()}
-                {renderInstallCard()}
                 {renderAboutCard()}
             </div>
         );

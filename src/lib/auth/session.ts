@@ -11,7 +11,7 @@ export const requireUser = cache(async () => {
     });
 
     if (!session) {
-        redirect('/login');
+        redirect('/api/session-expired');
     }
 
     return session;

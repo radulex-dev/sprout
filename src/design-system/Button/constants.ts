@@ -1,6 +1,7 @@
 export enum ButtonVariant {
     Default = 'default',
     Primary = 'primary',
+    Accent = 'accent',
     Secondary = 'secondary',
     Danger = 'danger',
     Soft = 'soft',
