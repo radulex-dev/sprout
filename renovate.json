@@ -4,6 +4,12 @@
     "platformAutomerge": false,
     "packageRules": [
         {
+            "description": "Stay on Postgres 16 until the v18 container issue is resolved",
+            "matchDatasources": ["docker"],
+            "matchPackageNames": ["postgres"],
+            "allowedVersions": "<17"
+        },
+        {
             "description": "Auto-merge minor and patch updates once CI is green",
             "matchUpdateTypes": ["minor", "patch"],
             "automerge": true,
