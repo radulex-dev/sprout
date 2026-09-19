@@ -49,13 +49,11 @@ jobs:
       - run: bunx vercel@59.23.2 build --prod
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          # next.config.ts drops `output: 'standalone'` for Vercel builds. Set the
-          # indicator explicitly so the guard never depends on the project's
-          # "System Environment Variables" toggle being enabled.
           VERCEL: '1'
-          # Becomes the service worker cache name, so each deployment installs a
-          # fresh worker that purges the previous cache on activate.
           NEXT_PUBLIC_BUILD_ID: ${{ github.event.workflow_run.head_sha }}
+          DATABASE_URL: postgres://build:build@localhost:5432/build
+          BETTER_AUTH_SECRET: build-time-placeholder-not-used-at-runtime
+          BETTER_AUTH_URL: https://sprout.radualex.me
       - uses: actions/upload-artifact@v7
         with:
           name: vercel-output
