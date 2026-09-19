@@ -16,18 +16,20 @@ import styles from './styles.module.css';
 // Types
 import type { AlertDialogChangeDetails } from './types';
 
-export interface Props {
+export interface Props extends Omit<React.ComponentProps<typeof BaseAlertDialog.Root>, 'children'> {
     isOpen: boolean;
     title: string;
     description: string;
     confirmLabel: string;
     cancelLabel?: string;
     confirmVariant?: ButtonVariant;
+    hideCancel?: boolean;
     onConfirm: () => void;
     onCancel: () => void;
+    children?: React.ReactNode;
 }
 
-const AlertDialog: React.FunctionComponent<Props> = ({ isOpen, title, description, confirmLabel, cancelLabel = DEFAULT_CANCEL_LABEL, confirmVariant = DEFAULT_CONFIRM_VARIANT, onConfirm, onCancel }) => {
+const AlertDialog: React.FunctionComponent<Props> = ({ isOpen, title, description, confirmLabel, cancelLabel = DEFAULT_CANCEL_LABEL, confirmVariant = DEFAULT_CONFIRM_VARIANT, hideCancel = false, onConfirm, onCancel, children, ...props }) => {
     const handleConfirm = useCallback(() => {
         onConfirm();
     }, [onConfirm]);
@@ -42,17 +44,30 @@ const AlertDialog: React.FunctionComponent<Props> = ({ isOpen, title, descriptio
         }
     }, [onCancel]);
 
+    const renderContent = () => {
+        if (!children) {
+            return;
+        }
+
+        return (
+            <div className={styles.content}>{children}</div>
+        );
+    };
+
     return (
-        <BaseAlertDialog.Root open={isOpen} onOpenChange={handleOpenChange}>
+        <BaseAlertDialog.Root open={isOpen} onOpenChange={handleOpenChange} {...props}>
             <BaseAlertDialog.Portal>
                 <BaseAlertDialog.Backdrop className={styles.backdrop} />
                 <BaseAlertDialog.Popup className={styles.popup}>
                     <BaseAlertDialog.Title className={styles.title}>{title}</BaseAlertDialog.Title>
                     <BaseAlertDialog.Description className={styles.description}>{description}</BaseAlertDialog.Description>
+                    {renderContent()}
                     <div className={styles.actions}>
-                        <BaseAlertDialog.Close render={<Button variant={ButtonVariant.Secondary} onClick={handleCancel} />}>
-                            {cancelLabel}
-                        </BaseAlertDialog.Close>
+                        {!hideCancel && (
+                            <BaseAlertDialog.Close render={<Button variant={ButtonVariant.Secondary} onClick={handleCancel} />}>
+                                {cancelLabel}
+                            </BaseAlertDialog.Close>
+                        )}
                         <BaseAlertDialog.Close render={<Button variant={confirmVariant} onClick={handleConfirm} />}>
                             {confirmLabel}
                         </BaseAlertDialog.Close>

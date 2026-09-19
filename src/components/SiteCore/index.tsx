@@ -1,5 +1,6 @@
 'use client';
 
+import 'pwa-install-handler';
 import { useEffect } from 'react';
 
 // Constants

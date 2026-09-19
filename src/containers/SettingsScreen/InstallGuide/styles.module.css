@@ -1,0 +1,21 @@
+@reference "../../../app/globals.css";
+
+.root {
+    @apply flex flex-col;
+}
+
+.heading {
+    @apply m-0 mb-2 flex items-center gap-1.5 text-sm font-bold text-green-900;
+}
+
+.steps {
+    @apply m-0 flex list-decimal flex-col gap-2 pl-5 text-sm/normal text-ink-soft;
+}
+
+.step {
+    @apply wrap-anywhere;
+}
+
+.step::marker {
+    @apply font-bold text-green-700;
+}

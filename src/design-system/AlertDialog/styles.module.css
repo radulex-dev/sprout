@@ -35,6 +35,10 @@
     @apply mt-2 mb-5 text-sm/normal text-ink-soft;
 }
 
+.content {
+    @apply mb-5;
+}
+
 .actions {
     @apply ui-field-row justify-end;
 }

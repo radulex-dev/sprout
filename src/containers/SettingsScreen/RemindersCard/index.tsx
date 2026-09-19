@@ -15,15 +15,25 @@ import styles from './styles.module.css';
 export interface Props extends React.ComponentProps<'div'> {
     isSupported: boolean | undefined;
     perm: NotificationPermission;
+    needsInstall: boolean;
     onEnable: () => void;
+    onInstall: () => void;
     onTest: () => void;
 }
 
-const RemindersCard: React.FunctionComponent<Props> = ({ isSupported, perm, onEnable, onTest, className, ...props }) => {
+const RemindersCard: React.FunctionComponent<Props> = ({ isSupported, perm, needsInstall, onEnable, onInstall, onTest, className, ...props }) => {
     const warnNoticeClasses = classNames(styles.notice, styles.warn);
     const classes = classNames(styles.root, className);
 
     const renderUnsupported = () => {
+        if (needsInstall) {
+            return (
+                <Button block onClick={onInstall}>
+                    Install the app to enable reminders
+                </Button>
+            );
+        }
+
         return (
             <div className={warnNoticeClasses}>
                 Notifications aren't supported in this browser.
@@ -92,16 +102,18 @@ const RemindersCard: React.FunctionComponent<Props> = ({ isSupported, perm, onEn
                 when the app is open or in the background (installed app on Android/Chrome).
             </p>
             {renderStatus()}
-            <p className={styles.hint} style={IPHONE_HINT_STYLE}>
-                <Lightbulb size="1rem" aria-hidden />
-                <span>
-                    On iPhone, open this app in Safari, tap Share →
-                    <strong>
-                        Add to Home Screen
-                    </strong>
-                    , then enable notifications from the installed app (iOS 16.4+).
-                </span>
-            </p>
+            {!needsInstall && (
+                <p className={styles.hint} style={IPHONE_HINT_STYLE}>
+                    <Lightbulb size="1rem" aria-hidden />
+                    <span>
+                        On iPhone, open this app in Safari, tap Share →
+                        <strong>
+                            Add to Home Screen
+                        </strong>
+                        , then enable notifications from the installed app (iOS 16.4+).
+                    </span>
+                </p>
+            )}
         </div>
     );
 };
