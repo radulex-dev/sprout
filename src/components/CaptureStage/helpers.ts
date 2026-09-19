@@ -1,7 +1,9 @@
-export const playVideo = async (video: HTMLVideoElement): Promise<void> => {
+export const playVideo = async (video: HTMLVideoElement): Promise<boolean> => {
     try {
         await video.play();
+
+        return true;
     } catch {
-        // Autoplay may be blocked by the browser; the stream is still attached to the video element.
+        return false;
     }
 };

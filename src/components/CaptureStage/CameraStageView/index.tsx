@@ -21,7 +21,7 @@ const CameraStageView: React.FunctionComponent<Props> = ({ photoUrl, isStreaming
     };
 
     const renderVideo = () => {
-        return <video ref={videoRef} playsInline muted aria-label="Camera preview" />;
+        return <video ref={videoRef} autoPlay playsInline muted aria-label="Camera preview" />;
     };
 
     const renderPlaceholder = () => {

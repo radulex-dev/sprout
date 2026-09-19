@@ -35,6 +35,26 @@ const CaptureStage: React.FunctionComponent<Props> = ({ photoUrl, isIdentifying,
         setIsStreaming(false);
     }, []);
 
+    const attachStream = useCallback(async () => {
+        const video = videoRef.current;
+        const stream = streamRef.current;
+
+        if (!video || !stream) {
+            return;
+        }
+
+        // iOS Safari only renders a live stream when these are set as DOM properties.
+        video.muted = true;
+        video.playsInline = true;
+        video.srcObject = stream;
+
+        const isPlaying = await playVideo(video);
+
+        if (!isPlaying) {
+            onError('Camera preview could not start — try again, or upload a photo instead.');
+        }
+    }, [onError]);
+
     const handleStartCamera = useCallback(async () => {
         onError('');
 
@@ -51,16 +71,6 @@ const CaptureStage: React.FunctionComponent<Props> = ({ photoUrl, isIdentifying,
             streamRef.current = stream;
 
             setIsStreaming(true);
-
-            requestAnimationFrame(() => {
-                if (!videoRef.current) {
-                    return;
-                }
-
-                videoRef.current.srcObject = stream;
-
-                void playVideo(videoRef.current);
-            });
         } catch {
             onError('Camera unavailable — you can upload a photo instead.');
         }
@@ -108,6 +118,14 @@ const CaptureStage: React.FunctionComponent<Props> = ({ photoUrl, isIdentifying,
     const handleUpload = useCallback(() => {
         fileRef.current?.click();
     }, []);
+
+    useEffect(() => {
+        if (!isStreaming) {
+            return;
+        }
+
+        void attachStream();
+    }, [attachStream, isStreaming]);
 
     useEffect(() => {
         return handleStopCamera;
