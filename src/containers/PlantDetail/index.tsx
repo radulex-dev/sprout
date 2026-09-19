@@ -3,6 +3,7 @@
 import classNames from 'classnames';
 import Link from 'next/link';
 import React, { useCallback, useState } from 'react';
+import { getLocalTimeZone, parseDate } from '@internationalized/date';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 
@@ -21,6 +22,7 @@ import CareStatValue from './CareStatValue';
 import CareScheduleNotice from './CareScheduleNotice';
 
 // Helpers
+import { startOfToday } from '@/helpers/care';
 import { displayName } from '@/helpers/plant';
 
 // Hooks
@@ -52,7 +54,19 @@ const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...prop
     const handleMarkDone = useCallback(async (kind: CareKind) => {
         setError(undefined);
         try {
-            await markCareDone(plant.id, kind);
+            await markCareDone(plant.id, kind, startOfToday());
+
+            router.refresh();
+        } catch (reason) {
+            console.error('Failed to log care', reason);
+            setError('Couldn\'t log that care. Please try again.');
+        }
+    }, [plant, router]);
+
+    const handleSetDate = useCallback(async (kind: CareKind, date: string) => {
+        setError(undefined);
+        try {
+            await markCareDone(plant.id, kind, parseDate(date).toDate(getLocalTimeZone()).getTime());
 
             router.refresh();
         } catch (reason) {
@@ -169,7 +183,7 @@ const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...prop
                         {[CareKind.Water, CareKind.Fertilize, CareKind.Repot].map((kind) => {
                             return (
                                 <li key={kind}>
-                                    <CareLogRow plant={plant} label={kind} now={now} onDone={handleMarkDone} />
+                                    <CareLogRow plant={plant} label={kind} now={now} onDone={handleMarkDone} onSetDate={handleSetDate} />
                                 </li>
                             );
                         })}

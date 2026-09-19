@@ -1,0 +1,86 @@
+@reference "../../app/globals.css";
+
+.root {
+    @apply inline-flex;
+}
+
+.positioner {
+    @apply z-50;
+}
+
+.popup {
+    @apply rounded-card border border-solid border-ink-soft/20 bg-surface p-2.5 shadow-card;
+
+    transition:
+        opacity var(--dur-base) var(--ease-out),
+        transform var(--dur-base) var(--ease-out);
+}
+
+.popup[data-starting-style],
+.popup[data-ending-style] {
+    @apply scale-95 opacity-0;
+}
+
+.header {
+    @apply flex items-center justify-between;
+}
+
+.nav {
+    @apply flex size-11 items-center justify-center rounded-full text-ink-soft;
+}
+
+.month {
+    @apply text-note font-[650] text-ink;
+}
+
+.weekdays {
+    @apply grid grid-cols-7;
+}
+
+.weekday {
+    @apply flex h-8 w-11 items-center justify-center text-xs font-[650] text-ink-soft;
+}
+
+.grid {
+    @apply grid grid-cols-7;
+}
+
+.day {
+    @apply relative flex size-11 items-center justify-center rounded-full text-note text-ink;
+}
+
+.day:disabled {
+    @apply text-ink-soft;
+}
+
+.selected,
+.selected:disabled {
+    @apply bg-green-700 text-white;
+}
+
+.today::after {
+    @apply absolute bottom-1.25 left-1/2 size-1 -translate-x-1/2 rounded-full;
+
+    background-color: currentcolor;
+    content: "";
+}
+
+.blank {
+    @apply size-11;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .nav:hover {
+        @apply bg-surface-2;
+    }
+
+    .day:not(:disabled, .selected):hover {
+        @apply bg-green-100;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .popup {
+        @apply transition-none;
+    }
+}

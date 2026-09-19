@@ -16,12 +16,13 @@ import type { AnchorProps, ButtonProps } from './types';
 
 export type Props = ButtonProps | AnchorProps;
 
-const Button: React.FunctionComponent<Props> = ({ variant = ButtonVariant.Default, size = ButtonSize.Md, block = false, grow = false, className, icon: Icon, children, ...props }) => {
+const Button: React.FunctionComponent<Props> = ({ variant = ButtonVariant.Default, size = ButtonSize.Md, block = false, grow = false, round = false, className, icon: Icon, children, ...props }) => {
     const classes = classNames(styles.root, {
         [styles[variant]]: variant !== ButtonVariant.Unstyled,
         [styles.block]: block,
         [styles.grow]: grow,
-        [styles.sm]: size === ButtonSize.Sm
+        [styles.sm]: size === ButtonSize.Sm,
+        [styles.round]: round
     }, className);
 
     const renderContent = () => {

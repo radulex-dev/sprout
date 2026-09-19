@@ -57,7 +57,7 @@ export const updatePlant = async (userId: string, id: string, input: UpdatePlant
         .where(and(eq(plants.id, id), eq(plants.userId, userId)));
 };
 
-export const markCareDone = async (userId: string, id: string, kind: CareKind): Promise<void> => {
+export const markCareDone = async (userId: string, id: string, kind: CareKind, atDate: number = Date.now()): Promise<void> => {
     const rows = await database
         .select({
             lastCare: plants.lastCare
@@ -75,7 +75,7 @@ export const markCareDone = async (userId: string, id: string, kind: CareKind): 
         .set({
             lastCare: {
                 ...row.lastCare,
-                [kind]: Date.now()
+                [kind]: atDate
             }
         })
         .where(and(eq(plants.id, id), eq(plants.userId, userId)));

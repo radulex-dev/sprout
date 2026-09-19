@@ -3,10 +3,9 @@
 import classNames from 'classnames';
 import React, { useCallback } from 'react';
 import { capitalize } from 'lodash-es';
-import { Check } from 'lucide-react';
 
 // Constants
-import { ButtonSize, ButtonVariant } from '@/design-system/Button/constants';
+import { ButtonVariant } from '@/design-system/Button/constants';
 import { CARE_META } from '@/helpers/care/constants';
 
 // Components
@@ -23,11 +22,10 @@ import styles from './styles.module.css';
 
 export interface Props extends Omit<React.ComponentProps<'div'>, 'onSelect'> {
     task: CareTask;
-    onDone: (t: CareTask) => void;
     onSelect: (id: string) => void;
 }
 
-const TaskRow: React.FunctionComponent<Props> = ({ task, onDone, onSelect, className, ...props }) => {
+const TaskRow: React.FunctionComponent<Props> = ({ task, onSelect, className, ...props }) => {
     const meta = CARE_META[task.kind];
     const classes = classNames(styles.root, className);
     const whenClasses = classNames(styles.when, {
@@ -38,10 +36,6 @@ const TaskRow: React.FunctionComponent<Props> = ({ task, onDone, onSelect, class
     const handleSelect = useCallback(() => {
         onSelect(task.plant.id);
     }, [onSelect, task]);
-
-    const handleDone = useCallback(() => {
-        onDone(task);
-    }, [onDone, task]);
 
     return (
         <div className={classes} {...props}>
@@ -64,11 +58,6 @@ const TaskRow: React.FunctionComponent<Props> = ({ task, onDone, onSelect, class
                     </span>
                 </span>
             </Button>
-            {task.daysUntil <= 0 && (
-                <Button variant={ButtonVariant.Soft} size={ButtonSize.Sm} onClick={handleDone} icon={Check} className={styles.done}>
-                    Done
-                </Button>
-            )}
         </div>
     );
 };

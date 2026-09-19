@@ -1,7 +1,8 @@
 'use client';
 
 import classNames from 'classnames';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { getLocalTimeZone, today } from '@internationalized/date';
 import { capitalize } from 'lodash-es';
 import { Check } from 'lucide-react';
 
@@ -11,6 +12,7 @@ import { CARE_META, DAY_MS } from '@/helpers/care/constants';
 
 // Components
 import Button from '@/design-system/Button';
+import DateSelect from '@/design-system/DateSelect';
 import Popover from '@/design-system/Popover';
 
 // Helpers
@@ -28,18 +30,26 @@ export interface Props extends React.ComponentProps<'div'> {
     label: CareKind;
     now: number;
     onDone: (kind: CareKind) => void;
+    onSetDate: (kind: CareKind, date: string) => void;
 }
 
-const CareLogRow: React.FunctionComponent<Props> = ({ plant, label, now, onDone, className, ...props }) => {
+const CareLogRow: React.FunctionComponent<Props> = ({ plant, label, now, onDone, onSetDate, className, ...props }) => {
     const classes = classNames(styles.root, className);
 
     const meta = CARE_META[label];
     const last = plant.lastCare[label];
     const daysAgo = Math.floor((now - last) / DAY_MS);
+    const maxDate = useMemo(() => {
+        return today(getLocalTimeZone()).toString();
+    }, []);
 
     const handleDone = useCallback(() => {
         onDone(label);
     }, [onDone, label]);
+
+    const handleSelectDate = useCallback((date: string) => {
+        onSetDate(label, date);
+    }, [onSetDate, label]);
 
     return (
         <div className={classes} {...props}>
@@ -54,9 +64,8 @@ const CareLogRow: React.FunctionComponent<Props> = ({ plant, label, now, onDone,
                     {toDateValue(last)}
                 </Popover>
             </div>
-            <Button variant={ButtonVariant.Soft} size={ButtonSize.Sm} onClick={handleDone} icon={Check} className={styles.done}>
-                {`${capitalize(meta.verb)} today`}
-            </Button>
+            <Button variant={ButtonVariant.Soft} size={ButtonSize.Sm} icon={Check} onClick={handleDone} className={styles.done}>{`${capitalize(meta.verb)} today`}</Button>
+            <DateSelect label={`Last ${meta.verb}`} value={toDateValue(last)} max={maxDate} onSelect={handleSelectDate} className={styles.date} />
         </div>
     );
 };

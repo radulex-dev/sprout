@@ -24,10 +24,6 @@
     @apply flex flex-wrap items-center gap-1 ui-title;
 }
 
-.done {
-    @apply flex-none;
-}
-
 .when {
     @apply ui-when block font-[650];
 

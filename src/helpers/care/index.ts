@@ -72,6 +72,10 @@ const startOfLocalDay = (timestamp: number, timeZone: string): number => {
     return toCalendarDate(fromDate(new Date(timestamp), timeZone)).toDate(timeZone).getTime();
 };
 
+export const startOfToday = (now = Date.now()): number => {
+    return startOfLocalDay(now, getLocalTimeZone());
+};
+
 const localMidnightOf = (value: string | undefined, fallback: number, timeZone: string): number => {
     if (!value) {
         return fallback;
@@ -82,12 +86,12 @@ const localMidnightOf = (value: string | undefined, fallback: number, timeZone: 
 
 export const resolveLastCare = (dates: LastCareDates, now = Date.now()): Record<CareKind, number> => {
     const timeZone = getLocalTimeZone();
-    const startOfToday = startOfLocalDay(now, timeZone);
+    const startOfDay = startOfToday(now);
 
     return {
-        [CareKind.Water]: localMidnightOf(dates[CareKind.Water], startOfToday, timeZone),
-        [CareKind.Fertilize]: localMidnightOf(dates[CareKind.Fertilize], startOfToday, timeZone),
-        [CareKind.Repot]: localMidnightOf(dates[CareKind.Repot], startOfToday, timeZone)
+        [CareKind.Water]: localMidnightOf(dates[CareKind.Water], startOfDay, timeZone),
+        [CareKind.Fertilize]: localMidnightOf(dates[CareKind.Fertilize], startOfDay, timeZone),
+        [CareKind.Repot]: localMidnightOf(dates[CareKind.Repot], startOfDay, timeZone)
     };
 };
 

@@ -25,7 +25,7 @@ const photoSchema = z.custom<Blob>((value) => {
     message: 'Photo must be a Blob no larger than 5 MB.'
 });
 
-const LastCareDateSchema = z.int().nonnegative().refine((value) => {
+export const LastCareDateSchema = z.int().nonnegative().refine((value) => {
     return value <= Date.now();
 }, {
     message: 'Last care cannot be in the future.'

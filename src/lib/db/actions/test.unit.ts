@@ -139,6 +139,32 @@ describe('markCareDone', () => {
         expect(serviceMarkCareDone).toHaveBeenCalledWith('user-1', VALID_ID, CareKind.Water);
         expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
     });
+
+    it('omits at so the service applies its own default', async () => {
+        const careMock = vi.mocked(serviceMarkCareDone);
+
+        await markCareDone(VALID_ID, CareKind.Water);
+
+        expect(careMock.mock.calls.at(0)).toHaveLength(3);
+        expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
+    });
+
+    it('forwards an explicit at timestamp to the service', async () => {
+        await markCareDone(VALID_ID, CareKind.Water, 1_699_000_000_000);
+
+        expect(serviceMarkCareDone).toHaveBeenCalledWith('user-1', VALID_ID, CareKind.Water, 1_699_000_000_000);
+        expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
+    });
+
+    it.each([
+        9_999_999_999_999,
+        1_699_000_000_000.5,
+        -1
+    ])('rejects the timestamp %s before calling the service', async (at) => {
+        await expect(markCareDone(VALID_ID, CareKind.Water, at)).rejects.toThrow();
+
+        expect(serviceMarkCareDone).not.toHaveBeenCalled();
+    });
 });
 
 describe('recordNotified', () => {

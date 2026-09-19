@@ -9,6 +9,7 @@ export interface BaseProps {
     size?: ButtonSize;
     block?: boolean;
     grow?: boolean;
+    round?: boolean;
     icon?: LucideIcon;
 }
 

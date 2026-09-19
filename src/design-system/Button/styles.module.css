@@ -1,7 +1,7 @@
 @reference "../../app/globals.css";
 
 .root {
-    @apply cursor-pointer;
+    @apply cursor-pointer border-none bg-transparent;
 
     text-decoration: none;
     transition:
@@ -67,6 +67,10 @@
 
 .sm {
     @apply min-h-11 shrink-0 gap-1.5 rounded-btn-sm px-3.5 py-2.25 text-note;
+}
+
+.round {
+    @apply size-11 shrink-0 justify-center rounded-full p-0;
 }
 
 @media (hover: hover) and (pointer: fine) {

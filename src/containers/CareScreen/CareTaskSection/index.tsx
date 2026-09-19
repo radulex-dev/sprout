@@ -13,12 +13,11 @@ import styles from './styles.module.css';
 export interface Props extends React.ComponentProps<'div'> {
     title: string;
     tasks: CareTask[];
-    onDone: (task: CareTask) => void | Promise<void>;
     onSelectPlant: (id: string) => void;
     emptyNotice?: string;
 }
 
-const CareTaskSection: React.FunctionComponent<Props> = ({ title, tasks, onDone, onSelectPlant, emptyNotice, className, ...props }) => {
+const CareTaskSection: React.FunctionComponent<Props> = ({ title, tasks, onSelectPlant, emptyNotice, className, ...props }) => {
     const classes = classNames(styles.root, className);
     const shouldShowTitle = tasks.length > 0 || Boolean(emptyNotice);
 
@@ -48,7 +47,7 @@ const CareTaskSection: React.FunctionComponent<Props> = ({ title, tasks, onDone,
                 {tasks.map((task) => {
                     return (
                         <li key={`${task.plant.id}-${task.kind}`}>
-                            <TaskRow task={task} onDone={onDone} onSelect={onSelectPlant} />
+                            <TaskRow task={task} onSelect={onSelectPlant} />
                         </li>
                     );
                 })}

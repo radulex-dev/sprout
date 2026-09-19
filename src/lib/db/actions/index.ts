@@ -7,7 +7,7 @@ import { ALL_PATH, PLANT_ID_SCHEMA } from '@/lib/db/constants';
 
 // Services
 import { createPlant as serviceCreatePlant, deletePlant as serviceDeletePlant, markCareDone as serviceMarkCareDone, recordNotified as serviceRecordNotified, updatePlant as serviceUpdatePlant } from '@/services/server/plants';
-import { CareKindSchema, NotifiedAtSchema, parsePlantInput, UpdatePlantSchema, type UpdatePlantInput } from '@/services/server/plants/schema';
+import { CareKindSchema, LastCareDateSchema, NotifiedAtSchema, parsePlantInput, UpdatePlantSchema, type UpdatePlantInput } from '@/services/server/plants/schema';
 
 // Auth
 import { requireUser } from '@/lib/auth/session';
@@ -36,12 +36,17 @@ export const updatePlant = async (id: string, input: UpdatePlantInput): Promise<
     revalidatePath(ALL_PATH, 'layout');
 };
 
-export const markCareDone = async (id: string, kind: CareKind): Promise<void> => {
+export const markCareDone = async (id: string, kind: CareKind, atDate?: number): Promise<void> => {
     const session = await requireUser();
     const parsedId = PLANT_ID_SCHEMA.parse(id);
     const parsedKind = CareKindSchema.parse(kind);
+    const parsedAtDate = atDate === undefined ? undefined : LastCareDateSchema.parse(atDate);
 
-    await serviceMarkCareDone(session.user.id, parsedId, parsedKind);
+    if (parsedAtDate === undefined) {
+        await serviceMarkCareDone(session.user.id, parsedId, parsedKind);
+    } else {
+        await serviceMarkCareDone(session.user.id, parsedId, parsedKind, parsedAtDate);
+    }
 
     revalidatePath(ALL_PATH, 'layout');
 };

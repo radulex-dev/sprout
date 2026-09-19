@@ -11,13 +11,9 @@ import CareTaskSection from './CareTaskSection';
 
 // Helpers
 import { allTasks } from '@/helpers/care';
-import type { CareTask } from '@/helpers/care/types';
 
 // Hooks
 import { useClock } from '@/hooks';
-
-// Database
-import { markCareDone } from '@/lib/db/actions';
 
 // Styles
 import styles from './styles.module.css';
@@ -49,11 +45,6 @@ const CareScreen: React.FunctionComponent<Props> = ({ plants, className, ...prop
         });
     }, [tasks]);
 
-    const handleDone = useCallback(async (task: CareTask) => {
-        await markCareDone(task.plant.id, task.kind);
-        router.refresh();
-    }, [router]);
-
     const handleSelect = useCallback((id: string) => {
         router.push(`/plants/${id}`);
     }, [router]);
@@ -80,8 +71,8 @@ const CareScreen: React.FunctionComponent<Props> = ({ plants, className, ...prop
                 <CareEmptyState />
             ) : (
                 <div className={styles.sections}>
-                    <CareTaskSection title="Needs attention" tasks={due} onDone={handleDone} onSelectPlant={handleSelect} />
-                    <CareTaskSection title="Coming up" tasks={upcoming} onDone={handleDone} onSelectPlant={handleSelect} emptyNotice="Nothing due in the next two weeks." />
+                    <CareTaskSection title="Needs attention" tasks={due} onSelectPlant={handleSelect} />
+                    <CareTaskSection title="Coming up" tasks={upcoming} onSelectPlant={handleSelect} emptyNotice="Nothing due in the next two weeks." />
                 </div>
             )}
         </div>

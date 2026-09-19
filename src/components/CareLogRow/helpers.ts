@@ -1,5 +1,5 @@
 export const formatDaysAgo = (daysAgo: number): string => {
-    if (daysAgo === 0) {
+    if (daysAgo <= 0) {
         return 'today';
     }
 

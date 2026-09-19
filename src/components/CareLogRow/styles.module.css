@@ -17,7 +17,7 @@
 }
 
 .when {
-    @apply relative ui-when flex border-none bg-transparent p-0 text-left;
+    @apply relative ui-when flex self-start border-none bg-transparent p-0 text-left;
 }
 
 .when::after {
@@ -28,4 +28,8 @@
 
 .done {
     @apply flex-none;
+}
+
+.date {
+    @apply shrink-0;
 }

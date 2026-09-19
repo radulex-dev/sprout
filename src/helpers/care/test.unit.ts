@@ -6,7 +6,7 @@ import { makePlant, NOW } from '@test/vitest/data/plant.mock';
 import { DAY_MS, DAYS_PER_MONTH } from './constants';
 
 // Helpers
-import { allTasks, dueTasks, formatDue, nextDue, resolveLastCare, toDateValue } from './index';
+import { allTasks, dueTasks, formatDue, nextDue, resolveLastCare, startOfToday, toDateValue } from './index';
 
 // Types
 import { CareKind } from '@/types';
@@ -198,5 +198,17 @@ describe('parseDate', () => {
         expect(() => {
             return parseDate(value);
         }).toThrow();
+    });
+});
+
+describe('startOfToday', () => {
+    it('returns the local midnight of the given instant', () => {
+        expect(startOfToday(NOW)).toBe(startOfLocalDay(NOW));
+    });
+
+    it('resolves a late-evening instant to the same local day', () => {
+        const evening = new Date(2026, 8, 6, 21, 34).getTime();
+
+        expect(toDateValue(startOfToday(evening))).toBe('2026-09-06');
     });
 });

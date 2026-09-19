@@ -7,6 +7,9 @@ import { Plus } from 'lucide-react';
 // Components
 import Button from './index';
 
+// Styles
+import styles from './styles.module.css';
+
 const CALLER_CLASS_NAME = 'caller-class-name';
 
 const handleFormSubmit = (handleSubmit: () => void) => {
@@ -126,5 +129,24 @@ describe('Button', () => {
         });
 
         expect(button.querySelector('svg')).toBeInTheDocument();
+    });
+
+    it('renders a round icon-only button', () => {
+        render(<Button round icon={Plus} aria-label="Watered today" />);
+
+        const button = screen.getByRole('button', {
+            name: 'Watered today'
+        });
+
+        expect(button).toHaveClass(styles.round);
+        expect(button.querySelector('svg')).toBeInTheDocument();
+    });
+
+    it('renders an empty round button without children', () => {
+        render(<Button round aria-label="Empty round button" />);
+
+        expect(screen.getByRole('button', {
+            name: 'Empty round button'
+        })).toHaveClass(styles.round);
     });
 });
