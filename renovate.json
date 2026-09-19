@@ -10,6 +10,13 @@
             "allowedVersions": "<17"
         },
         {
+            "description": "TypeScript minor/major bumps need a dashboard checkbox until typescript-eslint supports them (https://github.com/typescript-eslint/typescript-eslint/issues/10940)",
+            "matchDatasources": ["npm"],
+            "matchPackageNames": ["typescript"],
+            "matchUpdateTypes": ["minor", "major"],
+            "dependencyDashboardApproval": true
+        },
+        {
             "description": "Auto-merge minor and patch updates once CI is green",
             "matchUpdateTypes": ["minor", "patch"],
             "automerge": true,
