@@ -1,8 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="116" fill="#1d3b2a"/>
-  <path d="M256 416V236" stroke="#e8e3d2" stroke-width="22" stroke-linecap="round"/>
-  <path d="M256 252c0-86-56-132-128-138 4 80 50 138 128 138z" fill="#5fae6e"/>
-  <path d="M256 200c0-66 44-102 100-108-4 62-40 108-100 108z" fill="#8fd09a"/>
-  <path d="M176 416h160c0 0-8 48-80 48s-80-48-80-48z" fill="#c97b4a"/>
-  <path d="M164 384h184l-10 36H174z" fill="#e09257"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Sprout"><defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#3FBE7A"/>
+    <stop offset="1" stop-color="#0F6B45"/>
+  </linearGradient>
+  <radialGradient id="glow" cx="0.28" cy="0.18" r="0.85">
+    <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.22"/>
+    <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+  </radialGradient>
+</defs><rect width="512" height="512" rx="114" ry="114" fill="url(#bg)"/><rect width="512" height="512" rx="114" ry="114" fill="url(#glow)"/><g transform="translate(-37.95,-88.78) scale(1.1460)"><g>
+      <path d="M245,410 C240,352 248,306 266,272" fill="none" stroke="#F4FBF2"
+            stroke-width="30" stroke-linecap="round"/>
+      <g transform="translate(262,272) rotate(-38)">
+        <path d="M0,0 C50.4,-53.8 126.0,-48.4 168.0,0 C121.0,28.6 50.4,28.6 0,0 Z" fill="#F4FBF2"/><path d="M10.1,0 C58.8,-11.8 100.8,-15.1 141.1,-10.1" fill="none" stroke="#0F6B45" stroke-opacity="0.17" stroke-width="9" stroke-linecap="round"/>
+      </g>
+      <g transform="translate(247,314) scale(-1,1) rotate(-31)">
+        <path d="M0,0 C45.0,-48.0 112.5,-43.2 150.0,0 C108.0,25.5 45.0,25.5 0,0 Z" fill="#F4FBF2"/><path d="M9.0,0 C52.5,-10.5 90.0,-13.5 126.0,-9.0" fill="none" stroke="#0F6B45" stroke-opacity="0.17" stroke-width="8" stroke-linecap="round"/>
+      </g>
+    </g></g></svg>

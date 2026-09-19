@@ -1,7 +1,8 @@
 import * as z from 'zod';
 
 // Constants
-import { MAX_DAYS, MAX_MONTHS, MAX_PHOTO_BYTES, MAX_TEXT_LENGTH } from './constants';
+import { MAX_DAYS, MAX_MONTHS, MAX_TEXT_LENGTH } from './constants';
+import { MAX_PHOTO_BYTES } from '@/helpers/image/constants';
 
 // Types
 import { CareKind, type PlantInput } from '@/types';
@@ -22,7 +23,7 @@ const photoSchema = z.custom<Blob>((value) => {
         && typeof (value as Blob).size === 'number'
         && (value as Blob).size <= MAX_PHOTO_BYTES;
 }, {
-    message: 'Photo must be a Blob no larger than 5 MB.'
+    message: `Photo must be a Blob no larger than ${MAX_PHOTO_BYTES / 1024 / 1024} MB.`
 });
 
 export const LastCareDateSchema = z.int().nonnegative().refine((value) => {

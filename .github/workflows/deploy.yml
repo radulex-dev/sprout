@@ -1,0 +1,67 @@
+name: Deploy
+
+# Runs only after the CI workflow succeeds on master, so a red build can never
+# reach production. `workflow_run` always reads this file from the default branch.
+on:
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+    branches: [master]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  migrate:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bunx drizzle-kit migrate
+        env:
+          DIRECT_URL: ${{ secrets.PROD_DIRECT_URL }}
+
+  deploy:
+    needs: migrate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bunx vercel@59.23.2 pull --yes --environment=production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      - run: bunx vercel@59.23.2 build --prod
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          # next.config.ts drops `output: 'standalone'` for Vercel builds. Set the
+          # indicator explicitly so the guard never depends on the project's
+          # "System Environment Variables" toggle being enabled.
+          VERCEL: '1'
+          # Becomes the service worker cache name, so each deployment installs a
+          # fresh worker that purges the previous cache on activate.
+          NEXT_PUBLIC_BUILD_ID: ${{ github.event.workflow_run.head_sha }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: vercel-output
+          path: .vercel/output
+          include-hidden-files: true
+          retention-days: 14
+      - run: bunx vercel@59.23.2 deploy --prebuilt --prod --archive=tgz
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}

@@ -2,6 +2,9 @@
 
 import { useEffect } from 'react';
 
+// Constants
+import { BUILD_ID, SERVICE_WORKER_PATH } from './constants';
+
 // Services
 import { startCareWatcher } from '@/services/notifications';
 
@@ -24,7 +27,7 @@ const SiteCore: React.FunctionComponent<Props> = ({ children }) => {
     useEffect(() => {
         if ('serviceWorker' in navigator) {
             if (process.env.NODE_ENV === 'production') {
-                void navigator.serviceWorker.register('/sw.js', {
+                void navigator.serviceWorker.register(`${SERVICE_WORKER_PATH}?v=${BUILD_ID}`, {
                     updateViaCache: 'none'
                 });
             } else {

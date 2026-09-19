@@ -4,5 +4,6 @@ build
 .git
 .env
 .env.local
+.vercel
 eslint-rules/**/*.js
 *.log

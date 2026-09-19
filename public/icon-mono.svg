@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Sprout"><g transform="translate(9.46,-34.17) scale(0.9612)"><g>
+      <path d="M245,410 C240,352 248,306 266,272" fill="none" stroke="#FFFFFF"
+            stroke-width="30" stroke-linecap="round"/>
+      <g transform="translate(262,272) rotate(-38)">
+        <path d="M0,0 C50.4,-53.8 126.0,-48.4 168.0,0 C121.0,28.6 50.4,28.6 0,0 Z" fill="#FFFFFF"/>
+      </g>
+      <g transform="translate(247,314) scale(-1,1) rotate(-31)">
+        <path d="M0,0 C45.0,-48.0 112.5,-43.2 150.0,0 C108.0,25.5 45.0,25.5 0,0 Z" fill="#FFFFFF"/>
+      </g>
+    </g></g></svg>

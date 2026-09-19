@@ -7,8 +7,9 @@
  * client router: the page segment never arrives and the route-level
  * loading.tsx boundary resolves to its skeleton forever, with no error.
  */
-const CACHE = 'sprout-v4';
-const SHELL = ['/icon.svg', '/icon-192.png', '/icon-512.png', '/manifest.webmanifest'];
+const CACHE_VERSION = new URLSearchParams(location.search).get('v') || 'dev';
+const CACHE = `sprout-${CACHE_VERSION}`;
+const SHELL = ['/favicon.ico', '/icon.svg', '/icon-192.png', '/icon-512.png', '/icon-maskable-192.png', '/icon-maskable-512.png', '/icon-mono.svg', '/manifest.webmanifest'];
 const SHELL_PATHS = new Set(SHELL);
 
 globalThis.addEventListener('install', (e) => {

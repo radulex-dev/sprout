@@ -23,12 +23,21 @@ export const metadata: Metadata = {
     applicationName: 'Sprout',
     appleWebApp: {
         capable: true,
-        statusBarStyle: 'black-translucent',
+        statusBarStyle: 'default',
         title: 'Sprout'
     },
     icons: {
-        icon: '/icon.svg',
-        apple: '/icon-192.png'
+        icon: [{
+            url: '/favicon.ico',
+            sizes: '48x48'
+        }, {
+            url: '/icon.svg',
+            type: 'image/svg+xml'
+        }],
+        apple: [{
+            url: '/apple-touch-icon.png',
+            sizes: '180x180'
+        }]
     }
 };
 
@@ -36,7 +45,7 @@ export const viewport: Viewport = {
     width: 'device-width',
     initialScale: 1,
     viewportFit: 'cover',
-    themeColor: '#1d3b2a'
+    themeColor: '#0F6B45'
 };
 
 interface Props extends React.ComponentProps<'html'> {

@@ -2,7 +2,7 @@ import type Compressor from 'compressorjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Constants
-import { ERROR_UNREADABLE_IMAGE, JPEG_QUALITY, MAX_IMAGE_DIMENSION } from './constants';
+import { ERROR_IMAGE_TOO_LARGE, ERROR_UNREADABLE_IMAGE, JPEG_QUALITY, MAX_IMAGE_DIMENSION, MAX_PHOTO_BYTES } from './constants';
 
 // Helpers
 import { compressPhoto } from './index';
@@ -57,5 +57,17 @@ describe('compressPhoto', () => {
         compressor.options?.error?.(new Error('canvas exploded'));
 
         await expect(promise).rejects.toThrow(ERROR_UNREADABLE_IMAGE);
+    });
+
+    it('rejects a photo that is still too large to upload after compression', async () => {
+        const promise = compressPhoto(new Blob(['huge'], {
+            type: 'image/jpeg'
+        }));
+
+        compressor.options?.success?.(new Blob([new Uint8Array(MAX_PHOTO_BYTES + 1)], {
+            type: 'image/jpeg'
+        }));
+
+        await expect(promise).rejects.toThrow(ERROR_IMAGE_TOO_LARGE);
     });
 });
