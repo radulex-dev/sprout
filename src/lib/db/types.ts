@@ -16,4 +16,7 @@ export interface ByteaColumn {
 }
 
 export type PlantRow = typeof plants.$inferSelect;
+export type PlantListRow = Omit<PlantRow, 'photo'> & {
+    hasPhoto: boolean;
+};
 export type CareReferenceRow = typeof careReference.$inferSelect;

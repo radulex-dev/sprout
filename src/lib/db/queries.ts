@@ -1,4 +1,4 @@
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import { cache } from 'react';
 
 // Constants
@@ -10,15 +10,29 @@ import { careReference, plants } from '@/lib/db/schema';
 
 // Types
 import type { Plant } from '@/types';
-import type { CareReferenceRow, PlantRow } from './types';
+import type { CareReferenceRow, PlantListRow } from './types';
 
-const rowToPlant = (row: PlantRow): Plant => {
+const plantColumns = {
+    id: plants.id,
+    userId: plants.userId,
+    nickname: plants.nickname,
+    species: plants.species,
+    commonName: plants.commonName,
+    hasPhoto: sql<boolean>`${plants.photo} is not null`,
+    acquiredAt: plants.acquiredAt,
+    care: plants.care,
+    lastCare: plants.lastCare,
+    lastNotified: plants.lastNotified,
+    notes: plants.notes
+};
+
+const rowToPlant = (row: PlantListRow): Plant => {
     return {
         id: row.id,
         nickname: row.nickname,
         species: row.species,
         commonName: row.commonName,
-        photo: row.photo ? `/plants/${row.id}/photo` : undefined,
+        photo: row.hasPhoto ? `/plants/${row.id}/photo` : undefined,
         acquiredAt: row.acquiredAt,
         care: row.care,
         lastCare: row.lastCare,
@@ -29,7 +43,7 @@ const rowToPlant = (row: PlantRow): Plant => {
 
 export const getPlantsForUser = cache(async (userId: string): Promise<Plant[]> => {
     const rows = await database
-        .select()
+        .select(plantColumns)
         .from(plants)
         .where(eq(plants.userId, userId))
         .orderBy(desc(plants.acquiredAt));
@@ -45,7 +59,7 @@ export const getPlantForUser = cache(async (userId: string, id: string): Promise
     }
 
     const rows = await database
-        .select()
+        .select(plantColumns)
         .from(plants)
         .where(and(eq(plants.id, id), eq(plants.userId, userId)));
     const row = rows.at(0);
