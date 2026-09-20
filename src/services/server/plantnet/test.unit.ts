@@ -3,10 +3,56 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 // Constants
 import { ERROR_BAD_IMAGE, ERROR_BAD_KEY, ERROR_NO_IMAGE, ERROR_NO_KEY, ERROR_NOT_RECOGNISED, ERROR_UNAVAILABLE, ERROR_UNREACHABLE } from './constants';
 
+// Helpers
+import type { CareReference } from '@/helpers/care/types';
+
 // Services
 import { identifySpecies, PlantNetError } from './index';
 
+// Types
+import { CareSource } from '@/types';
+
+const mockLoadCareReference = vi.hoisted(() => {
+    return vi.fn<() => Promise<CareReference>>();
+});
+
+vi.mock('@/services/server/care-reference', () => {
+    return {
+        loadCareReference: mockLoadCareReference
+    };
+});
+
 const API_KEY = 'env-test-key';
+
+const careReference: CareReference = {
+    alias: {
+        'dracaena trifasciata': 'sansevieria'
+    },
+    family: {
+        urticaceae: {
+            waterEveryDays: 6,
+            fertilizeEveryDays: 30,
+            repotEveryMonths: 18
+        }
+    },
+    genus: {
+        dracaena: {
+            waterEveryDays: 10,
+            fertilizeEveryDays: 30,
+            repotEveryMonths: 30
+        },
+        monstera: {
+            waterEveryDays: 5,
+            fertilizeEveryDays: 30,
+            repotEveryMonths: 18
+        },
+        sansevieria: {
+            waterEveryDays: 21,
+            fertilizeEveryDays: 90,
+            repotEveryMonths: 30
+        }
+    }
+};
 
 const imageForm = (): FormData => {
     const form = new FormData();
@@ -55,6 +101,8 @@ describe('identifySpecies', () => {
         vi.stubGlobal('fetch', fetchMock);
         vi.stubEnv('PLANTNET_API_KEY', API_KEY);
         vi.spyOn(console, 'error').mockImplementation(vi.fn());
+        vi.spyOn(console, 'warn').mockImplementation(vi.fn());
+        mockLoadCareReference.mockResolvedValue(careReference);
     });
 
     afterEach(() => {
@@ -154,11 +202,17 @@ describe('identifySpecies', () => {
         expect(error.message).toBe(ERROR_UNREACHABLE);
     });
 
-    it('maps PlantNet results to IdentifyResult with default care', async () => {
+    it('maps PlantNet results to IdentifyResult with resolved care', async () => {
         fetchMock.mockResolvedValue(mockResponse({
             results: [{
                 species: {
                     scientificNameWithoutAuthor: 'Monstera deliciosa',
+                    genus: {
+                        scientificNameWithoutAuthor: 'Monstera'
+                    },
+                    family: {
+                        scientificNameWithoutAuthor: 'Araceae'
+                    },
                     commonNames: ['Swiss cheese plant']
                 },
                 score: 0.93
@@ -171,16 +225,18 @@ describe('identifySpecies', () => {
         const results = await identifySpecies(imageForm());
         const [identified, unknown] = results;
 
+        expect(mockLoadCareReference).toHaveBeenCalledTimes(1);
         expect(results).toHaveLength(2);
         expect(identified).toEqual({
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             confidence: 0.93,
             defaultCare: {
-                waterEveryDays: 7,
+                waterEveryDays: 5,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
-            }
+            },
+            careSource: CareSource.Genus
         });
         expect(unknown).toEqual({
             species: 'Unknown species',
@@ -190,8 +246,110 @@ describe('identifySpecies', () => {
                 waterEveryDays: 7,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
-            }
+            },
+            careSource: CareSource.None
         });
+    });
+
+    it('resolves the current botanical name through its genus alias', async () => {
+        fetchMock.mockResolvedValue(mockResponse({
+            results: [{
+                species: {
+                    scientificNameWithoutAuthor: 'Dracaena trifasciata',
+                    genus: {
+                        scientificNameWithoutAuthor: 'Dracaena'
+                    },
+                    family: {
+                        scientificNameWithoutAuthor: 'Asparagaceae'
+                    },
+                    commonNames: ['Snake plant']
+                },
+                score: 0.88
+            }]
+        }, 200));
+
+        const [identified] = await identifySpecies(imageForm());
+
+        expect(identified.defaultCare).toEqual({
+            waterEveryDays: 21,
+            fertilizeEveryDays: 90,
+            repotEveryMonths: 30
+        });
+        expect(identified.careSource).toBe(CareSource.Genus);
+    });
+
+    it('falls back to the family care when the genus is not in the table', async () => {
+        fetchMock.mockResolvedValue(mockResponse({
+            results: [{
+                species: {
+                    scientificNameWithoutAuthor: 'Soleirolia soleirolii',
+                    genus: {
+                        scientificNameWithoutAuthor: 'Soleirolia'
+                    },
+                    family: {
+                        scientificNameWithoutAuthor: 'Urticaceae'
+                    }
+                },
+                score: 0.71
+            }]
+        }, 200));
+
+        const [identified] = await identifySpecies(imageForm());
+
+        expect(identified.defaultCare).toEqual({
+            waterEveryDays: 6,
+            fertilizeEveryDays: 30,
+            repotEveryMonths: 18
+        });
+        expect(identified.careSource).toBe(CareSource.Family);
+    });
+
+    it('warns with the identification when no care data matches', async () => {
+        fetchMock.mockResolvedValue(mockResponse({
+            results: [{
+                species: {
+                    scientificNameWithoutAuthor: 'Ficus unknownia',
+                    genus: {
+                        scientificNameWithoutAuthor: 'Unknownia'
+                    },
+                    family: {
+                        scientificNameWithoutAuthor: 'Unknownaceae'
+                    }
+                },
+                score: 0.42
+            }]
+        }, 200));
+
+        const [identified] = await identifySpecies(imageForm());
+
+        expect(identified.careSource).toBe(CareSource.None);
+        expect(vi.mocked(console.warn)).toHaveBeenCalledWith('No care data for identified plant', {
+            family: 'Unknownaceae',
+            genus: 'Unknownia',
+            species: 'Ficus unknownia'
+        });
+    });
+
+    it('does not warn when the genus resolves', async () => {
+        fetchMock.mockResolvedValue(mockResponse({
+            results: [{
+                species: {
+                    scientificNameWithoutAuthor: 'Monstera deliciosa',
+                    genus: {
+                        scientificNameWithoutAuthor: 'Monstera'
+                    },
+                    family: {
+                        scientificNameWithoutAuthor: 'Araceae'
+                    }
+                },
+                score: 0.93
+            }]
+        }, 200));
+
+        const [identified] = await identifySpecies(imageForm());
+
+        expect(identified.careSource).toBe(CareSource.Genus);
+        expect(vi.mocked(console.warn)).not.toHaveBeenCalled();
     });
 
     it('returns an empty list when PlantNet omits results', async () => {

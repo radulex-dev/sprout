@@ -11,6 +11,7 @@ import { ButtonVariant } from '@/design-system/Button/constants';
 // Components
 import AboutCard from './AboutCard';
 import AccountCard from './AccountCard';
+import CreditsCard from './CreditsCard';
 import InstallGuide from './InstallGuide';
 import RemindersCard from './RemindersCard';
 import AlertDialog from '@/design-system/AlertDialog';
@@ -126,12 +127,19 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
         );
     };
 
+    const renderCreditsCard = () => {
+        return (
+            <CreditsCard className={styles.about} />
+        );
+    };
+
     const renderContent = () => {
         return (
             <div className={styles.cards}>
                 {renderAccountCard()}
                 {renderRemindersCard()}
                 {renderAboutCard()}
+                {renderCreditsCard()}
             </div>
         );
     };

@@ -6,11 +6,11 @@ import { PLANT_ID_SCHEMA } from './constants';
 
 // Database
 import { database } from '@/lib/db';
-import { plants } from '@/lib/db/schema';
+import { careReference, plants } from '@/lib/db/schema';
 
 // Types
 import type { Plant } from '@/types';
-import type { PlantRow } from './types';
+import type { CareReferenceRow, PlantRow } from './types';
 
 const rowToPlant = (row: PlantRow): Plant => {
     return {
@@ -67,4 +67,8 @@ export const getPlantPhoto = async (userId: string, id: string): Promise<Buffer 
     const row = rows.at(0);
 
     return row?.photo ?? undefined;
+};
+
+export const getCareReferenceRows = async (): Promise<CareReferenceRow[]> => {
+    return database.select().from(careReference);
 };

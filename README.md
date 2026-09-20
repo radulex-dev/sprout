@@ -10,7 +10,9 @@ reminders when each plant needs watering, fertilising or repotting.
 - **📷 Camera identification** — snap a leaf or flower; species recognition via the
   [PlantNet API](https://my.plantnet.org) with ranked matches and confidence scores.
 - **🗓 Care engine** — per-plant water / fertilise / repot schedules, editable per plant. New plants
-  start from a generic default (water every 7 days, fertilise every 30, repot every 18 months).
+  start from reference data stored in the database (`care_reference`, seeded by migration), looked up
+  by the identified genus, falling back to family and then to a generic 7/30/18 default — and the form
+  says which of the three it used, so an unsourced default is never presented as plant-specific.
 - **🔔 Reminders** — notifications when care is due (at most one per task per day), checked on
   app open, on focus, hourly while open, and via periodic background sync on installed
   Chromium/Android PWAs.
@@ -62,7 +64,7 @@ Copy `.env.example` to `.env.local` and set:
 | Data model | `src/types/index.ts` | `Plant` with `care` intervals + `lastCare` timestamps |
 | Database | `src/lib/db/` | Postgres via Drizzle ORM; photos stored as `bytea` |
 | Auth | `src/lib/auth/index.ts` | Better Auth (Google OAuth + email/password) with Drizzle adapter |
-| Care engine | `src/helpers/care/` | Due-date math and the default schedule for new plants |
+| Care engine | `src/helpers/care/` + `src/services/server/care-reference/` | Due-date math and the pure `resolveCare` (alias → genus → family → generic default); the reference data itself lives in the `care_reference` table and is loaded server-side |
 | Identification | `src/services/server/plantnet/` | Server-only PlantNet client; `/api/identify/` is a thin handler that keeps the key out of the browser |
 | Server services | `src/services/server/plants/` | Validation + plant mutations; thin server actions live in `src/lib/db/actions/` |
 | Notifications | `src/services/notifications/` | Permission, de-duplicated due-task notifications, watcher |

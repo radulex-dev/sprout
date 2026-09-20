@@ -1,8 +1,9 @@
 // Database
-import type { plants } from './schema';
+import type { careReference, plants } from './schema';
 
 export enum TableName {
     Plants = 'plants',
+    CareReference = 'care_reference',
     User = 'user',
     Session = 'session',
     Account = 'account',
@@ -15,3 +16,4 @@ export interface ByteaColumn {
 }
 
 export type PlantRow = typeof plants.$inferSelect;
+export type CareReferenceRow = typeof careReference.$inferSelect;

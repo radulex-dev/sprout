@@ -1,11 +1,12 @@
-import { bigint, customType, index, jsonb, pgTable, text, uuid } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+import { bigint, check, customType, index, integer, jsonb, pgTable, text, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 
 // Schema
 export { account, session, user, verification } from './auth-schema';
 import { user } from './auth-schema';
 
 // Types
-import type { CareKind, CareSchedule } from '@/types';
+import type { CareKind, CareMatchType, CareSchedule, CareUnit } from '@/types';
 import { TableName, type ByteaColumn } from './types';
 
 /** Postgres `bytea` column. node-postgres already maps bytea <-> Buffer. */
@@ -41,5 +42,31 @@ export const plants = pgTable(
     },
     (table) => {
         return [index('plants_user_id_idx').on(table.userId)];
+    }
+);
+
+export const careReference = pgTable(
+    TableName.CareReference,
+    {
+        id: uuid('id').primaryKey().defaultRandom(),
+        matchType: text('match_type').$type<CareMatchType>().notNull(),
+        matchKey: text('match_key').notNull(),
+        aliasTarget: text('alias_target'),
+        waterInterval: integer('water_interval'),
+        waterUnit: text('water_unit').$type<CareUnit>(),
+        fertilizeInterval: integer('fertilize_interval'),
+        fertilizeUnit: text('fertilize_unit').$type<CareUnit>(),
+        repotInterval: integer('repot_interval'),
+        repotUnit: text('repot_unit').$type<CareUnit>(),
+        family: text('family'),
+        sourceUrl: text('source_url')
+    },
+    (table) => {
+        return [
+            uniqueIndex('care_reference_match_idx').on(table.matchType, table.matchKey),
+            check('care_reference_water_range', sql`(${table.waterInterval} is null and ${table.waterUnit} is null) or (${table.waterInterval} is not null and ${table.waterUnit} is not null and ${table.waterUnit} in ('D', 'M', 'Y') and ${table.waterInterval} * case ${table.waterUnit} when 'D' then 1 when 'M' then 30 else 365 end between 2 and 28)`),
+            check('care_reference_fertilize_range', sql`(${table.fertilizeInterval} is null and ${table.fertilizeUnit} is null) or (${table.fertilizeInterval} is not null and ${table.fertilizeUnit} is not null and ${table.fertilizeUnit} in ('D', 'M', 'Y') and ${table.fertilizeInterval} * case ${table.fertilizeUnit} when 'D' then 1 when 'M' then 30 else 365 end between 14 and 90)`),
+            check('care_reference_repot_range', sql`(${table.repotInterval} is null and ${table.repotUnit} is null) or (${table.repotInterval} is not null and ${table.repotUnit} is not null and ${table.repotUnit} in ('D', 'M', 'Y') and ${table.repotInterval} * case ${table.repotUnit} when 'D' then 1 when 'M' then 30 else 365 end between 180 and 1095)`)
+        ];
     }
 );

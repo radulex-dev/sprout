@@ -4,6 +4,24 @@ export enum CareKind {
     Repot = 'repot'
 }
 
+export enum CareSource {
+    Genus = 'genus',
+    Family = 'family',
+    None = 'none'
+}
+
+export enum CareMatchType {
+    Genus = 'genus',
+    Family = 'family',
+    Alias = 'alias'
+}
+
+export enum CareUnit {
+    Days = 'D',
+    Months = 'M',
+    Years = 'Y'
+}
+
 export interface CareSchedule {
     waterEveryDays: number;
     fertilizeEveryDays: number;

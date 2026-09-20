@@ -5,7 +5,7 @@ import React, { useCallback, useId, useState } from 'react';
 import { Sprout } from 'lucide-react';
 
 // Constants
-import { NICKNAME_LABEL, NICKNAME_PLACEHOLDER } from './constants';
+import { CARE_HINT_BY_SOURCE, NICKNAME_LABEL, NICKNAME_PLACEHOLDER } from './constants';
 import { FREQUENCY_TITLE } from '@/components/CareScheduleFields/constants';
 import { LAST_CARE_HINT, LAST_CARE_TITLE } from '@/components/LastCareFields/constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
@@ -40,6 +40,7 @@ export interface Props extends React.ComponentProps<'div'> {
 const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel, onSave, className, ...props }) => {
     const classes = classNames(styles.root, className);
     const resultCardClasses = classNames(styles.resultCard, styles.selected);
+    const careHint = CARE_HINT_BY_SOURCE[result.careSource];
 
     const [nickname, setNickname] = useState(result.commonName || result.species);
     const [care, setCare] = useState<CareSchedule>(() => {
@@ -101,7 +102,7 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
                 <h2 className={styles.sectionTitle}>
                     {FREQUENCY_TITLE}
                 </h2>
-                <CareScheduleFields value={care} onChange={setCare} hint="Suggested defaults are based on the identified species — tweak as needed." />
+                <CareScheduleFields value={care} onChange={setCare} hint={careHint} />
 
                 <div className={styles.shutterRow}>
                     <Button variant={ButtonVariant.Secondary} grow onClick={onCancel}>

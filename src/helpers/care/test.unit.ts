@@ -3,13 +3,51 @@ import { describe, expect, it } from 'vitest';
 import { makePlant, NOW } from '@test/vitest/data/plant.mock';
 
 // Constants
-import { DAY_MS, DAYS_PER_MONTH } from './constants';
+import { DAY_MS, DAYS_PER_MONTH, FALLBACK_CARE } from './constants';
 
 // Helpers
 import { allTasks, dueTasks, formatDue, nextDue, resolveLastCare, startOfToday, toDateValue } from './index';
+import { resolveCare } from './resolve';
 
 // Types
-import { CareKind } from '@/types';
+import { CareKind, CareSource } from '@/types';
+import type { CareReference } from './types';
+
+const careReference: CareReference = {
+    alias: {
+        'calathea': 'goeppertia',
+        'dracaena trifasciata': 'sansevieria'
+    },
+    family: {
+        urticaceae: {
+            waterEveryDays: 6,
+            fertilizeEveryDays: 30,
+            repotEveryMonths: 18
+        }
+    },
+    genus: {
+        dracaena: {
+            waterEveryDays: 10,
+            fertilizeEveryDays: 30,
+            repotEveryMonths: 30
+        },
+        goeppertia: {
+            waterEveryDays: 4,
+            fertilizeEveryDays: 21,
+            repotEveryMonths: 12
+        },
+        monstera: {
+            waterEveryDays: 5,
+            fertilizeEveryDays: 30,
+            repotEveryMonths: 18
+        },
+        sansevieria: {
+            waterEveryDays: 21,
+            fertilizeEveryDays: 90,
+            repotEveryMonths: 30
+        }
+    }
+};
 
 const WATER_ONLY = {
     waterEveryDays: 7,
@@ -210,5 +248,99 @@ describe('startOfToday', () => {
         const evening = new Date(2026, 8, 6, 21, 34).getTime();
 
         expect(toDateValue(startOfToday(evening))).toBe('2026-09-06');
+    });
+});
+
+describe('resolveCare', () => {
+    it('resolves a genus case-insensitively', () => {
+        const resolved = resolveCare(careReference, {
+            species: 'Monstera deliciosa',
+            genus: 'Monstera'
+        });
+
+        expect(resolved.source).toBe(CareSource.Genus);
+        expect(resolved.care).toEqual(careReference.genus.monstera);
+    });
+
+    it('resolves the family case-insensitively when the genus is unknown', () => {
+        const resolved = resolveCare(careReference, {
+            genus: 'Soleirolia',
+            family: 'Urticaceae'
+        });
+
+        expect(resolved.source).toBe(CareSource.Family);
+        expect(resolved.care).toEqual(careReference.family.urticaceae);
+    });
+
+    it('prefers the genus over the family when both match', () => {
+        const resolved = resolveCare(careReference, {
+            genus: 'Monstera',
+            family: 'Urticaceae'
+        });
+
+        expect(resolved.source).toBe(CareSource.Genus);
+        expect(resolved.care).toEqual(careReference.genus.monstera);
+    });
+
+    it('falls back to FALLBACK_CARE when neither the genus nor the family is known', () => {
+        const resolved = resolveCare(careReference, {
+            species: 'Ficus unknownia',
+            genus: 'Unknownia',
+            family: 'Unknownaceae'
+        });
+
+        expect(resolved).toEqual({
+            care: FALLBACK_CARE,
+            source: CareSource.None
+        });
+    });
+
+    it('falls back to FALLBACK_CARE for an empty lookup', () => {
+        expect(resolveCare(careReference, {})).toEqual({
+            care: FALLBACK_CARE,
+            source: CareSource.None
+        });
+    });
+});
+
+describe('alias resolution', () => {
+    it('resolves a genus alias to the reclassified genus entry', () => {
+        const resolved = resolveCare(careReference, {
+            species: 'Calathea orbifolia',
+            genus: 'Calathea'
+        });
+
+        expect(resolved.source).toBe(CareSource.Genus);
+        expect(resolved.care).toEqual(careReference.genus.goeppertia);
+    });
+
+    it('resolves a species alias to the aliased genus entry', () => {
+        const resolved = resolveCare(careReference, {
+            species: 'Dracaena trifasciata',
+            genus: 'Dracaena'
+        });
+
+        expect(resolved.source).toBe(CareSource.Genus);
+        expect(resolved.care).toEqual(careReference.genus.sansevieria);
+    });
+
+    it('normalises case and surrounding whitespace before alias resolution', () => {
+        const resolved = resolveCare(careReference, {
+            species: '  DRACAENA TRIFASCIATA  ',
+            genus: '  Dracaena  '
+        });
+
+        expect(resolved.source).toBe(CareSource.Genus);
+        expect(resolved.care).toEqual(careReference.genus.sansevieria);
+    });
+
+    it('keeps Dracaena fragrans on the dracaena entry while aliasing Dracaena trifasciata', () => {
+        const resolved = resolveCare(careReference, {
+            species: 'Dracaena fragrans',
+            genus: 'Dracaena'
+        });
+
+        expect(resolved.source).toBe(CareSource.Genus);
+        expect(resolved.care).toEqual(careReference.genus.dracaena);
     });
 });

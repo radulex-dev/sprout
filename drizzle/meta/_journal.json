@@ -8,6 +8,20 @@
       "when": 1786823281451,
       "tag": "0000_odd_micromacro",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789911041470,
+      "tag": "0001_added_care_reference_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789911042222,
+      "tag": "0002_seeded_care_reference_table",
+      "breakpoints": true
     }
   ]
 }
