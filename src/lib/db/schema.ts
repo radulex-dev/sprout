@@ -70,3 +70,27 @@ export const careReference = pgTable(
         ];
     }
 );
+
+export const pushSubscriptions = pgTable(
+    TableName.PushSubscriptions,
+    {
+        id: uuid('id').primaryKey().defaultRandom(),
+        userId: text('user_id')
+            .notNull()
+            .references(() => { return user.id; }, {
+                onDelete: 'cascade'
+            }),
+        endpoint: text('endpoint').notNull(),
+        p256dh: text('p256dh').notNull(),
+        auth: text('auth').notNull(),
+        createdAt: bigint('created_at', {
+            mode: 'number'
+        }).notNull()
+    },
+    (table) => {
+        return [
+            uniqueIndex('push_subscriptions_endpoint_idx').on(table.endpoint),
+            index('push_subscriptions_user_id_idx').on(table.userId)
+        ];
+    }
+);

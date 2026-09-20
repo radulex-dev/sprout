@@ -13,9 +13,9 @@ reminders when each plant needs watering, fertilising or repotting.
   start from reference data stored in the database (`care_reference`, seeded by migration), looked up
   by the identified genus, falling back to family and then to a generic 7/30/18 default — and the form
   says which of the three it used, so an unsourced default is never presented as plant-specific.
-- **🔔 Reminders** — notifications when care is due (at most one per task per day), checked on
-  app open, on focus, hourly while open, and via periodic background sync on installed
-  Chromium/Android PWAs.
+- **🔔 Reminders** — Web Push notifications when care is due (at most one per task per day), so they
+  arrive with the app closed; a daily Vercel Cron sends what is due, and an in-app watcher also
+  checks on open, on focus, and hourly while open.
 - **📱 Installable PWA** — home-screen icon, standalone display, notification click handling.
 
 ## Run it
@@ -77,10 +77,14 @@ Copy `.env.example` to `.env.local` and set:
 | Images | plain `<img>` in `src/components/` | Deliberately no `next/image`: the auth-gated photo route cannot be optimized, and previews use `blob:` URLs. |
 | Local dev | `docker-compose.yml` | `db` (Postgres) + `app` (Next dev) containers |
 
-Known limitation: this is a serverless PWA, so reminders fire when the app is open, focused, or
-(on Chromium/Android installed PWAs) via periodic background sync. Fully reliable push while the
-app is closed — especially on iOS — would need Web Push/VAPID; the service worker is already
-structured to accept that.
+Reminders arrive as Web Push, so they reach you with the app closed. On iOS 16.4+ the app must be
+added to the Home Screen first, since Safari only delivers push to installed web apps. One Vercel
+Cron sends a daily digest of everything due (Hobby plans allow cron jobs only once per day), and the
+in-app watcher additionally checks on open and on focus.
+
+Web Push needs four environment variables in the deployment — `NEXT_PUBLIC_VAPID_PUBLIC_KEY`,
+`VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` and `CRON_SECRET`. Without them the app runs normally, but
+reminders only fire while it is open.
 
 Known limitation, error/loading boundaries: `(app)/error.tsx` catches errors thrown by the page and
 nested segments, but **not** by `(app)/layout.tsx` itself — those bubble to the root

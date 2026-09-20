@@ -1,3 +1,1 @@
-export const PERIODIC_SYNC_MIN_INTERVAL_MS = 12 * 60 * 60 * 1000;
-
 export const CARE_CHECK_INTERVAL_MS = 60 * 60 * 1000;

@@ -1,16 +1,16 @@
 // Constants
-import { CARE_CHECK_INTERVAL_MS, PERIODIC_SYNC_MIN_INTERVAL_MS } from './constants';
+import { CARE_CHECK_INTERVAL_MS } from './constants';
 import { CARE_META, DAY_MS } from '@/helpers/care/constants';
 
 // Helpers
 import { dueTasks } from '@/helpers/care';
+import { decodeVapidPublicKey } from '@/helpers/push';
 
 // Database
 import { recordNotified } from '@/lib/db/actions';
 
 // Types
 import type { Plant } from '@/types';
-import type { CareCheckMessage, ServiceWorkerRegistrationWithPeriodicSync } from './types';
 
 const fetchPlants = async (): Promise<Plant[]> => {
     try {
@@ -28,16 +28,26 @@ const fetchPlants = async (): Promise<Plant[]> => {
     }
 };
 
-const registerPeriodicSync = async () => {
-    try {
-        const reg = await navigator.serviceWorker.ready as ServiceWorkerRegistrationWithPeriodicSync;
-        // Only available on installed PWAs in Chromium; fails silently elsewhere.
-        await reg.periodicSync?.register('sprout-care-check', {
-            minInterval: PERIODIC_SYNC_MIN_INTERVAL_MS
-        });
-    } catch {
-        /* periodic sync unavailable — in-app checks still run */
+const subscribeToPush = async (key: string): Promise<void> => {
+    const registration = await navigator.serviceWorker.ready;
+    const pushManager = registration.pushManager as PushManager | undefined;
+
+    if (!pushManager) {
+        return;
     }
+
+    const subscription = await pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: decodeVapidPublicKey(key)
+    });
+
+    await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(subscription)
+    });
 };
 
 export const isNotificationsSupported = (): boolean => {
@@ -52,7 +62,11 @@ export const requestNotificationPermission = async (): Promise<NotificationPermi
     const perm = await Notification.requestPermission();
 
     if (perm === 'granted') {
-        await registerPeriodicSync();
+        const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+
+        if (key) {
+            await Promise.allSettled([subscribeToPush(key)]);
+        }
     }
 
     return perm;
@@ -94,8 +108,6 @@ export const checkAndNotify = async (): Promise<number> => {
 export const startCareWatcher = (): (() => void) => {
     void checkAndNotify();
 
-    const sw = 'serviceWorker' in navigator ? navigator.serviceWorker : undefined;
-
     const handleFocus = () => {
         void checkAndNotify();
     };
@@ -104,19 +116,11 @@ export const startCareWatcher = (): (() => void) => {
         void checkAndNotify();
     };
 
-    const handleMessage = (event: MessageEvent<CareCheckMessage>) => {
-        if (event.data.type === 'care-check') {
-            void checkAndNotify();
-        }
-    };
-
     window.addEventListener('focus', handleFocus);
-    sw?.addEventListener('message', handleMessage);
     const interval = setInterval(handleTick, CARE_CHECK_INTERVAL_MS);
 
     return () => {
         window.removeEventListener('focus', handleFocus);
-        sw?.removeEventListener('message', handleMessage);
         clearInterval(interval);
     };
 };

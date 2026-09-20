@@ -12,18 +12,18 @@ const CACHE = `sprout-${CACHE_VERSION}`;
 const SHELL = ['/favicon.ico', '/icon.svg', '/icon-192.png', '/icon-512.png', '/icon-maskable-192.png', '/icon-maskable-512.png', '/icon-mono.svg', '/manifest.webmanifest'];
 const SHELL_PATHS = new Set(SHELL);
 
-globalThis.addEventListener('install', (e) => {
-    e.waitUntil(caches.open(CACHE).then((c) => { return c.addAll(SHELL); }));
+globalThis.addEventListener('install', (event) => {
+    event.waitUntil(caches.open(CACHE).then((cache) => { return cache.addAll(SHELL); }));
     globalThis.skipWaiting();
 });
 
-globalThis.addEventListener('activate', (e) => {
-    e.waitUntil(
+globalThis.addEventListener('activate', (event) => {
+    event.waitUntil(
         caches
             .keys()
             .then((keys) => {
-                return Promise.all(keys.reduce((accumulator, k) => {
-                    if (k !== CACHE) accumulator.push(caches.delete(k));
+                return Promise.all(keys.reduce((accumulator, key) => {
+                    if (key !== CACHE) accumulator.push(caches.delete(key));
                     return accumulator;
                 }, []));
             })
@@ -31,53 +31,61 @@ globalThis.addEventListener('activate', (e) => {
     );
 });
 
-globalThis.addEventListener('fetch', (e) => {
-    const url = new URL(e.request.url);
-    if (e.request.method !== 'GET' || url.origin !== location.origin) return;
-    if (e.request.mode === 'navigate') return;
+globalThis.addEventListener('fetch', (event) => {
+    const url = new URL(event.request.url);
+    if (event.request.method !== 'GET' || url.origin !== location.origin) return;
+    if (event.request.mode === 'navigate') return;
     // RSC navigations look like ordinary same-origin GETs but are per-user
     // flight payloads. Serving a cached one leaves the router's transition
     // stuck on the route-level loading skeleton, silently and permanently —
     // dropping this guard reintroduces that bug.
-    if (e.request.headers.get('RSC') === '1') return;
+    if (event.request.headers.get('RSC') === '1') return;
     if (url.pathname.startsWith('/api/')) return;
     // Never add /_next/static here: the browser already revalidates it, and a
     // copy cached here outlives every rebuild (dev chunk names are stable).
     if (!SHELL_PATHS.has(url.pathname)) return;
 
-    e.respondWith(
-        caches.match(e.request).then((hit) => {
+    event.respondWith(
+        caches.match(event.request).then((hit) => {
             return (
                 hit ||
-                fetch(e.request).then((res) => {
-                    const copy = res.clone();
-                    caches.open(CACHE).then((c) => { return c.put(e.request, copy); });
-                    return res;
+                fetch(event.request).then((response) => {
+                    const copy = response.clone();
+                    caches.open(CACHE).then((cache) => { return cache.put(event.request, copy); });
+                    return response;
                 })
             );
         })
     );
 });
 
-globalThis.addEventListener('notificationclick', (e) => {
-    e.notification.close();
-    e.waitUntil(
+globalThis.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    event.waitUntil(
         globalThis.clients.matchAll({ type: 'window',
             includeUncontrolled: true }).then((clients) => {
-            const open = clients.find((c) => { return 'focus' in c; });
+            const open = clients.find((client) => { return 'focus' in client; });
             if (open) return open.focus();
-            return globalThis.clients.openWindow('/');
+            return globalThis.clients.openWindow(event.notification.data?.url || '/');
         })
     );
 });
 
-/* Periodic background sync (Chrome/Android installed PWAs): re-check care schedule. */
-globalThis.addEventListener('periodicsync', (e) => {
-    if (e.tag === 'sprout-care-check') {
-        e.waitUntil(
-            globalThis.clients.matchAll().then((clients) => {
-                clients.forEach((c) => { return c.postMessage({ type: 'care-check' }); });
-            })
-        );
+globalThis.addEventListener('push', (event) => {
+    let payload;
+    try {
+        payload = event.data ? event.data.json() : {};
+    } catch {
+        payload = {};
     }
+
+    event.waitUntil(
+        globalThis.registration.showNotification(payload.title || 'Sprout', {
+            body: payload.body || 'A plant needs care.',
+            tag: payload.tag,
+            icon: '/icon-192.png',
+            badge: '/icon-192.png',
+            data: { url: payload.url || '/' }
+        })
+    );
 });
