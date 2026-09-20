@@ -135,7 +135,7 @@ const CaptureStage: React.FunctionComponent<Props> = ({ photoUrl, isIdentifying,
         <React.Fragment>
             <CameraStageView photoUrl={photoUrl} isStreaming={isStreaming} videoRef={videoRef} />
             <ShutterRow photoUrl={photoUrl} isStreaming={isStreaming} isIdentifying={isIdentifying} onReset={onReset} onIdentify={onIdentify} onStopCamera={handleStopCamera} onCapture={handleCapture} onStartCamera={handleStartCamera} onUpload={handleUpload} />
-            <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden aria-label="Upload a photo of your plant" onChange={handleFileChange} />
+            <input ref={fileRef} type="file" accept="image/*" hidden aria-label="Upload a photo of your plant" onChange={handleFileChange} />
         </React.Fragment>
     );
 };
