@@ -12,29 +12,23 @@ import AddPlantForm from './index';
 import type { IdentifyResult } from '@/services/identify/types';
 
 // Types
-import { CareSource, type CareSchedule } from '@/types';
-
-const RESOLVED_CARE: CareSchedule = {
-    fertilizeEveryDays: 30,
-    repotEveryMonths: 18,
-    waterEveryDays: 5
-};
-
-const makeResult = (careSource: CareSource): IdentifyResult => {
-    return {
-        careSource,
-        commonName: 'Swiss Cheese Plant',
-        confidence: 0.92,
-        defaultCare: RESOLVED_CARE,
-        species: 'Monstera deliciosa'
-    };
-};
+import { CareSource } from '@/types';
 
 const props: React.ComponentProps<typeof AddPlantForm> = {
     onCancel: vi.fn(),
     onSave: vi.fn(),
     photo: new Blob(),
-    result: makeResult(CareSource.Genus)
+    result: {
+        careSource: CareSource.Genus,
+        commonName: 'Swiss Cheese Plant',
+        confidence: 0.92,
+        defaultCare: {
+            fertilizeEveryDays: 30,
+            repotEveryMonths: 18,
+            waterEveryDays: 5
+        },
+        species: 'Monstera deliciosa'
+    }
 };
 
 describe('AddPlantForm', () => {
@@ -52,13 +46,37 @@ describe('AddPlantForm', () => {
     });
 
     it('shows the family hint when only the family matched', () => {
-        render(<AddPlantForm {...props} result={makeResult(CareSource.Family)} />);
+        const result: IdentifyResult = {
+            careSource: CareSource.Family,
+            commonName: 'Swiss Cheese Plant',
+            confidence: 0.92,
+            defaultCare: {
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18,
+                waterEveryDays: 5
+            },
+            species: 'Monstera deliciosa'
+        };
+
+        render(<AddPlantForm {...props} result={result} />);
 
         expect(screen.getByText(CARE_HINT_FAMILY)).toBeInTheDocument();
     });
 
     it('tells the user to set the frequencies when we hold no data for the plant', () => {
-        render(<AddPlantForm {...props} result={makeResult(CareSource.None)} />);
+        const result: IdentifyResult = {
+            careSource: CareSource.None,
+            commonName: 'Swiss Cheese Plant',
+            confidence: 0.92,
+            defaultCare: {
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18,
+                waterEveryDays: 5
+            },
+            species: 'Monstera deliciosa'
+        };
+
+        render(<AddPlantForm {...props} result={result} />);
 
         expect(screen.getByText(CARE_HINT_NONE)).toBeInTheDocument();
     });
@@ -72,15 +90,25 @@ describe('AddPlantForm', () => {
     it('prefills the care fields from the resolved schedule', () => {
         render(<AddPlantForm {...props} />);
 
-        const values = screen.getAllByRole('combobox').map((field) => {
+        expect(screen.getAllByRole('combobox').map((field) => {
             return field.textContent;
-        });
-
-        expect(values).toEqual(['5 days', '30 days', '18 months']);
+        })).toEqual(['5 days', '30 days', '18 months']);
     });
 
     it('shows exactly one hint for the resolved source', () => {
-        render(<AddPlantForm {...props} result={makeResult(CareSource.Family)} />);
+        const result: IdentifyResult = {
+            careSource: CareSource.Family,
+            commonName: 'Swiss Cheese Plant',
+            confidence: 0.92,
+            defaultCare: {
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18,
+                waterEveryDays: 5
+            },
+            species: 'Monstera deliciosa'
+        };
+
+        render(<AddPlantForm {...props} result={result} />);
 
         expect(screen.queryByText(CARE_HINT_GENUS)).not.toBeInTheDocument();
         expect(screen.queryByText(CARE_HINT_NONE)).not.toBeInTheDocument();

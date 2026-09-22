@@ -8,7 +8,7 @@ import { createPlant as serviceCreatePlant, deletePlant as serviceDeletePlant, m
 import { createPlant, deletePlant, markCareDone, recordNotified, updatePlant } from './index';
 
 // Types
-import { CareKind, type PlantInput } from '@/types';
+import { CareKind } from '@/types';
 
 vi.mock('@/services/server/plants', () => {
     return {
@@ -41,22 +41,6 @@ vi.mock('next/cache', () => {
     };
 });
 
-const VALID_CARE = {
-    waterEveryDays: 7,
-    fertilizeEveryDays: 30,
-    repotEveryMonths: 18
-};
-
-const VALID_INPUT: PlantInput = {
-    nickname: 'Kitchen monstera',
-    species: 'Monstera deliciosa',
-    commonName: 'Swiss cheese plant',
-    care: VALID_CARE,
-    acquiredAt: 1_700_000_000_000
-};
-
-const VALID_ID = '123e4567-e89b-42d3-a456-426614174000';
-
 beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(serviceCreatePlant).mockResolvedValue('plant-1');
@@ -69,17 +53,44 @@ beforeEach(() => {
 describe('createPlant', () => {
     it('rejects malformed input before calling the service', async () => {
         await expect(createPlant({
-            ...VALID_INPUT,
-            nickname: ''
+            nickname: '',
+            species: 'Monstera deliciosa',
+            commonName: 'Swiss cheese plant',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1_700_000_000_000
         })).rejects.toThrow();
 
         expect(serviceCreatePlant).not.toHaveBeenCalled();
     });
 
     it('validates, delegates, revalidates, and returns the id', async () => {
-        const id = await createPlant(VALID_INPUT);
+        const id = await createPlant({
+            nickname: 'Kitchen monstera',
+            species: 'Monstera deliciosa',
+            commonName: 'Swiss cheese plant',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1_700_000_000_000
+        });
 
-        expect(serviceCreatePlant).toHaveBeenCalledWith('user-1', VALID_INPUT);
+        expect(serviceCreatePlant).toHaveBeenCalledWith('user-1', {
+            nickname: 'Kitchen monstera',
+            species: 'Monstera deliciosa',
+            commonName: 'Swiss cheese plant',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1_700_000_000_000
+        });
         expect(id).toBe('plant-1');
         expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
     });
@@ -91,12 +102,28 @@ describe('createPlant', () => {
         };
 
         await createPlant({
-            ...VALID_INPUT,
+            nickname: 'Kitchen monstera',
+            species: 'Monstera deliciosa',
+            commonName: 'Swiss cheese plant',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1_700_000_000_000,
             lastCare
         });
 
         expect(serviceCreatePlant).toHaveBeenCalledWith('user-1', {
-            ...VALID_INPUT,
+            nickname: 'Kitchen monstera',
+            species: 'Monstera deliciosa',
+            commonName: 'Swiss cheese plant',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1_700_000_000_000,
             lastCare
         });
     });
@@ -106,21 +133,33 @@ describe('updatePlant', () => {
     it('rejects an invalid id before calling the service', async () => {
         await expect(updatePlant('not-a-uuid', {
             nickname: 'Fern',
-            care: VALID_CARE
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            }
         })).rejects.toThrow();
 
         expect(serviceUpdatePlant).not.toHaveBeenCalled();
     });
 
     it('validates, delegates, and revalidates', async () => {
-        await updatePlant(VALID_ID, {
+        await updatePlant('123e4567-e89b-42d3-a456-426614174000', {
             nickname: 'Fern',
-            care: VALID_CARE
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            }
         });
 
-        expect(serviceUpdatePlant).toHaveBeenCalledWith('user-1', VALID_ID, {
+        expect(serviceUpdatePlant).toHaveBeenCalledWith('user-1', '123e4567-e89b-42d3-a456-426614174000', {
             nickname: 'Fern',
-            care: VALID_CARE
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            }
         });
         expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
     });
@@ -128,31 +167,29 @@ describe('updatePlant', () => {
 
 describe('markCareDone', () => {
     it('rejects an invalid kind before calling the service', async () => {
-        await expect(markCareDone(VALID_ID, 'sun' as unknown as CareKind)).rejects.toThrow();
+        await expect(markCareDone('123e4567-e89b-42d3-a456-426614174000', 'sun' as unknown as CareKind)).rejects.toThrow();
 
         expect(serviceMarkCareDone).not.toHaveBeenCalled();
     });
 
     it('validates, delegates, and revalidates', async () => {
-        await markCareDone(VALID_ID, CareKind.Water);
+        await markCareDone('123e4567-e89b-42d3-a456-426614174000', CareKind.Water);
 
-        expect(serviceMarkCareDone).toHaveBeenCalledWith('user-1', VALID_ID, CareKind.Water);
+        expect(serviceMarkCareDone).toHaveBeenCalledWith('user-1', '123e4567-e89b-42d3-a456-426614174000', CareKind.Water);
         expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
     });
 
     it('omits at so the service applies its own default', async () => {
-        const careMock = vi.mocked(serviceMarkCareDone);
+        await markCareDone('123e4567-e89b-42d3-a456-426614174000', CareKind.Water);
 
-        await markCareDone(VALID_ID, CareKind.Water);
-
-        expect(careMock.mock.calls.at(0)).toHaveLength(3);
+        expect(vi.mocked(serviceMarkCareDone).mock.calls.at(0)).toHaveLength(3);
         expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
     });
 
     it('forwards an explicit at timestamp to the service', async () => {
-        await markCareDone(VALID_ID, CareKind.Water, 1_699_000_000_000);
+        await markCareDone('123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1_699_000_000_000);
 
-        expect(serviceMarkCareDone).toHaveBeenCalledWith('user-1', VALID_ID, CareKind.Water, 1_699_000_000_000);
+        expect(serviceMarkCareDone).toHaveBeenCalledWith('user-1', '123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1_699_000_000_000);
         expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
     });
 
@@ -161,7 +198,7 @@ describe('markCareDone', () => {
         1_699_000_000_000.5,
         -1
     ])('rejects the timestamp %s before calling the service', async (at) => {
-        await expect(markCareDone(VALID_ID, CareKind.Water, at)).rejects.toThrow();
+        await expect(markCareDone('123e4567-e89b-42d3-a456-426614174000', CareKind.Water, at)).rejects.toThrow();
 
         expect(serviceMarkCareDone).not.toHaveBeenCalled();
     });
@@ -169,15 +206,15 @@ describe('markCareDone', () => {
 
 describe('recordNotified', () => {
     it('rejects a negative timestamp before calling the service', async () => {
-        await expect(recordNotified(VALID_ID, CareKind.Water, -1)).rejects.toThrow();
+        await expect(recordNotified('123e4567-e89b-42d3-a456-426614174000', CareKind.Water, -1)).rejects.toThrow();
 
         expect(serviceRecordNotified).not.toHaveBeenCalled();
     });
 
     it('validates and delegates without revalidating', async () => {
-        await recordNotified(VALID_ID, CareKind.Water, 1_700_000_000_000);
+        await recordNotified('123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1_700_000_000_000);
 
-        expect(serviceRecordNotified).toHaveBeenCalledWith('user-1', VALID_ID, CareKind.Water, 1_700_000_000_000);
+        expect(serviceRecordNotified).toHaveBeenCalledWith('user-1', '123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1_700_000_000_000);
         expect(revalidatePath).not.toHaveBeenCalled();
     });
 });
@@ -190,9 +227,9 @@ describe('deletePlant', () => {
     });
 
     it('validates, delegates, and revalidates', async () => {
-        await deletePlant(VALID_ID);
+        await deletePlant('123e4567-e89b-42d3-a456-426614174000');
 
-        expect(serviceDeletePlant).toHaveBeenCalledWith('user-1', VALID_ID);
+        expect(serviceDeletePlant).toHaveBeenCalledWith('user-1', '123e4567-e89b-42d3-a456-426614174000');
         expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
     });
 });

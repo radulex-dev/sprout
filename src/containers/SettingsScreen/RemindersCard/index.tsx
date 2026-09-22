@@ -16,13 +16,14 @@ export interface Props extends React.ComponentProps<'div'> {
     isSupported: boolean | undefined;
     perm: NotificationPermission;
     isStandalone: boolean | undefined;
+    testCooldown: number;
     onEnable: () => void;
     onInstall: () => void;
     onTest: () => void;
     testStatus: string;
 }
 
-const RemindersCard: React.FunctionComponent<Props> = ({ isSupported, perm, isStandalone, onEnable, onInstall, onTest, testStatus, className, ...props }) => {
+const RemindersCard: React.FunctionComponent<Props> = ({ isSupported, perm, isStandalone, testCooldown, onEnable, onInstall, onTest, testStatus, className, ...props }) => {
     const isInstallRequired = isSupported === false && isStandalone === false;
     const warnNoticeClasses = classNames(styles.notice, styles.warn);
     const classes = classNames(styles.root, className);
@@ -44,14 +45,16 @@ const RemindersCard: React.FunctionComponent<Props> = ({ isSupported, perm, isSt
     };
 
     const renderEnabled = () => {
+        const isTestCoolingDown = testCooldown > 0;
+
         return (
             <React.Fragment>
                 <div className={styles.notice}>
                     <Check size="1rem" aria-hidden />
                     Notifications are enabled.
                 </div>
-                <Button variant={ButtonVariant.Secondary} block onClick={onTest}>
-                    Send a test notification
+                <Button variant={ButtonVariant.Secondary} block disabled={isTestCoolingDown} onClick={onTest}>
+                    {isTestCoolingDown ? `Try again in ${testCooldown}s` : 'Send a test notification'}
                 </Button>
                 {testStatus !== '' && (
                     <div className={styles.notice} role="status">

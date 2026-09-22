@@ -89,3 +89,19 @@ globalThis.addEventListener('push', (event) => {
         })
     );
 });
+
+globalThis.addEventListener('pushsubscriptionchange', (event) => {
+    if (!event.oldSubscription) return;
+
+    event.waitUntil(
+        globalThis.registration.pushManager
+            .subscribe(event.oldSubscription.options)
+            .then((subscription) => {
+                return fetch('/api/push/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(subscription)
+                });
+            })
+    );
+});

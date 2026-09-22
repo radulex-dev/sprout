@@ -1,7 +1,7 @@
+import type React from 'react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { makePlant, NOW } from '@test/vitest/data/plant.mock';
 
 // Constants
 import { DAY_MS } from '@/helpers/care/constants';
@@ -9,22 +9,33 @@ import { DAY_MS } from '@/helpers/care/constants';
 // Components
 import TaskRow from './index';
 
+// Mocks
+import { makePlant, NOW } from '@test/vitest/data/plant.mock';
+
 // Types
 import { CareKind } from '@/types';
 import type { CareTask } from '@/helpers/care/types';
 
-const makeTask = (daysUntil: number): CareTask => {
-    return {
+const props: React.ComponentProps<typeof TaskRow> = {
+    task: {
         plant: makePlant(),
         kind: CareKind.Water,
-        dueAt: NOW + daysUntil * DAY_MS,
-        daysUntil
-    };
+        dueAt: NOW,
+        daysUntil: 0
+    },
+    onSelect: vi.fn()
 };
 
 describe('TaskRow', () => {
     it('renders the task label, the plant name and the due state', () => {
-        render(<TaskRow task={makeTask(-3)} onSelect={vi.fn()} />);
+        const task: CareTask = {
+            plant: makePlant(),
+            kind: CareKind.Water,
+            dueAt: NOW - 3 * DAY_MS,
+            daysUntil: -3
+        };
+
+        render(<TaskRow {...props} task={task} />);
 
         expect(screen.getByText('Water')).toBeInTheDocument();
         expect(screen.getByText('Monstera deliciosa')).toBeInTheDocument();
@@ -35,7 +46,7 @@ describe('TaskRow', () => {
         const handleSelect = vi.fn();
         const user = userEvent.setup();
 
-        render(<TaskRow task={makeTask(0)} onSelect={handleSelect} />);
+        render(<TaskRow {...props} onSelect={handleSelect} />);
         await user.click(screen.getByRole('button', {
             name: /Water/
         }));
@@ -44,7 +55,7 @@ describe('TaskRow', () => {
     });
 
     it('offers no done action of its own', () => {
-        render(<TaskRow task={makeTask(0)} onSelect={vi.fn()} />);
+        render(<TaskRow {...props} />);
 
         expect(screen.queryByRole('button', {
             name: 'Done'

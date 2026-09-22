@@ -1,73 +1,19 @@
 import { getLocalTimeZone, parseDate } from '@internationalized/date';
 import { describe, expect, it } from 'vitest';
-import { makePlant, NOW } from '@test/vitest/data/plant.mock';
 
 // Constants
 import { DAY_MS, DAYS_PER_MONTH, FALLBACK_CARE } from './constants';
 
 // Helpers
-import { allTasks, dueTasks, formatDue, nextDue, resolveLastCare, startOfToday, toDateValue } from './index';
+import { allTasks, dueTasks, formatDue, isNotifiedToday, nextDue, resolveLastCare, startOfToday, toDateValue } from './index';
 import { resolveCare } from './resolve';
+
+// Mocks
+import { careReference } from '@test/vitest/data/care-reference.mock';
+import { makePlant, NOW } from '@test/vitest/data/plant.mock';
 
 // Types
 import { CareKind, CareSource } from '@/types';
-import type { CareReference } from './types';
-
-const careReference: CareReference = {
-    alias: {
-        'calathea': 'goeppertia',
-        'dracaena trifasciata': 'sansevieria'
-    },
-    family: {
-        urticaceae: {
-            waterEveryDays: 6,
-            fertilizeEveryDays: 30,
-            repotEveryMonths: 18
-        }
-    },
-    genus: {
-        dracaena: {
-            waterEveryDays: 10,
-            fertilizeEveryDays: 30,
-            repotEveryMonths: 30
-        },
-        goeppertia: {
-            waterEveryDays: 4,
-            fertilizeEveryDays: 21,
-            repotEveryMonths: 12
-        },
-        monstera: {
-            waterEveryDays: 5,
-            fertilizeEveryDays: 30,
-            repotEveryMonths: 18
-        },
-        sansevieria: {
-            waterEveryDays: 21,
-            fertilizeEveryDays: 90,
-            repotEveryMonths: 30
-        }
-    }
-};
-
-const WATER_ONLY = {
-    waterEveryDays: 7,
-    fertilizeEveryDays: 0,
-    repotEveryMonths: 0
-};
-
-const NO_CARE = {
-    waterEveryDays: 0,
-    fertilizeEveryDays: 0,
-    repotEveryMonths: 0
-};
-
-const lastCareAt = (at: number): Record<CareKind, number> => {
-    return {
-        [CareKind.Water]: at,
-        [CareKind.Fertilize]: at,
-        [CareKind.Repot]: at
-    };
-};
 
 const startOfLocalDay = (timestamp: number): number => {
     const date = new Date(timestamp);
@@ -75,21 +21,23 @@ const startOfLocalDay = (timestamp: number): number => {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 };
 
-const FORMAT_DUE_CASES: [number, string][] = [
-    [-2, '2 days overdue'],
-    [-1, '1 day overdue'],
-    [0, 'due today'],
-    [1, 'tomorrow'],
-    [5, 'in 5 days'],
-    [30, 'in ~1 month'],
-    [45, 'in ~2 months']
-];
+const utcDate = (timestamp: number): string => {
+    return new Date(timestamp).toISOString().slice(0, 10);
+};
 
 describe('nextDue', () => {
     it('returns undefined when the interval is zero', () => {
         const plant = makePlant({
-            care: NO_CARE,
-            lastCare: lastCareAt(NOW)
+            care: {
+                waterEveryDays: 0,
+                fertilizeEveryDays: 0,
+                repotEveryMonths: 0
+            },
+            lastCare: {
+                [CareKind.Water]: NOW,
+                [CareKind.Fertilize]: NOW,
+                [CareKind.Repot]: NOW
+            }
         });
 
         expect(nextDue(plant, CareKind.Water)).toBeUndefined();
@@ -100,8 +48,16 @@ describe('nextDue', () => {
     it('returns lastCare plus the day interval', () => {
         const last = NOW - 3 * DAY_MS;
         const plant = makePlant({
-            care: WATER_ONLY,
-            lastCare: lastCareAt(last)
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 0,
+                repotEveryMonths: 0
+            },
+            lastCare: {
+                [CareKind.Water]: last,
+                [CareKind.Fertilize]: last,
+                [CareKind.Repot]: last
+            }
         });
 
         expect(nextDue(plant, CareKind.Water)).toBe(last + 7 * DAY_MS);
@@ -115,7 +71,11 @@ describe('nextDue', () => {
                 fertilizeEveryDays: 0,
                 repotEveryMonths: 3
             },
-            lastCare: lastCareAt(last)
+            lastCare: {
+                [CareKind.Water]: last,
+                [CareKind.Fertilize]: last,
+                [CareKind.Repot]: last
+            }
         });
 
         expect(nextDue(plant, CareKind.Repot)).toBe(last + 3 * DAYS_PER_MONTH * DAY_MS);
@@ -123,7 +83,15 @@ describe('nextDue', () => {
 });
 
 describe('formatDue', () => {
-    it.each(FORMAT_DUE_CASES)('formats %i as "%s"', (daysUntil, expected) => {
+    it.each([
+        [-2, '2 days overdue'],
+        [-1, '1 day overdue'],
+        [0, 'due today'],
+        [1, 'tomorrow'],
+        [5, 'in 5 days'],
+        [30, 'in ~1 month'],
+        [45, 'in ~2 months']
+    ])('formats %i as "%s"', (daysUntil, expected) => {
         expect(formatDue(daysUntil)).toBe(expected);
     });
 });
@@ -132,13 +100,29 @@ describe('dueTasks', () => {
     it('includes an overdue task and excludes a future one', () => {
         const overdue = makePlant({
             id: 'plant-overdue',
-            care: WATER_ONLY,
-            lastCare: lastCareAt(NOW - 10 * DAY_MS)
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 0,
+                repotEveryMonths: 0
+            },
+            lastCare: {
+                [CareKind.Water]: NOW - 10 * DAY_MS,
+                [CareKind.Fertilize]: NOW - 10 * DAY_MS,
+                [CareKind.Repot]: NOW - 10 * DAY_MS
+            }
         });
         const future = makePlant({
             id: 'plant-future',
-            care: WATER_ONLY,
-            lastCare: lastCareAt(NOW - DAY_MS)
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 0,
+                repotEveryMonths: 0
+            },
+            lastCare: {
+                [CareKind.Water]: NOW - DAY_MS,
+                [CareKind.Fertilize]: NOW - DAY_MS,
+                [CareKind.Repot]: NOW - DAY_MS
+            }
         });
 
         const tasks = dueTasks([overdue, future], NOW);
@@ -150,17 +134,98 @@ describe('dueTasks', () => {
     });
 });
 
+describe('isNotifiedToday', () => {
+    it('is false when the kind has never been notified', () => {
+        const plant = makePlant();
+
+        expect(isNotifiedToday(plant, CareKind.Water, NOW)).toBe(false);
+    });
+
+    it('is true when notified earlier on the same UTC date', () => {
+        const last = NOW - 2 * 60 * 60 * 1000;
+        const plant = makePlant({
+            lastNotified: {
+                [CareKind.Water]: last
+            }
+        });
+
+        expect(utcDate(last)).toBe(utcDate(NOW));
+        expect(isNotifiedToday(plant, CareKind.Water, NOW)).toBe(true);
+    });
+
+    it('is false when the previous notification falls on an earlier UTC date, even 23h ago', () => {
+        const last = NOW - 23 * 60 * 60 * 1000;
+        const plant = makePlant({
+            lastNotified: {
+                [CareKind.Water]: last
+            }
+        });
+
+        expect(utcDate(last)).not.toBe(utcDate(NOW));
+        expect(isNotifiedToday(plant, CareKind.Water, NOW)).toBe(false);
+    });
+
+    it('is false one millisecond before the current UTC day starts', () => {
+        const dayStart = Math.floor(NOW / DAY_MS) * DAY_MS;
+        const plant = makePlant({
+            lastNotified: {
+                [CareKind.Water]: dayStart - 1
+            }
+        });
+
+        expect(isNotifiedToday(plant, CareKind.Water, NOW)).toBe(false);
+    });
+
+    it('is true exactly at the start of the current UTC day', () => {
+        const dayStart = Math.floor(NOW / DAY_MS) * DAY_MS;
+        const plant = makePlant({
+            lastNotified: {
+                [CareKind.Water]: dayStart
+            }
+        });
+
+        expect(isNotifiedToday(plant, CareKind.Water, NOW)).toBe(true);
+    });
+
+    it('tracks each kind independently', () => {
+        const plant = makePlant({
+            lastNotified: {
+                [CareKind.Water]: NOW
+            }
+        });
+
+        expect(isNotifiedToday(plant, CareKind.Fertilize, NOW)).toBe(false);
+        expect(isNotifiedToday(plant, CareKind.Water, NOW)).toBe(true);
+    });
+});
+
 describe('allTasks', () => {
     it('sorts tasks soonest first across plants', () => {
         const soon = makePlant({
             id: 'plant-soon',
-            care: WATER_ONLY,
-            lastCare: lastCareAt(NOW - 6 * DAY_MS)
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 0,
+                repotEveryMonths: 0
+            },
+            lastCare: {
+                [CareKind.Water]: NOW - 6 * DAY_MS,
+                [CareKind.Fertilize]: NOW - 6 * DAY_MS,
+                [CareKind.Repot]: NOW - 6 * DAY_MS
+            }
         });
         const later = makePlant({
             id: 'plant-later',
-            care: WATER_ONLY,
-            lastCare: lastCareAt(NOW - DAY_MS)
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 0,
+                repotEveryMonths: 0
+            },
+            lastCare: {
+                [CareKind.Water]: NOW - DAY_MS,
+                [CareKind.Fertilize]: NOW - DAY_MS,
+                [CareKind.Repot]: NOW - DAY_MS
+            }
         });
 
         const tasks = allTasks([later, soon], NOW);
@@ -259,7 +324,11 @@ describe('resolveCare', () => {
         });
 
         expect(resolved.source).toBe(CareSource.Genus);
-        expect(resolved.care).toEqual(careReference.genus.monstera);
+        expect(resolved.care).toEqual({
+            waterEveryDays: 5,
+            fertilizeEveryDays: 30,
+            repotEveryMonths: 18
+        });
     });
 
     it('resolves the family case-insensitively when the genus is unknown', () => {
@@ -269,7 +338,11 @@ describe('resolveCare', () => {
         });
 
         expect(resolved.source).toBe(CareSource.Family);
-        expect(resolved.care).toEqual(careReference.family.urticaceae);
+        expect(resolved.care).toEqual({
+            waterEveryDays: 6,
+            fertilizeEveryDays: 30,
+            repotEveryMonths: 18
+        });
     });
 
     it('prefers the genus over the family when both match', () => {
@@ -279,7 +352,11 @@ describe('resolveCare', () => {
         });
 
         expect(resolved.source).toBe(CareSource.Genus);
-        expect(resolved.care).toEqual(careReference.genus.monstera);
+        expect(resolved.care).toEqual({
+            waterEveryDays: 5,
+            fertilizeEveryDays: 30,
+            repotEveryMonths: 18
+        });
     });
 
     it('falls back to FALLBACK_CARE when neither the genus nor the family is known', () => {
@@ -311,7 +388,11 @@ describe('alias resolution', () => {
         });
 
         expect(resolved.source).toBe(CareSource.Genus);
-        expect(resolved.care).toEqual(careReference.genus.goeppertia);
+        expect(resolved.care).toEqual({
+            waterEveryDays: 4,
+            fertilizeEveryDays: 21,
+            repotEveryMonths: 12
+        });
     });
 
     it('resolves a species alias to the aliased genus entry', () => {
@@ -321,7 +402,11 @@ describe('alias resolution', () => {
         });
 
         expect(resolved.source).toBe(CareSource.Genus);
-        expect(resolved.care).toEqual(careReference.genus.sansevieria);
+        expect(resolved.care).toEqual({
+            waterEveryDays: 21,
+            fertilizeEveryDays: 90,
+            repotEveryMonths: 30
+        });
     });
 
     it('normalises case and surrounding whitespace before alias resolution', () => {
@@ -331,7 +416,11 @@ describe('alias resolution', () => {
         });
 
         expect(resolved.source).toBe(CareSource.Genus);
-        expect(resolved.care).toEqual(careReference.genus.sansevieria);
+        expect(resolved.care).toEqual({
+            waterEveryDays: 21,
+            fertilizeEveryDays: 90,
+            repotEveryMonths: 30
+        });
     });
 
     it('keeps Dracaena fragrans on the dracaena entry while aliasing Dracaena trifasciata', () => {
@@ -341,6 +430,10 @@ describe('alias resolution', () => {
         });
 
         expect(resolved.source).toBe(CareSource.Genus);
-        expect(resolved.care).toEqual(careReference.genus.dracaena);
+        expect(resolved.care).toEqual({
+            waterEveryDays: 10,
+            fertilizeEveryDays: 30,
+            repotEveryMonths: 30
+        });
     });
 });

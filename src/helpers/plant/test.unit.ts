@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { makePlant } from '@test/vitest/data/plant.mock';
 
 // Helpers
 import { displayName } from './index';
+
+// Mocks
+import { makePlant } from '@test/vitest/data/plant.mock';
 
 describe('displayName', () => {
     it('prefers the nickname', () => {

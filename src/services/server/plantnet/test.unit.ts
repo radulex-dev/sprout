@@ -22,51 +22,6 @@ vi.mock('@/services/server/care-reference', () => {
     };
 });
 
-const API_KEY = 'env-test-key';
-
-const careReference: CareReference = {
-    alias: {
-        'dracaena trifasciata': 'sansevieria'
-    },
-    family: {
-        urticaceae: {
-            waterEveryDays: 6,
-            fertilizeEveryDays: 30,
-            repotEveryMonths: 18
-        }
-    },
-    genus: {
-        dracaena: {
-            waterEveryDays: 10,
-            fertilizeEveryDays: 30,
-            repotEveryMonths: 30
-        },
-        monstera: {
-            waterEveryDays: 5,
-            fertilizeEveryDays: 30,
-            repotEveryMonths: 18
-        },
-        sansevieria: {
-            waterEveryDays: 21,
-            fertilizeEveryDays: 90,
-            repotEveryMonths: 30
-        }
-    }
-};
-
-const imageForm = (): FormData => {
-    const form = new FormData();
-    form.append('images', new File(['leaf'], 'plant.jpg', {
-        type: 'image/jpeg'
-    }));
-
-    return form;
-};
-
-const emptyForm = (): FormData => {
-    return new FormData();
-};
-
 const mockResponse = (body: unknown, status: number): Response => {
     const isOk = status >= 200 && status < 300;
 
@@ -99,10 +54,38 @@ describe('identifySpecies', () => {
     beforeEach(() => {
         fetchMock = vi.fn();
         vi.stubGlobal('fetch', fetchMock);
-        vi.stubEnv('PLANTNET_API_KEY', API_KEY);
+        vi.stubEnv('PLANTNET_API_KEY', 'env-test-key');
         vi.spyOn(console, 'error').mockImplementation(vi.fn());
         vi.spyOn(console, 'warn').mockImplementation(vi.fn());
-        mockLoadCareReference.mockResolvedValue(careReference);
+        mockLoadCareReference.mockResolvedValue({
+            alias: {
+                'dracaena trifasciata': 'sansevieria'
+            },
+            family: {
+                urticaceae: {
+                    waterEveryDays: 6,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 18
+                }
+            },
+            genus: {
+                dracaena: {
+                    waterEveryDays: 10,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 30
+                },
+                monstera: {
+                    waterEveryDays: 5,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 18
+                },
+                sansevieria: {
+                    waterEveryDays: 21,
+                    fertilizeEveryDays: 90,
+                    repotEveryMonths: 30
+                }
+            }
+        });
     });
 
     afterEach(() => {
@@ -112,7 +95,7 @@ describe('identifySpecies', () => {
     });
 
     it('rejects with 400 when no image is provided', async () => {
-        const error = await capturePlantNetError(identifySpecies(emptyForm()));
+        const error = await capturePlantNetError(identifySpecies(new FormData()));
 
         expect(error.httpStatus).toBe(400);
         expect(error.message).toBe(ERROR_NO_IMAGE);
@@ -122,7 +105,12 @@ describe('identifySpecies', () => {
     it('rejects with 400 when no key is configured', async () => {
         vi.stubEnv('PLANTNET_API_KEY', '');
 
-        const error = await capturePlantNetError(identifySpecies(imageForm()));
+        const form = new FormData();
+        form.append('images', new File(['leaf'], 'plant.jpg', {
+            type: 'image/jpeg'
+        }));
+
+        const error = await capturePlantNetError(identifySpecies(form));
 
         expect(error.httpStatus).toBe(400);
         expect(error.message).toBe(ERROR_NO_KEY);
@@ -132,7 +120,12 @@ describe('identifySpecies', () => {
     it('maps a 401 to a bad-key 400', async () => {
         fetchMock.mockResolvedValue(mockResponse({}, 401));
 
-        const error = await capturePlantNetError(identifySpecies(imageForm()));
+        const form = new FormData();
+        form.append('images', new File(['leaf'], 'plant.jpg', {
+            type: 'image/jpeg'
+        }));
+
+        const error = await capturePlantNetError(identifySpecies(form));
 
         expect(error.httpStatus).toBe(400);
         expect(error.message).toBe(ERROR_BAD_KEY);
@@ -141,7 +134,12 @@ describe('identifySpecies', () => {
     it('maps a 404 to a not-recognised 400', async () => {
         fetchMock.mockResolvedValue(mockResponse({}, 404));
 
-        const error = await capturePlantNetError(identifySpecies(imageForm()));
+        const form = new FormData();
+        form.append('images', new File(['leaf'], 'plant.jpg', {
+            type: 'image/jpeg'
+        }));
+
+        const error = await capturePlantNetError(identifySpecies(form));
 
         expect(error.httpStatus).toBe(400);
         expect(error.message).toBe(ERROR_NOT_RECOGNISED);
@@ -150,7 +148,12 @@ describe('identifySpecies', () => {
     it('maps any other HTTP failure to a 502', async () => {
         fetchMock.mockResolvedValue(mockResponse({}, 500));
 
-        const error = await capturePlantNetError(identifySpecies(imageForm()));
+        const form = new FormData();
+        form.append('images', new File(['leaf'], 'plant.jpg', {
+            type: 'image/jpeg'
+        }));
+
+        const error = await capturePlantNetError(identifySpecies(form));
 
         expect(error.httpStatus).toBe(502);
         expect(error.message).toBe(ERROR_UNAVAILABLE);
@@ -163,7 +166,12 @@ describe('identifySpecies', () => {
             message: 'upstream boom'
         }, 500));
 
-        const error = await capturePlantNetError(identifySpecies(imageForm()));
+        const form = new FormData();
+        form.append('images', new File(['leaf'], 'plant.jpg', {
+            type: 'image/jpeg'
+        }));
+
+        const error = await capturePlantNetError(identifySpecies(form));
 
         expect(error.httpStatus).toBe(502);
         expect(error.message).toBe(ERROR_UNAVAILABLE);
@@ -177,7 +185,12 @@ describe('identifySpecies', () => {
             message: 'Unsupported file type for image[0] (jpeg or png)'
         }, 400));
 
-        const error = await capturePlantNetError(identifySpecies(imageForm()));
+        const form = new FormData();
+        form.append('images', new File(['leaf'], 'plant.jpg', {
+            type: 'image/jpeg'
+        }));
+
+        const error = await capturePlantNetError(identifySpecies(form));
 
         expect(error.httpStatus).toBe(400);
         expect(error.message).toBe(ERROR_BAD_IMAGE);
@@ -187,7 +200,12 @@ describe('identifySpecies', () => {
     it('falls back to a generic message when a 400 has no body', async () => {
         fetchMock.mockResolvedValue(mockResponse({}, 400));
 
-        const error = await capturePlantNetError(identifySpecies(imageForm()));
+        const form = new FormData();
+        form.append('images', new File(['leaf'], 'plant.jpg', {
+            type: 'image/jpeg'
+        }));
+
+        const error = await capturePlantNetError(identifySpecies(form));
 
         expect(error.httpStatus).toBe(400);
         expect(error.message).toBe(ERROR_BAD_IMAGE);
@@ -196,7 +214,12 @@ describe('identifySpecies', () => {
     it('maps a network throw to a 502 unreachable error', async () => {
         fetchMock.mockRejectedValue(new Error('socket hang up'));
 
-        const error = await capturePlantNetError(identifySpecies(imageForm()));
+        const form = new FormData();
+        form.append('images', new File(['leaf'], 'plant.jpg', {
+            type: 'image/jpeg'
+        }));
+
+        const error = await capturePlantNetError(identifySpecies(form));
 
         expect(error.httpStatus).toBe(502);
         expect(error.message).toBe(ERROR_UNREACHABLE);
@@ -222,7 +245,12 @@ describe('identifySpecies', () => {
             }]
         }, 200));
 
-        const results = await identifySpecies(imageForm());
+        const form = new FormData();
+        form.append('images', new File(['leaf'], 'plant.jpg', {
+            type: 'image/jpeg'
+        }));
+
+        const results = await identifySpecies(form);
         const [identified, unknown] = results;
 
         expect(mockLoadCareReference).toHaveBeenCalledTimes(1);
@@ -268,7 +296,12 @@ describe('identifySpecies', () => {
             }]
         }, 200));
 
-        const [identified] = await identifySpecies(imageForm());
+        const form = new FormData();
+        form.append('images', new File(['leaf'], 'plant.jpg', {
+            type: 'image/jpeg'
+        }));
+
+        const [identified] = await identifySpecies(form);
 
         expect(identified.defaultCare).toEqual({
             waterEveryDays: 21,
@@ -294,7 +327,12 @@ describe('identifySpecies', () => {
             }]
         }, 200));
 
-        const [identified] = await identifySpecies(imageForm());
+        const form = new FormData();
+        form.append('images', new File(['leaf'], 'plant.jpg', {
+            type: 'image/jpeg'
+        }));
+
+        const [identified] = await identifySpecies(form);
 
         expect(identified.defaultCare).toEqual({
             waterEveryDays: 6,
@@ -320,7 +358,12 @@ describe('identifySpecies', () => {
             }]
         }, 200));
 
-        const [identified] = await identifySpecies(imageForm());
+        const form = new FormData();
+        form.append('images', new File(['leaf'], 'plant.jpg', {
+            type: 'image/jpeg'
+        }));
+
+        const [identified] = await identifySpecies(form);
 
         expect(identified.careSource).toBe(CareSource.None);
         expect(vi.mocked(console.warn)).toHaveBeenCalledWith('No care data for identified plant', {
@@ -346,7 +389,12 @@ describe('identifySpecies', () => {
             }]
         }, 200));
 
-        const [identified] = await identifySpecies(imageForm());
+        const form = new FormData();
+        form.append('images', new File(['leaf'], 'plant.jpg', {
+            type: 'image/jpeg'
+        }));
+
+        const [identified] = await identifySpecies(form);
 
         expect(identified.careSource).toBe(CareSource.Genus);
         expect(vi.mocked(console.warn)).not.toHaveBeenCalled();
@@ -355,7 +403,12 @@ describe('identifySpecies', () => {
     it('returns an empty list when PlantNet omits results', async () => {
         fetchMock.mockResolvedValue(mockResponse({}, 200));
 
-        const results = await identifySpecies(imageForm());
+        const form = new FormData();
+        form.append('images', new File(['leaf'], 'plant.jpg', {
+            type: 'image/jpeg'
+        }));
+
+        const results = await identifySpecies(form);
 
         expect(results).toEqual([]);
     });

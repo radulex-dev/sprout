@@ -9,22 +9,6 @@ import { CareKindSchema, CareScheduleSchema, LastCareSchema, NotifiedAtSchema, P
 // Types
 import { CareKind } from '@/types';
 
-const VALID_CARE = {
-    waterEveryDays: 7,
-    fertilizeEveryDays: 30,
-    repotEveryMonths: 18
-};
-
-const VALID_INPUT = {
-    nickname: 'Kitchen monstera',
-    species: 'Monstera deliciosa',
-    commonName: 'Swiss cheese plant',
-    care: VALID_CARE,
-    acquiredAt: 1_700_000_000_000
-};
-
-const VALID_ID = '123e4567-e89b-42d3-a456-426614174000';
-
 describe('CareKindSchema', () => {
     it.each([CareKind.Water, CareKind.Fertilize, CareKind.Repot])('accepts %s', (kind) => {
         expect(CareKindSchema.parse(kind)).toBe(kind);
@@ -39,14 +23,23 @@ describe('CareKindSchema', () => {
 
 describe('CareScheduleSchema', () => {
     it('accepts a valid schedule', () => {
-        expect(CareScheduleSchema.parse(VALID_CARE)).toEqual(VALID_CARE);
+        expect(CareScheduleSchema.parse({
+            waterEveryDays: 7,
+            fertilizeEveryDays: 30,
+            repotEveryMonths: 18
+        })).toEqual({
+            waterEveryDays: 7,
+            fertilizeEveryDays: 30,
+            repotEveryMonths: 18
+        });
     });
 
     it('rejects a negative interval', () => {
         expect(() => {
             return CareScheduleSchema.parse({
-                ...VALID_CARE,
-                waterEveryDays: -1
+                waterEveryDays: -1,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
             });
         }).toThrow();
     });
@@ -54,8 +47,9 @@ describe('CareScheduleSchema', () => {
     it('rejects a float interval', () => {
         expect(() => {
             return CareScheduleSchema.parse({
-                ...VALID_CARE,
-                waterEveryDays: 1.5
+                waterEveryDays: 1.5,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
             });
         }).toThrow();
     });
@@ -63,8 +57,9 @@ describe('CareScheduleSchema', () => {
     it('rejects an interval over the day maximum', () => {
         expect(() => {
             return CareScheduleSchema.parse({
-                ...VALID_CARE,
-                fertilizeEveryDays: 3651
+                waterEveryDays: 7,
+                fertilizeEveryDays: 3651,
+                repotEveryMonths: 18
             });
         }).toThrow();
     });
@@ -72,7 +67,8 @@ describe('CareScheduleSchema', () => {
     it('rejects an interval over the month maximum', () => {
         expect(() => {
             return CareScheduleSchema.parse({
-                ...VALID_CARE,
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
                 repotEveryMonths: 601
             });
         }).toThrow();
@@ -81,12 +77,40 @@ describe('CareScheduleSchema', () => {
 
 describe('PlantInputSchema', () => {
     it('accepts a full valid object without a photo', () => {
-        expect(PlantInputSchema.parse(VALID_INPUT)).toEqual(VALID_INPUT);
+        expect(PlantInputSchema.parse({
+            nickname: 'Kitchen monstera',
+            species: 'Monstera deliciosa',
+            commonName: 'Swiss cheese plant',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1_700_000_000_000
+        })).toEqual({
+            nickname: 'Kitchen monstera',
+            species: 'Monstera deliciosa',
+            commonName: 'Swiss cheese plant',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1_700_000_000_000
+        });
     });
 
     it('accepts a Blob photo', () => {
         const parsed = PlantInputSchema.parse({
-            ...VALID_INPUT,
+            nickname: 'Kitchen monstera',
+            species: 'Monstera deliciosa',
+            commonName: 'Swiss cheese plant',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1_700_000_000_000,
             photo: new Blob(['x'])
         });
 
@@ -95,8 +119,15 @@ describe('PlantInputSchema', () => {
 
     it('trims the nickname', () => {
         const parsed = PlantInputSchema.parse({
-            ...VALID_INPUT,
-            nickname: '  Fern  '
+            nickname: '  Fern  ',
+            species: 'Monstera deliciosa',
+            commonName: 'Swiss cheese plant',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1_700_000_000_000
         });
 
         expect(parsed.nickname).toBe('Fern');
@@ -105,8 +136,15 @@ describe('PlantInputSchema', () => {
     it('rejects an empty nickname', () => {
         expect(() => {
             return PlantInputSchema.parse({
-                ...VALID_INPUT,
-                nickname: ''
+                nickname: '',
+                species: 'Monstera deliciosa',
+                commonName: 'Swiss cheese plant',
+                care: {
+                    waterEveryDays: 7,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 18
+                },
+                acquiredAt: 1_700_000_000_000
             });
         }).toThrow();
     });
@@ -114,8 +152,15 @@ describe('PlantInputSchema', () => {
     it('rejects a whitespace-only nickname', () => {
         expect(() => {
             return PlantInputSchema.parse({
-                ...VALID_INPUT,
-                nickname: ' '.repeat(3)
+                nickname: ' '.repeat(3),
+                species: 'Monstera deliciosa',
+                commonName: 'Swiss cheese plant',
+                care: {
+                    waterEveryDays: 7,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 18
+                },
+                acquiredAt: 1_700_000_000_000
             });
         }).toThrow();
     });
@@ -123,8 +168,15 @@ describe('PlantInputSchema', () => {
     it('rejects a missing species', () => {
         expect(() => {
             return PlantInputSchema.parse({
-                ...VALID_INPUT,
-                species: undefined
+                nickname: 'Kitchen monstera',
+                species: undefined,
+                commonName: 'Swiss cheese plant',
+                care: {
+                    waterEveryDays: 7,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 18
+                },
+                acquiredAt: 1_700_000_000_000
             });
         }).toThrow();
     });
@@ -132,8 +184,15 @@ describe('PlantInputSchema', () => {
     it('rejects text over the length maximum', () => {
         expect(() => {
             return PlantInputSchema.parse({
-                ...VALID_INPUT,
-                nickname: 'a'.repeat(201)
+                nickname: 'a'.repeat(201),
+                species: 'Monstera deliciosa',
+                commonName: 'Swiss cheese plant',
+                care: {
+                    waterEveryDays: 7,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 18
+                },
+                acquiredAt: 1_700_000_000_000
             });
         }).toThrow();
     });
@@ -141,7 +200,15 @@ describe('PlantInputSchema', () => {
     it('rejects a non-Blob photo', () => {
         expect(() => {
             return PlantInputSchema.parse({
-                ...VALID_INPUT,
+                nickname: 'Kitchen monstera',
+                species: 'Monstera deliciosa',
+                commonName: 'Swiss cheese plant',
+                care: {
+                    waterEveryDays: 7,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 18
+                },
+                acquiredAt: 1_700_000_000_000,
                 photo: 'not-a-blob'
             });
         }).toThrow();
@@ -150,7 +217,14 @@ describe('PlantInputSchema', () => {
     it('rejects a float acquiredAt', () => {
         expect(() => {
             return PlantInputSchema.parse({
-                ...VALID_INPUT,
+                nickname: 'Kitchen monstera',
+                species: 'Monstera deliciosa',
+                commonName: 'Swiss cheese plant',
+                care: {
+                    waterEveryDays: 7,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 18
+                },
                 acquiredAt: 1.5
             });
         }).toThrow();
@@ -159,7 +233,14 @@ describe('PlantInputSchema', () => {
     it('rejects a negative acquiredAt', () => {
         expect(() => {
             return PlantInputSchema.parse({
-                ...VALID_INPUT,
+                nickname: 'Kitchen monstera',
+                species: 'Monstera deliciosa',
+                commonName: 'Swiss cheese plant',
+                care: {
+                    waterEveryDays: 7,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 18
+                },
                 acquiredAt: -1
             });
         }).toThrow();
@@ -167,16 +248,44 @@ describe('PlantInputSchema', () => {
 
     it('strips unknown keys', () => {
         const parsed = PlantInputSchema.parse({
-            ...VALID_INPUT,
+            nickname: 'Kitchen monstera',
+            species: 'Monstera deliciosa',
+            commonName: 'Swiss cheese plant',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1_700_000_000_000,
             extra: 'ignored'
         });
 
-        expect(parsed).toEqual(VALID_INPUT);
+        expect(parsed).toEqual({
+            nickname: 'Kitchen monstera',
+            species: 'Monstera deliciosa',
+            commonName: 'Swiss cheese plant',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1_700_000_000_000
+        });
         expect(parsed).not.toHaveProperty('extra');
     });
 
     it('accepts an omitted lastCare', () => {
-        expect(PlantInputSchema.parse(VALID_INPUT)).not.toHaveProperty('lastCare');
+        expect(PlantInputSchema.parse({
+            nickname: 'Kitchen monstera',
+            species: 'Monstera deliciosa',
+            commonName: 'Swiss cheese plant',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1_700_000_000_000
+        })).not.toHaveProperty('lastCare');
     });
 
     it('accepts a lastCare map', () => {
@@ -185,7 +294,15 @@ describe('PlantInputSchema', () => {
         };
 
         expect(PlantInputSchema.parse({
-            ...VALID_INPUT,
+            nickname: 'Kitchen monstera',
+            species: 'Monstera deliciosa',
+            commonName: 'Swiss cheese plant',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1_700_000_000_000,
             lastCare
         }).lastCare).toEqual(lastCare);
     });
@@ -233,7 +350,7 @@ describe('LastCareSchema', () => {
 
 describe('PLANT_ID_SCHEMA', () => {
     it('accepts a UUID', () => {
-        expect(PLANT_ID_SCHEMA.parse(VALID_ID)).toBe(VALID_ID);
+        expect(PLANT_ID_SCHEMA.parse('123e4567-e89b-42d3-a456-426614174000')).toBe('123e4567-e89b-42d3-a456-426614174000');
     });
 
     it('rejects a non-UUID id', () => {
@@ -247,10 +364,18 @@ describe('UpdatePlantSchema', () => {
     it('accepts a nickname and care schedule', () => {
         expect(UpdatePlantSchema.parse({
             nickname: 'Fern',
-            care: VALID_CARE
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            }
         })).toEqual({
             nickname: 'Fern',
-            care: VALID_CARE
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            }
         });
     });
 
@@ -258,7 +383,11 @@ describe('UpdatePlantSchema', () => {
         expect(() => {
             return UpdatePlantSchema.parse({
                 nickname: '',
-                care: VALID_CARE
+                care: {
+                    waterEveryDays: 7,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 18
+                }
             });
         }).toThrow();
     });

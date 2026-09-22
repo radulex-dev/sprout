@@ -1,9 +1,9 @@
 // Constants
 import { CARE_CHECK_INTERVAL_MS } from './constants';
-import { CARE_META, DAY_MS } from '@/helpers/care/constants';
+import { CARE_META } from '@/helpers/care/constants';
 
 // Helpers
-import { dueTasks } from '@/helpers/care';
+import { dueTasks, isNotifiedToday } from '@/helpers/care';
 import { decodeVapidPublicKey } from '@/helpers/push';
 
 // Database
@@ -28,26 +28,37 @@ const fetchPlants = async (): Promise<Plant[]> => {
     }
 };
 
-const subscribeToPush = async (key: string): Promise<void> => {
-    const registration = await navigator.serviceWorker.ready;
-    const pushManager = registration.pushManager as PushManager | undefined;
+export const ensurePushSubscription = async (): Promise<void> => {
+    const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
-    if (!pushManager) {
+    if (!isNotificationsSupported() || Notification.permission !== 'granted' || !key) {
         return;
     }
 
-    const subscription = await pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: decodeVapidPublicKey(key)
-    });
+    try {
+        const registration = await navigator.serviceWorker.ready;
+        const pushManager = registration.pushManager as PushManager | undefined;
 
-    await fetch('/api/push/subscribe', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(subscription)
-    });
+        if (!pushManager) {
+            return;
+        }
+
+        const existing = await pushManager.getSubscription();
+        const subscription = existing ?? await pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: decodeVapidPublicKey(key)
+        });
+
+        await fetch('/api/push/subscribe', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(subscription)
+        });
+    } catch (error) {
+        console.error('Failed to register the push subscription', error);
+    }
 };
 
 export const isNotificationsSupported = (): boolean => {
@@ -62,11 +73,7 @@ export const requestNotificationPermission = async (): Promise<NotificationPermi
     const perm = await Notification.requestPermission();
 
     if (perm === 'granted') {
-        const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-
-        if (key) {
-            await Promise.allSettled([subscribeToPush(key)]);
-        }
+        await ensurePushSubscription();
     }
 
     return perm;
@@ -81,9 +88,7 @@ export const checkAndNotify = async (): Promise<number> => {
     const now = Date.now();
 
     const pendingTasks = dueTasks(plants, now).filter((task) => {
-        const last = task.plant.lastNotified[task.kind] ?? 0;
-
-        return now - last >= DAY_MS;
+        return !isNotifiedToday(task.plant, task.kind, now);
     });
 
     await Promise.all(pendingTasks.map(async (task) => {

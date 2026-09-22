@@ -1,7 +1,7 @@
+import type React from 'react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import { makePlant, NOW } from '@test/vitest/data/plant.mock';
 
 // Constants
 import { SELECT_DATE_TEXT } from '@/design-system/DateSelect/constants';
@@ -9,26 +9,25 @@ import { SELECT_DATE_TEXT } from '@/design-system/DateSelect/constants';
 // Components
 import CareLogRow from './index';
 
+// Mocks
+import { makePlant, NOW } from '@test/vitest/data/plant.mock';
+
 // Types
 import { CareKind } from '@/types';
 
-const LAST_WATERED = new Date(2026, 6, 6).getTime();
-const TEN_DAYS_LATER = new Date(2026, 6, 16).getTime();
 const SELECT_DATE_NAME = `Last watered: ${SELECT_DATE_TEXT}`;
 
-const LAST_CARE = {
-    [CareKind.Water]: LAST_WATERED,
-    [CareKind.Fertilize]: LAST_WATERED,
-    [CareKind.Repot]: LAST_WATERED
+const props: React.ComponentProps<typeof CareLogRow> = {
+    plant: makePlant(),
+    label: CareKind.Water,
+    now: NOW,
+    onDone: vi.fn(),
+    onSetDate: vi.fn()
 };
 
 describe('CareLogRow', () => {
     it('renders the care label, the relative line and the select-date button', () => {
-        const plant = makePlant();
-        const handleDone = vi.fn();
-        const handleSetDate = vi.fn();
-
-        render(<CareLogRow plant={plant} label={CareKind.Water} now={NOW} onDone={handleDone} onSetDate={handleSetDate} />);
+        render(<CareLogRow {...props} />);
 
         expect(screen.getByText('Water')).toBeInTheDocument();
         expect(screen.getByText('Last: today')).toBeInTheDocument();
@@ -41,12 +40,10 @@ describe('CareLogRow', () => {
     });
 
     it('calls onDone with the care kind when the button is clicked', async () => {
-        const plant = makePlant();
         const handleDone = vi.fn();
-        const handleSetDate = vi.fn();
         const user = userEvent.setup();
 
-        render(<CareLogRow plant={plant} label={CareKind.Water} now={NOW} onDone={handleDone} onSetDate={handleSetDate} />);
+        render(<CareLogRow {...props} onDone={handleDone} />);
         await user.click(screen.getByRole('button', {
             name: 'Watered today'
         }));
@@ -56,13 +53,15 @@ describe('CareLogRow', () => {
 
     it('reveals the stored care date when the relative-time line is clicked', async () => {
         const plant = makePlant({
-            lastCare: LAST_CARE
+            lastCare: {
+                [CareKind.Water]: new Date(2026, 6, 6).getTime(),
+                [CareKind.Fertilize]: new Date(2026, 6, 6).getTime(),
+                [CareKind.Repot]: new Date(2026, 6, 6).getTime()
+            }
         });
-        const handleDone = vi.fn();
-        const handleSetDate = vi.fn();
         const user = userEvent.setup();
 
-        render(<CareLogRow plant={plant} label={CareKind.Water} now={TEN_DAYS_LATER} onDone={handleDone} onSetDate={handleSetDate} />);
+        render(<CareLogRow {...props} plant={plant} now={new Date(2026, 6, 16).getTime()} />);
 
         const trigger = screen.getByRole('button', {
             name: 'Last: 10 days ago'
@@ -80,13 +79,15 @@ describe('CareLogRow', () => {
 
     it('closes the date popup on Escape', async () => {
         const plant = makePlant({
-            lastCare: LAST_CARE
+            lastCare: {
+                [CareKind.Water]: new Date(2026, 6, 6).getTime(),
+                [CareKind.Fertilize]: new Date(2026, 6, 6).getTime(),
+                [CareKind.Repot]: new Date(2026, 6, 6).getTime()
+            }
         });
-        const handleDone = vi.fn();
-        const handleSetDate = vi.fn();
         const user = userEvent.setup();
 
-        render(<CareLogRow plant={plant} label={CareKind.Water} now={TEN_DAYS_LATER} onDone={handleDone} onSetDate={handleSetDate} />);
+        render(<CareLogRow {...props} plant={plant} now={new Date(2026, 6, 16).getTime()} />);
         await user.click(screen.getByRole('button', {
             name: 'Last: 10 days ago'
         }));
@@ -99,13 +100,16 @@ describe('CareLogRow', () => {
 
     it('reports the picked day with the care kind', async () => {
         const plant = makePlant({
-            lastCare: LAST_CARE
+            lastCare: {
+                [CareKind.Water]: new Date(2026, 6, 6).getTime(),
+                [CareKind.Fertilize]: new Date(2026, 6, 6).getTime(),
+                [CareKind.Repot]: new Date(2026, 6, 6).getTime()
+            }
         });
-        const handleDone = vi.fn();
         const handleSetDate = vi.fn();
         const user = userEvent.setup();
 
-        render(<CareLogRow plant={plant} label={CareKind.Water} now={TEN_DAYS_LATER} onDone={handleDone} onSetDate={handleSetDate} />);
+        render(<CareLogRow {...props} plant={plant} now={new Date(2026, 6, 16).getTime()} onSetDate={handleSetDate} />);
         await user.click(screen.getByRole('button', {
             name: SELECT_DATE_NAME
         }));
@@ -119,14 +123,13 @@ describe('CareLogRow', () => {
     it('reads today when the stored care lands a moment ahead of the clock', () => {
         const plant = makePlant({
             lastCare: {
-                ...LAST_CARE,
-                [CareKind.Water]: TEN_DAYS_LATER + 1
+                [CareKind.Water]: new Date(2026, 6, 16).getTime() + 1,
+                [CareKind.Fertilize]: new Date(2026, 6, 6).getTime(),
+                [CareKind.Repot]: new Date(2026, 6, 6).getTime()
             }
         });
-        const handleDone = vi.fn();
-        const handleSetDate = vi.fn();
 
-        render(<CareLogRow plant={plant} label={CareKind.Water} now={TEN_DAYS_LATER} onDone={handleDone} onSetDate={handleSetDate} />);
+        render(<CareLogRow {...props} plant={plant} now={new Date(2026, 6, 16).getTime()} />);
 
         expect(screen.getByText('Last: today')).toBeInTheDocument();
     });

@@ -1,3 +1,4 @@
+import type React from 'react';
 import userEvent from '@testing-library/user-event';
 import type { SyntheticEvent } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -10,6 +11,9 @@ import Button from './index';
 // Styles
 import styles from './styles.module.css';
 
+// Types
+import type { AnchorProps } from './types';
+
 const CALLER_CLASS_NAME = 'caller-class-name';
 
 const handleFormSubmit = (handleSubmit: () => void) => {
@@ -19,9 +23,15 @@ const handleFormSubmit = (handleSubmit: () => void) => {
     };
 };
 
+const props: React.ComponentProps<typeof Button> = {};
+
+const anchorProps: AnchorProps = {
+    href: '/identify'
+};
+
 describe('Button', () => {
     it('renders a button of type button by default', () => {
-        render(<Button>Save</Button>);
+        render(<Button {...props}>Save</Button>);
 
         expect(screen.getByRole('button', {
             name: 'Save'
@@ -29,7 +39,7 @@ describe('Button', () => {
     });
 
     it('keeps an explicit type when the caller passes one', () => {
-        render(<Button type="submit">Save</Button>);
+        render(<Button {...props} type="submit">Save</Button>);
 
         expect(screen.getByRole('button', {
             name: 'Save'
@@ -42,7 +52,7 @@ describe('Button', () => {
 
         render(
             <form onSubmit={handleFormSubmit(handleSubmit)}>
-                <Button>Save</Button>
+                <Button {...props}>Save</Button>
             </form>
         );
 
@@ -59,7 +69,7 @@ describe('Button', () => {
 
         render(
             <form onSubmit={handleFormSubmit(handleSubmit)}>
-                <Button type="submit">Save</Button>
+                <Button {...props} type="submit">Save</Button>
             </form>
         );
 
@@ -71,7 +81,7 @@ describe('Button', () => {
     });
 
     it('renders a link when href is given', () => {
-        render(<Button href="/identify">Add a plant</Button>);
+        render(<Button {...anchorProps}>Add a plant</Button>);
 
         const link = screen.getByRole('link', {
             name: 'Add a plant'
@@ -83,7 +93,7 @@ describe('Button', () => {
     });
 
     it('passes className and aria attributes through', () => {
-        render(<Button className={CALLER_CLASS_NAME} aria-label="Remove plant">Remove</Button>);
+        render(<Button {...props} className={CALLER_CLASS_NAME} aria-label="Remove plant">Remove</Button>);
 
         expect(screen.getByRole('button', {
             name: 'Remove plant'
@@ -94,7 +104,7 @@ describe('Button', () => {
         const handleClick = vi.fn();
         const user = userEvent.setup();
 
-        render(<Button onClick={handleClick}>Save</Button>);
+        render(<Button {...props} onClick={handleClick}>Save</Button>);
 
         await user.click(screen.getByRole('button', {
             name: 'Save'
@@ -108,7 +118,7 @@ describe('Button', () => {
         const handleClick = vi.fn();
         const user = userEvent.setup();
 
-        render(<Button disabled onClick={handleClick}>Save</Button>);
+        render(<Button {...props} disabled onClick={handleClick}>Save</Button>);
 
         const button = screen.getByRole('button', {
             name: 'Save'
@@ -122,7 +132,7 @@ describe('Button', () => {
     });
 
     it('renders the icon alongside the children', () => {
-        render(<Button icon={Plus}>Add a plant</Button>);
+        render(<Button {...props} icon={Plus}>Add a plant</Button>);
 
         const button = screen.getByRole('button', {
             name: 'Add a plant'
@@ -132,7 +142,7 @@ describe('Button', () => {
     });
 
     it('renders a round icon-only button', () => {
-        render(<Button round icon={Plus} aria-label="Watered today" />);
+        render(<Button {...props} round icon={Plus} aria-label="Watered today" />);
 
         const button = screen.getByRole('button', {
             name: 'Watered today'
@@ -143,7 +153,7 @@ describe('Button', () => {
     });
 
     it('renders an empty round button without children', () => {
-        render(<Button round aria-label="Empty round button" />);
+        render(<Button {...props} round aria-label="Empty round button" />);
 
         expect(screen.getByRole('button', {
             name: 'Empty round button'

@@ -68,6 +68,16 @@ export const dueTasks = (plants: Plant[], now = Date.now()): CareTask[] => {
     });
 };
 
+const utcDayIndex = (timestamp: number): number => {
+    return Math.floor(timestamp / DAY_MS);
+};
+
+export const isNotifiedToday = (plant: Plant, kind: CareKind, now: number): boolean => {
+    const last = plant.lastNotified[kind];
+
+    return last !== undefined && utcDayIndex(last) === utcDayIndex(now);
+};
+
 const startOfLocalDay = (timestamp: number, timeZone: string): number => {
     return toCalendarDate(fromDate(new Date(timestamp), timeZone)).toDate(timeZone).getTime();
 };

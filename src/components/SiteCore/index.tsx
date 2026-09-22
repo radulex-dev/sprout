@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import { BUILD_ID, SERVICE_WORKER_PATH } from './constants';
 
 // Services
-import { startCareWatcher } from '@/services/notifications';
+import { ensurePushSubscription, startCareWatcher } from '@/services/notifications';
 
 export interface Props {
     children: React.ReactNode;
@@ -31,6 +31,7 @@ const SiteCore: React.FunctionComponent<Props> = ({ children }) => {
                 void navigator.serviceWorker.register(`${SERVICE_WORKER_PATH}?v=${BUILD_ID}`, {
                     updateViaCache: 'none'
                 });
+                void ensurePushSubscription();
             } else {
                 void purgeServiceWorker();
             }

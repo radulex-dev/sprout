@@ -1,10 +1,11 @@
 'use client';
 
 import classNames from 'classnames';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 // Constants
+import { TEST_PUSH_COOLDOWN_SECONDS } from './constants';
 import { CONFIRM_LABEL, INSTALL_GUIDE_CONTENT } from './InstallGuide/constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
 
@@ -47,9 +48,26 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
     const { isStandalone, platform, canPrompt, promptInstall } = useInstall();
     const [isGuideOpen, setIsGuideOpen] = useState(false);
     const [testStatus, setTestStatus] = useState('');
+    const [testCooldown, setTestCooldown] = useState(0);
 
     const guidePlatform = platform ?? InstallPlatform.Other;
     const guideContent = INSTALL_GUIDE_CONTENT[guidePlatform];
+
+    useEffect(() => {
+        if (testCooldown <= 0) {
+            return;
+        }
+
+        const timeout = setTimeout(() => {
+            setTestCooldown((remaining) => {
+                return remaining - 1;
+            });
+        }, 1000);
+
+        return () => {
+            clearTimeout(timeout);
+        };
+    }, [testCooldown]);
 
     const handleSignOut = useCallback(async () => {
         await authClient.signOut();
@@ -69,29 +87,31 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
     }, [requestPermission]);
 
     const handleTestNotification = useCallback(async () => {
-        const registration = await navigator.serviceWorker.getRegistration();
-
-        if (!registration?.active) {
-            setTestStatus('Test notifications are unavailable because the app\'s service worker is not running.');
-
-            return;
-        }
+        setTestCooldown(TEST_PUSH_COOLDOWN_SECONDS);
+        setTestStatus('Sending a test push…');
 
         try {
-            await registration.showNotification('Sprout is ready', {
-                body: 'You\'ll get a reminder here when a plant needs watering, fertilising or repotting.',
-                icon: '/icon-192.png'
+            const response = await fetch('/api/push/test', {
+                method: 'POST'
             });
 
-            const shown = await registration.getNotifications();
+            if (response.status === 409) {
+                setTestStatus('No push subscription is registered for this device, so reminders cannot reach it.');
 
-            if (shown.length > 0) {
-                setTestStatus('Test notification sent.');
-            } else {
-                setTestStatus('The system did not display the test notification.');
+                return;
             }
+
+            if (!response.ok) {
+                setTestStatus('The test push could not be sent.');
+
+                return;
+            }
+
+            const { sent } = await response.json() as { sent: number; };
+
+            setTestStatus(`Test push sent to ${sent} device${sent === 1 ? '' : 's'}.`);
         } catch (error) {
-            setTestStatus(error instanceof Error ? error.message : 'The test notification could not be sent.');
+            setTestStatus(error instanceof Error ? error.message : 'The test push could not be sent.');
         }
     }, []);
 
@@ -117,7 +137,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
 
     const renderRemindersCard = () => {
         return (
-            <RemindersCard isSupported={isSupported} perm={permission} isStandalone={isStandalone} onEnable={handleEnableNotifications} onInstall={handleInstall} onTest={handleTestNotification} testStatus={testStatus} />
+            <RemindersCard isSupported={isSupported} perm={permission} isStandalone={isStandalone} testCooldown={testCooldown} onEnable={handleEnableNotifications} onInstall={handleInstall} onTest={handleTestNotification} testStatus={testStatus} />
         );
     };
 

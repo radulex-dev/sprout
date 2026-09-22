@@ -1,3 +1,4 @@
+import type React from 'react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
@@ -5,12 +6,17 @@ import { render, screen } from '@testing-library/react';
 // Components
 import InstallButton from './index';
 
+const props: React.ComponentProps<typeof InstallButton> = {
+    isPromptAvailable: true,
+    onInstall: vi.fn()
+};
+
 describe('InstallButton', () => {
     it('renders the install label and calls onInstall from the button', async () => {
         const handleInstall = vi.fn();
         const user = userEvent.setup();
 
-        render(<InstallButton isPromptAvailable onInstall={handleInstall} />);
+        render(<InstallButton {...props} onInstall={handleInstall} />);
 
         await user.click(screen.getByRole('button', {
             name: 'Install app'
@@ -20,7 +26,7 @@ describe('InstallButton', () => {
     });
 
     it('offers the guide label and no install button when the prompt is unavailable', () => {
-        render(<InstallButton isPromptAvailable={false} onInstall={vi.fn()} />);
+        render(<InstallButton {...props} isPromptAvailable={false} />);
 
         expect(screen.getByRole('button', {
             name: 'How to install'

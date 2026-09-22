@@ -125,7 +125,7 @@ const config = configure([{
         }],
         '@onefinity/eslint-config/import-grouping': ['error', {
             groups: [{
-                matches: /^(?:\w|@\w).*$/.source
+                matches: /^(?!.*\.mock$)(?:\w|@\w).*$/.source
             }, {
                 label: 'Schema',
                 matches: /\/auth-schema/.source
@@ -141,6 +141,9 @@ const config = configure([{
             }, {
                 label: 'Hooks',
                 matches: /\/hooks/.source
+            }, {
+                label: 'Mocks',
+                matches: /\.(mock)$/.source
             }, {
                 label: 'Services',
                 matches: /\/services/.source

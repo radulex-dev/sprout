@@ -3,8 +3,6 @@ import { describe, expect, it } from 'vitest';
 // Helpers
 import { decodeVapidPublicKey } from './index';
 
-const VAPID_KEY = 'BAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0-P0A';
-
 describe('decodeVapidPublicKey', () => {
     it('decodes a padded base64 key', () => {
         expect(decodeVapidPublicKey('AQ==')).toEqual(new Uint8Array([1]));
@@ -31,7 +29,7 @@ describe('decodeVapidPublicKey', () => {
     });
 
     it('decodes a 65-byte VAPID public key', () => {
-        const key = decodeVapidPublicKey(VAPID_KEY);
+        const key = decodeVapidPublicKey('BAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0-P0A');
 
         expect(key).toHaveLength(65);
         expect(key.at(0)).toBe(4);

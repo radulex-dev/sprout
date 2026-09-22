@@ -1,17 +1,15 @@
 import { NextResponse } from 'next/server';
 import { groupBy } from 'lodash-es';
-import { sendNotification, setVapidDetails, WebPushError } from 'web-push';
 
 // Constants
-import { CARE_META, DAY_MS } from '@/helpers/care/constants';
-import { PUSH_TTL_SECONDS } from '@/services/server/push/constants';
+import { CARE_META } from '@/helpers/care/constants';
 
 // Helpers
-import { dueTasks } from '@/helpers/care';
+import { dueTasks, isNotifiedToday } from '@/helpers/care';
 
 // Services
 import { listPlants, recordNotified } from '@/services/server/plants';
-import { removePushSubscription } from '@/services/server/push';
+import { sendPushToSubscriptions } from '@/services/server/push';
 
 // Database
 import { getAllPushSubscriptions } from '@/lib/db/queries';
@@ -26,12 +24,6 @@ export const GET = async (request: Request) => {
         });
     }
 
-    setVapidDetails(
-        process.env.VAPID_SUBJECT ?? '',
-        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? '',
-        process.env.VAPID_PRIVATE_KEY ?? ''
-    );
-
     const now = Date.now();
     const subscriptions = await getAllPushSubscriptions();
     const subscriptionsByUser = groupBy(subscriptions, (subscription) => {
@@ -44,9 +36,7 @@ export const GET = async (request: Request) => {
     for (const [userId, userSubscriptions] of Object.entries(subscriptionsByUser)) {
         const plants = await listPlants(userId);
         const pendingTasks = dueTasks(plants, now).filter((task) => {
-            const last = task.plant.lastNotified[task.kind] ?? 0;
-
-            return now - last >= DAY_MS;
+            return !isNotifiedToday(task.plant, task.kind, now);
         });
 
         for (const task of pendingTasks) {
@@ -60,32 +50,25 @@ export const GET = async (request: Request) => {
                 tag: `sprout-${task.plant.id}-${task.kind}`,
                 url: '/'
             };
+            const result = await sendPushToSubscriptions(userSubscriptions, payload);
 
-            for (const subscription of userSubscriptions) {
-                try {
-                    await sendNotification({
-                        endpoint: subscription.endpoint,
-                        keys: {
-                            p256dh: subscription.p256dh,
-                            auth: subscription.auth
-                        }
-                    }, JSON.stringify(payload), {
-                        TTL: PUSH_TTL_SECONDS,
-                        urgency: 'high'
-                    });
-                    notifications += 1;
-                } catch (error) {
-                    if (error instanceof WebPushError && error.statusCode === 410) {
-                        await removePushSubscription(subscription.endpoint);
-                        removed += 1;
-                    } else {
-                        console.error('Failed to send push notification', error);
-                    }
-                }
+            notifications += result.sent;
+            removed += result.removed;
+
+            if (result.sent > 0) {
+                await recordNotified(userId, task.plant.id, task.kind, now);
             }
-
-            await recordNotified(userId, task.plant.id, task.kind, now);
         }
+    }
+
+    if (users === 0) {
+        console.warn('Care check found no push subscriptions');
+    }
+
+    if (removed > 0) {
+        console.warn('Care check removed expired push subscriptions', {
+            removed
+        });
     }
 
     return NextResponse.json({

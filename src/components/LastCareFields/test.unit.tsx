@@ -1,3 +1,4 @@
+import type React from 'react';
 import userEvent from '@testing-library/user-event';
 import { getLocalTimeZone, today } from '@internationalized/date';
 import { describe, expect, it, vi } from 'vitest';
@@ -9,25 +10,18 @@ import LastCareFields from './index';
 // Types
 import { CareKind, type LastCareDates } from '@/types';
 
-const NO_DATES: LastCareDates = {};
-
-const LABELS = ['Watered', 'Fertilised', 'Repotted'];
+const props: React.ComponentProps<typeof LastCareFields> = {
+    value: {},
+    onChange: vi.fn()
+};
 
 describe('LastCareFields', () => {
     it('renders a labelled date input per care kind', () => {
-        const handleChange = vi.fn();
+        render(<LastCareFields {...props} />);
 
-        render(<LastCareFields value={NO_DATES} onChange={handleChange} />);
-
-        const inputs = LABELS.map((label) => {
-            return screen.getByLabelText(label);
-        });
-
-        expect(inputs).toHaveLength(3);
-
-        for (const input of inputs) {
-            expect(input).toHaveAttribute('type', 'date');
-        }
+        expect(screen.getByLabelText('Watered')).toHaveAttribute('type', 'date');
+        expect(screen.getByLabelText('Fertilised')).toHaveAttribute('type', 'date');
+        expect(screen.getByLabelText('Repotted')).toHaveAttribute('type', 'date');
     });
 
     it('reports the picked date without touching the other kinds', async () => {
@@ -37,7 +31,7 @@ describe('LastCareFields', () => {
         };
         const user = userEvent.setup();
 
-        render(<LastCareFields value={dates} onChange={handleChange} />);
+        render(<LastCareFields {...props} value={dates} onChange={handleChange} />);
 
         await user.type(screen.getByLabelText('Watered'), '2024-02-02');
 
@@ -48,20 +42,17 @@ describe('LastCareFields', () => {
     });
 
     it('caps every date input at today', () => {
-        const handleChange = vi.fn();
         const maxDate = today(getLocalTimeZone()).toString();
 
-        render(<LastCareFields value={NO_DATES} onChange={handleChange} />);
+        render(<LastCareFields {...props} />);
 
-        for (const label of LABELS) {
-            expect(screen.getByLabelText(label)).toHaveAttribute('max', maxDate);
-        }
+        expect(screen.getByLabelText('Watered')).toHaveAttribute('max', maxDate);
+        expect(screen.getByLabelText('Fertilised')).toHaveAttribute('max', maxDate);
+        expect(screen.getByLabelText('Repotted')).toHaveAttribute('max', maxDate);
     });
 
     it('renders the hint once when provided', () => {
-        const handleChange = vi.fn();
-
-        render(<LastCareFields value={NO_DATES} onChange={handleChange} hint="Today is assumed." />);
+        render(<LastCareFields {...props} hint="Today is assumed." />);
 
         expect(screen.getByText('Today is assumed.')).toBeInTheDocument();
     });

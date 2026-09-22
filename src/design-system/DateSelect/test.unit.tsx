@@ -1,3 +1,4 @@
+import type React from 'react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -8,13 +9,18 @@ import { NEXT_MONTH_LABEL, PREVIOUS_MONTH_LABEL, SELECT_DATE_TEXT } from './cons
 // Components
 import DateSelect from './index';
 
-const VALUE = '2026-09-12';
-const MAX = '2026-09-30';
-const TRIGGER_NAME = `Last watered: ${SELECT_DATE_TEXT}`;
+const props: React.ComponentProps<typeof DateSelect> = {
+    label: 'Last watered',
+    value: '2026-09-12',
+    max: '2026-09-30',
+    onSelect: vi.fn()
+};
 
 describe('DateSelect', () => {
+    const TRIGGER_NAME = `Last watered: ${SELECT_DATE_TEXT}`;
+
     it('renders an icon-only trigger with the accessible name', () => {
-        render(<DateSelect label="Last watered" value={VALUE} max={MAX} onSelect={vi.fn()} />);
+        render(<DateSelect {...props} />);
 
         const trigger = screen.getByRole('button', {
             name: TRIGGER_NAME
@@ -26,7 +32,7 @@ describe('DateSelect', () => {
     it('opens the calendar on the stored month', async () => {
         const user = userEvent.setup();
 
-        render(<DateSelect label="Last watered" value={VALUE} max={MAX} onSelect={vi.fn()} />);
+        render(<DateSelect {...props} />);
 
         await user.click(screen.getByRole('button', {
             name: TRIGGER_NAME
@@ -42,7 +48,7 @@ describe('DateSelect', () => {
         const handleSelect = vi.fn();
         const user = userEvent.setup();
 
-        render(<DateSelect label="Last watered" value={VALUE} max={MAX} onSelect={handleSelect} />);
+        render(<DateSelect {...props} onSelect={handleSelect} />);
 
         const trigger = screen.getByRole('button', {
             name: TRIGGER_NAME
@@ -64,7 +70,7 @@ describe('DateSelect', () => {
     it('disables days after the max date', async () => {
         const user = userEvent.setup();
 
-        render(<DateSelect label="Last watered" value={VALUE} max="2026-09-20" onSelect={vi.fn()} />);
+        render(<DateSelect {...props} max="2026-09-20" />);
 
         await user.click(screen.getByRole('button', {
             name: TRIGGER_NAME
@@ -81,7 +87,7 @@ describe('DateSelect', () => {
     it('advances to the next month', async () => {
         const user = userEvent.setup();
 
-        render(<DateSelect label="Last watered" value={VALUE} max={MAX} onSelect={vi.fn()} />);
+        render(<DateSelect {...props} />);
 
         await user.click(screen.getByRole('button', {
             name: TRIGGER_NAME
@@ -97,7 +103,7 @@ describe('DateSelect', () => {
     it('steps back to the previous month', async () => {
         const user = userEvent.setup();
 
-        render(<DateSelect label="Last watered" value={VALUE} max={MAX} onSelect={vi.fn()} />);
+        render(<DateSelect {...props} />);
 
         await user.click(screen.getByRole('button', {
             name: TRIGGER_NAME

@@ -90,3 +90,7 @@ export const getCareReferenceRows = async (): Promise<CareReferenceRow[]> => {
 export const getAllPushSubscriptions = async (): Promise<PushSubscriptionRow[]> => {
     return database.select().from(pushSubscriptions);
 };
+
+export const getPushSubscriptionsForUser = async (userId: string): Promise<PushSubscriptionRow[]> => {
+    return database.select().from(pushSubscriptions).where(eq(pushSubscriptions.userId, userId));
+};

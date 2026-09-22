@@ -1,3 +1,4 @@
+import type React from 'react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -21,16 +22,20 @@ const createStream = () => {
     };
 };
 
-const renderStage = () => {
-    return render(<CaptureStage isIdentifying={false} onPhoto={vi.fn()} onError={vi.fn()} onReset={vi.fn()} onIdentify={vi.fn()} />);
-};
-
 const openCamera = async () => {
     const user = userEvent.setup();
 
     await user.click(screen.getByRole('button', {
         name: 'Open camera'
     }));
+};
+
+const props: React.ComponentProps<typeof CaptureStage> = {
+    isIdentifying: false,
+    onPhoto: vi.fn(),
+    onError: vi.fn(),
+    onReset: vi.fn(),
+    onIdentify: vi.fn()
 };
 
 describe('CaptureStage', () => {
@@ -56,7 +61,7 @@ describe('CaptureStage', () => {
         const { stream } = createStream();
         getUserMedia.mockResolvedValue(stream);
 
-        renderStage();
+        render(<CaptureStage {...props} />);
         await openCamera();
 
         const video = screen.getByLabelText<HTMLVideoElement>('Camera preview');
@@ -71,7 +76,7 @@ describe('CaptureStage', () => {
         const { stream, track } = createStream();
         getUserMedia.mockResolvedValue(stream);
 
-        renderStage();
+        render(<CaptureStage {...props} />);
         await openCamera();
 
         const user = userEvent.setup();
@@ -89,7 +94,7 @@ describe('CaptureStage', () => {
         getUserMedia.mockResolvedValue(stream);
         playSpy.mockRejectedValue(new Error('NotAllowedError'));
 
-        render(<CaptureStage isIdentifying={false} onPhoto={vi.fn()} onError={handleError} onReset={vi.fn()} onIdentify={vi.fn()} />);
+        render(<CaptureStage {...props} onError={handleError} />);
         await openCamera();
 
         await waitFor(() => {
@@ -101,7 +106,7 @@ describe('CaptureStage', () => {
         const handleError = vi.fn();
         getUserMedia.mockRejectedValue(new Error('NotAllowedError'));
 
-        render(<CaptureStage isIdentifying={false} onPhoto={vi.fn()} onError={handleError} onReset={vi.fn()} onIdentify={vi.fn()} />);
+        render(<CaptureStage {...props} onError={handleError} />);
         await openCamera();
 
         expect(handleError).toHaveBeenCalledWith('Camera unavailable — you can upload a photo instead.');

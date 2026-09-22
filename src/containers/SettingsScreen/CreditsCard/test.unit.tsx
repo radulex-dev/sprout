@@ -10,11 +10,6 @@ import CreditsCard from './index';
 
 const CALLER_CLASS_NAME = 'caller-class-name';
 
-const EXTERNAL_LINKS: [string, string][] = [
-    [PLANTSOLVE_LINK_LABEL, PLANTSOLVE_URL],
-    [PLANTNET_LINK_LABEL, PLANTNET_URL]
-];
-
 const props: React.ComponentProps<typeof CreditsCard> = {};
 
 describe('CreditsCard', () => {
@@ -37,27 +32,30 @@ describe('CreditsCard', () => {
     it('links each source externally and safely', () => {
         render(<CreditsCard {...props} />);
 
-        for (const [label, href] of EXTERNAL_LINKS) {
-            const link = screen.getByRole('link', {
-                name: label
-            });
+        const plantSolveLink = screen.getByRole('link', {
+            name: PLANTSOLVE_LINK_LABEL
+        });
+        const plantNetLink = screen.getByRole('link', {
+            name: PLANTNET_LINK_LABEL
+        });
 
-            expect(link).toHaveAttribute('href', href);
-            expect(link).toHaveAttribute('target', '_blank');
-            expect(link).toHaveAttribute('rel', 'noreferrer');
-        }
+        expect(plantSolveLink).toHaveAttribute('href', PLANTSOLVE_URL);
+        expect(plantSolveLink).toHaveAttribute('target', '_blank');
+        expect(plantSolveLink).toHaveAttribute('rel', 'noreferrer');
+        expect(plantNetLink).toHaveAttribute('href', PLANTNET_URL);
+        expect(plantNetLink).toHaveAttribute('target', '_blank');
+        expect(plantNetLink).toHaveAttribute('rel', 'noreferrer');
     });
 
     it('gives the links descriptive names rather than bare urls', () => {
         render(<CreditsCard {...props} />);
 
-        for (const [, href] of EXTERNAL_LINKS) {
-            const bareUrlLink = screen.queryByRole('link', {
-                name: href
-            });
-
-            expect(bareUrlLink).not.toBeInTheDocument();
-        }
+        expect(screen.queryByRole('link', {
+            name: PLANTSOLVE_URL
+        })).not.toBeInTheDocument();
+        expect(screen.queryByRole('link', {
+            name: PLANTNET_URL
+        })).not.toBeInTheDocument();
     });
 
     it('spreads props and className onto the root element', () => {
