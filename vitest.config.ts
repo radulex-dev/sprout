@@ -11,6 +11,7 @@ export default defineConfig({
         globals: false,
         setupFiles: ['./test/vitest/setup.ts'],
         include: ['src/**/test.unit.{ts,tsx}'],
+        pool: 'vmThreads',
         coverage: {
             provider: 'v8',
             reporter: ['text', 'lcov'],

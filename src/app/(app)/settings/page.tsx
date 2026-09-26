@@ -19,7 +19,8 @@ const SettingsPage = async () => {
     const plants = await getPlantsForUser(session.user.id);
     const user = {
         name: session.user.name,
-        email: session.user.email
+        email: session.user.email,
+        emailVerified: session.user.emailVerified
     };
 
     return (

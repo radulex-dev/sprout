@@ -27,6 +27,14 @@
     @apply mt-0.5 block w-full break-all;
 }
 
+.notice {
+    @apply ui-notice flex items-center gap-1.5;
+}
+
+.notice svg {
+    @apply shrink-0;
+}
+
 .actions {
     @apply
         border-x-0 border-t border-b-0 border-solid border-ink-soft/20 pt-3

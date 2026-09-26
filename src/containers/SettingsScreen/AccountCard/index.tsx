@@ -1,8 +1,9 @@
 import classNames from 'classnames';
 import React from 'react';
-import { User } from 'lucide-react';
+import { BadgeCheck, User } from 'lucide-react';
 
 // Constants
+import { VERIFIED_LABEL, VERIFY_HINT, VERIFY_LABEL } from './constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
 
 // Components
@@ -16,11 +17,43 @@ import type { SettingsUser } from '../types';
 
 export interface Props extends React.ComponentProps<'div'> {
     user: SettingsUser;
+    verifyCooldown: number;
+    verifyStatus: string;
+    onVerify: () => void;
     onSignOut: () => void;
 }
 
-const AccountCard: React.FunctionComponent<Props> = ({ user, onSignOut, className, ...props }) => {
+const AccountCard: React.FunctionComponent<Props> = ({ user, verifyCooldown, verifyStatus, onVerify, onSignOut, className, ...props }) => {
     const classes = classNames(styles.root, className);
+
+    const renderVerification = () => {
+        if (user.emailVerified) {
+            return (
+                <div className={styles.notice}>
+                    <BadgeCheck size="1rem" aria-hidden />
+                    {VERIFIED_LABEL}
+                </div>
+            );
+        }
+
+        const isVerifyCoolingDown = verifyCooldown > 0;
+
+        return (
+            <React.Fragment>
+                <div className={styles.notice}>
+                    {VERIFY_HINT}
+                </div>
+                <Button block disabled={isVerifyCoolingDown} onClick={onVerify}>
+                    {isVerifyCoolingDown ? `Try again in ${verifyCooldown}s` : VERIFY_LABEL}
+                </Button>
+                {verifyStatus !== '' && (
+                    <div className={styles.notice} role="status">
+                        {verifyStatus}
+                    </div>
+                )}
+            </React.Fragment>
+        );
+    };
 
     return (
         <div className={classes} {...props}>
@@ -37,6 +70,7 @@ const AccountCard: React.FunctionComponent<Props> = ({ user, onSignOut, classNam
                     {user.email}
                 </span>
             </p>
+            {renderVerification()}
             <div className={styles.actions}>
                 <Button variant={ButtonVariant.Secondary} block onClick={onSignOut}>
                     Log out

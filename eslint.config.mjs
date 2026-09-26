@@ -154,6 +154,9 @@ const config = configure([{
                 label: 'Auth',
                 matches: /(?:\/lib\/auth|\/auth\/|\.\.\/auth)/.source
             }, {
+                label: 'Routes',
+                matches: /\/route$/.source
+            }, {
                 label: 'Styles',
                 matches: /\.(css|scss)$/.source
             }, {

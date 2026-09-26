@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 // Constants
-import { TEST_PUSH_COOLDOWN_SECONDS } from './constants';
+import { TEST_PUSH_COOLDOWN_SECONDS, VERIFY_COOLDOWN_SECONDS } from './constants';
 import { CONFIRM_LABEL, INSTALL_GUIDE_CONTENT } from './InstallGuide/constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
 
@@ -49,6 +49,8 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
     const [isGuideOpen, setIsGuideOpen] = useState(false);
     const [testStatus, setTestStatus] = useState('');
     const [testCooldown, setTestCooldown] = useState(0);
+    const [verifyStatus, setVerifyStatus] = useState('');
+    const [verifyCooldown, setVerifyCooldown] = useState(0);
 
     const guidePlatform = platform ?? InstallPlatform.Other;
     const guideContent = INSTALL_GUIDE_CONTENT[guidePlatform];
@@ -68,6 +70,22 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
             clearTimeout(timeout);
         };
     }, [testCooldown]);
+
+    useEffect(() => {
+        if (verifyCooldown <= 0) {
+            return;
+        }
+
+        const timeout = setTimeout(() => {
+            setVerifyCooldown((remaining) => {
+                return remaining - 1;
+            });
+        }, 1000);
+
+        return () => {
+            clearTimeout(timeout);
+        };
+    }, [verifyCooldown]);
 
     const handleSignOut = useCallback(async () => {
         await authClient.signOut();
@@ -115,6 +133,39 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
         }
     }, []);
 
+    const handleVerify = useCallback(async () => {
+        setVerifyCooldown(VERIFY_COOLDOWN_SECONDS);
+        setVerifyStatus('Sending a verification email…');
+
+        try {
+            const response = await fetch('/api/email/resend-verification', {
+                method: 'POST'
+            });
+
+            if (response.status === 503) {
+                setVerifyStatus('Email delivery is not configured on this server.');
+
+                return;
+            }
+
+            if (response.status === 409) {
+                setVerifyStatus('This address is already verified.');
+
+                return;
+            }
+
+            if (!response.ok) {
+                setVerifyStatus('The verification email could not be sent.');
+
+                return;
+            }
+
+            setVerifyStatus('Verification email requested. Check your inbox.');
+        } catch (error) {
+            setVerifyStatus(error instanceof Error ? error.message : 'The verification email could not be sent.');
+        }
+    }, []);
+
     const handleInstall = useCallback(async () => {
         if (canPrompt) {
             await promptInstall();
@@ -131,7 +182,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
 
     const renderAccountCard = () => {
         return (
-            <AccountCard user={user} onSignOut={handleSignOut} />
+            <AccountCard user={user} verifyCooldown={verifyCooldown} verifyStatus={verifyStatus} onVerify={handleVerify} onSignOut={handleSignOut} />
         );
     };
 

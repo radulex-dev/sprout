@@ -16,7 +16,11 @@
 }
 
 .notice {
-    @apply ui-notice flex items-start gap-1.5;
+    @apply ui-notice flex items-center gap-1.5;
+}
+
+.notice svg {
+    @apply shrink-0;
 }
 
 .warn {

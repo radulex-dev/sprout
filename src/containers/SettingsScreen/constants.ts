@@ -2,6 +2,8 @@ import type { CSSProperties } from 'react';
 
 export const TEST_PUSH_COOLDOWN_SECONDS = 15;
 
+export const VERIFY_COOLDOWN_SECONDS = 60;
+
 export const NO_MARGIN_STYLE: CSSProperties = {
     marginBottom: 0
 };
