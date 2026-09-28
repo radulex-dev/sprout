@@ -1,55 +1,75 @@
 import 'server-only';
+import nodemailer from 'nodemailer';
 
 // Constants
-import { EMAIL_USER_AGENT, ERROR_NOT_CONFIGURED, ERROR_SEND_FAILED, RESEND_ENDPOINT } from './constants';
+import { ERROR_NOT_CONFIGURED, ERROR_SEND_FAILED } from './constants';
 
 // Types
 import type { EmailMessage } from './types';
 
-const readErrorDetail = async (response: Response): Promise<string> => {
-    try {
-        return await response.text();
-    } catch {
-        return '';
+const transporters = new Map<string, ReturnType<typeof nodemailer.createTransport>>();
+
+const readSmtpEnvironment = () => {
+    return {
+        host: process.env.SMTP_HOST ?? '',
+        port: process.env.SMTP_PORT ?? '',
+        user: process.env.SMTP_USER ?? '',
+        password: process.env.SMTP_PASSWORD ?? '',
+        from: process.env.EMAIL_FROM ?? ''
+    };
+};
+
+export const isEmailConfigured = (): boolean => {
+    const environment = readSmtpEnvironment();
+
+    return Boolean(environment.host && environment.port && environment.user && environment.password && environment.from);
+};
+
+const getTransporter = (): ReturnType<typeof nodemailer.createTransport> | undefined => {
+    if (!isEmailConfigured()) {
+        return undefined;
     }
+
+    const environment = readSmtpEnvironment();
+    const port = Number(environment.port);
+    const key = `${environment.host}:${port}:${environment.user}`;
+    const cached = transporters.get(key);
+
+    if (cached) {
+        return cached;
+    }
+
+    const created = nodemailer.createTransport({
+        host: environment.host,
+        port,
+        secure: port === 465,
+        auth: {
+            user: environment.user,
+            pass: environment.password
+        }
+    });
+    transporters.set(key, created);
+
+    return created;
 };
 
 export const sendEmail = async (message: EmailMessage): Promise<void> => {
-    const apiKey = process.env.RESEND_API_KEY ?? '';
-    const emailFrom = process.env.EMAIL_FROM ?? '';
-    if (!apiKey || !emailFrom) {
-        console.warn(ERROR_NOT_CONFIGURED);
-
-        return;
-    }
-
-    let response: Response;
     try {
-        response = await fetch(RESEND_ENDPOINT, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json',
-                'User-Agent': EMAIL_USER_AGENT
-            },
-            body: JSON.stringify({
-                from: emailFrom,
-                to: message.to,
-                subject: message.subject,
-                html: message.html
-            })
+        const mailer = getTransporter();
+
+        if (!mailer) {
+            console.warn(ERROR_NOT_CONFIGURED);
+
+            return;
+        }
+
+        await mailer.sendMail({
+            from: process.env.EMAIL_FROM,
+            to: message.to,
+            subject: message.subject,
+            html: message.html
         });
     } catch (error) {
         console.error(ERROR_SEND_FAILED, error);
-
-        return;
-    }
-
-    if (!response.ok) {
-        const detail = await readErrorDetail(response);
-
-        console.error(ERROR_SEND_FAILED, response.status, detail);
-
-        return;
     }
 };
