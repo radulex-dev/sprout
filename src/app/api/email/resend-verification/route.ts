@@ -1,6 +1,9 @@
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 
+// Services
+import { isEmailConfigured } from '@/services/server/email';
+
 // Auth
 import { auth } from '@/lib/auth';
 import { requireUser } from '@/lib/auth/session';
@@ -16,7 +19,7 @@ export const POST = async () => {
         });
     }
 
-    if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
+    if (!isEmailConfigured()) {
         return NextResponse.json({
             error: 'Email delivery is not configured on this server.'
         }, {
