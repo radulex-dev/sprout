@@ -1,36 +1,56 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Constants
-import { EMAIL_USER_AGENT, ERROR_NOT_CONFIGURED, ERROR_SEND_FAILED, RESEND_ENDPOINT } from './constants';
-
-// Helpers
-import { mockResponse, stubFetch } from '@test/vitest/helpers/mockApi';
+import { ERROR_NOT_CONFIGURED, ERROR_SEND_FAILED } from './constants';
 
 // Services
 import { sendEmail } from './index';
 
-// Types
-import { FetchMock } from '@test/vitest/helpers/mockApi/types';
+const { createTransportMock, sendMailMock } = vi.hoisted(() => {
+    const sendMailMock = vi.fn();
+
+    return {
+        createTransportMock: vi.fn(() => {
+            return {
+                sendMail: sendMailMock
+            };
+        }),
+        sendMailMock
+    };
+});
+
+vi.mock('nodemailer', () => {
+    return {
+        default: {
+            createTransport: createTransportMock
+        }
+    };
+});
 
 describe('sendEmail', () => {
-    let fetchMock: FetchMock;
-
     beforeEach(() => {
-        fetchMock = stubFetch();
-        vi.stubEnv('RESEND_API_KEY', 're_test_key');
+        vi.clearAllMocks();
+        createTransportMock.mockImplementation(() => {
+            return {
+                sendMail: sendMailMock
+            };
+        });
+        vi.stubEnv('SMTP_HOST', 'smtp.example.test');
+        vi.stubEnv('SMTP_PORT', '587');
+        vi.stubEnv('SMTP_USER', 'smtp-user');
+        vi.stubEnv('SMTP_PASSWORD', 'smtp-password');
         vi.stubEnv('EMAIL_FROM', 'no-reply@example.test');
         vi.spyOn(console, 'error').mockImplementation(vi.fn());
         vi.spyOn(console, 'warn').mockImplementation(vi.fn());
     });
 
     afterEach(() => {
-        vi.unstubAllGlobals();
         vi.unstubAllEnvs();
         vi.restoreAllMocks();
     });
 
-    it('warns and skips the request when the API key is missing', async () => {
-        vi.stubEnv('RESEND_API_KEY', '');
+    it.each(['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASSWORD', 'EMAIL_FROM'])('warns and skips the send when %s is blank', async (variable) => {
+        vi.stubEnv(variable, '');
 
         await sendEmail({
             to: 'user@example.test',
@@ -38,45 +58,24 @@ describe('sendEmail', () => {
             html: '<p>Verify</p>'
         });
 
-        expect(fetchMock).not.toHaveBeenCalled();
+        expect(sendMailMock).not.toHaveBeenCalled();
         expect(vi.mocked(console.warn)).toHaveBeenCalledTimes(1);
         expect(vi.mocked(console.warn)).toHaveBeenCalledWith(ERROR_NOT_CONFIGURED);
     });
 
-    it('warns and skips the request when the sender address is missing', async () => {
-        vi.stubEnv('EMAIL_FROM', '');
+    it('sends the message through the transport and resolves', async () => {
+        sendMailMock.mockResolvedValue({
+            accepted: ['user@example.test']
+        });
 
-        await sendEmail({
+        await expect(sendEmail({
             to: 'user@example.test',
             subject: 'Verify your email',
             html: '<p>Verify</p>'
-        });
+        })).resolves.toBeUndefined();
 
-        expect(fetchMock).not.toHaveBeenCalled();
-        expect(vi.mocked(console.warn)).toHaveBeenCalledTimes(1);
-        expect(vi.mocked(console.warn)).toHaveBeenCalledWith(ERROR_NOT_CONFIGURED);
-    });
-
-    it('POSTs the message to Resend with the transport headers', async () => {
-        fetchMock.mockResolvedValue(mockResponse({
-            id: 'email_1'
-        }, 200));
-
-        await sendEmail({
-            to: 'user@example.test',
-            subject: 'Verify your email',
-            html: '<p>Verify</p>'
-        });
-
-        const [input, init] = fetchMock.mock.calls.at(0) ?? [];
-        const headers = init?.headers as Record<string, string>;
-
-        expect(input).toBe(RESEND_ENDPOINT);
-        expect(init?.method).toBe('POST');
-        expect(headers.Authorization).toBe('Bearer re_test_key');
-        expect(headers['Content-Type']).toBe('application/json');
-        expect(headers['User-Agent']).toBe(EMAIL_USER_AGENT);
-        expect(JSON.parse(init?.body as string)).toEqual({
+        expect(sendMailMock).toHaveBeenCalledTimes(1);
+        expect(sendMailMock).toHaveBeenCalledWith({
             from: 'no-reply@example.test',
             to: 'user@example.test',
             subject: 'Verify your email',
@@ -84,12 +83,29 @@ describe('sendEmail', () => {
         });
     });
 
-    it('logs the status and body and resolves when Resend rejects the send', async () => {
-        fetchMock.mockResolvedValue(mockResponse({
-            statusCode: 403,
-            name: 'validation_error',
-            message: 'The domain is not verified.'
-        }, 403));
+    it('reuses one transport for subsequent sends', async () => {
+        vi.stubEnv('SMTP_HOST', 'reuse.example.test');
+        sendMailMock.mockResolvedValue({
+            accepted: ['user@example.test']
+        });
+
+        await sendEmail({
+            to: 'user@example.test',
+            subject: 'Verify your email',
+            html: '<p>Verify</p>'
+        });
+        await sendEmail({
+            to: 'user@example.test',
+            subject: 'Verify your email',
+            html: '<p>Verify</p>'
+        });
+
+        expect(createTransportMock).toHaveBeenCalledTimes(1);
+        expect(sendMailMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('logs and resolves when the transport rejects the send', async () => {
+        sendMailMock.mockRejectedValue(new Error('connection refused'));
 
         await expect(sendEmail({
             to: 'user@example.test',
@@ -98,30 +114,14 @@ describe('sendEmail', () => {
         })).resolves.toBeUndefined();
 
         expect(vi.mocked(console.error)).toHaveBeenCalledTimes(1);
-        expect(vi.mocked(console.error)).toHaveBeenCalledWith(ERROR_SEND_FAILED, 403, expect.stringContaining('validation_error'));
+        expect(vi.mocked(console.error)).toHaveBeenCalledWith(ERROR_SEND_FAILED, expect.any(Error));
     });
 
-    it('logs a fallback detail when the error body cannot be read', async () => {
-        fetchMock.mockResolvedValue({
-            ok: false,
-            status: 403,
-            text: () => {
-                return Promise.reject(new Error('stream closed'));
-            }
-        } as unknown as Response);
-
-        await expect(sendEmail({
-            to: 'user@example.test',
-            subject: 'Verify your email',
-            html: '<p>Verify</p>'
-        })).resolves.toBeUndefined();
-
-        expect(vi.mocked(console.error)).toHaveBeenCalledTimes(1);
-        expect(vi.mocked(console.error)).toHaveBeenCalledWith(ERROR_SEND_FAILED, 403, '');
-    });
-
-    it('logs and resolves when the network request rejects', async () => {
-        fetchMock.mockRejectedValue(new Error('socket hang up'));
+    it('logs and resolves when the transport cannot be created', async () => {
+        vi.stubEnv('SMTP_HOST', 'broken.example.test');
+        createTransportMock.mockImplementationOnce(() => {
+            throw new Error('invalid transport options');
+        });
 
         await expect(sendEmail({
             to: 'user@example.test',

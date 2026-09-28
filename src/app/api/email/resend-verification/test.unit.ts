@@ -36,7 +36,10 @@ vi.mock('@/lib/auth/session', () => {
 describe('/api/email/resend-verification', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.stubEnv('RESEND_API_KEY', 're_test_key');
+        vi.stubEnv('SMTP_HOST', 'smtp.example.test');
+        vi.stubEnv('SMTP_PORT', '587');
+        vi.stubEnv('SMTP_USER', 'smtp-user');
+        vi.stubEnv('SMTP_PASSWORD', 'smtp-password');
         vi.stubEnv('EMAIL_FROM', 'no-reply@example.test');
         headersMock.mockResolvedValue(new Headers());
         requireUserMock.mockResolvedValue({
@@ -71,11 +74,7 @@ describe('/api/email/resend-verification', () => {
         });
     });
 
-    it.each([{
-        variable: 'RESEND_API_KEY'
-    }, {
-        variable: 'EMAIL_FROM'
-    }])('answers 503 and sends nothing when $variable is blank', async ({ variable }) => {
+    it.each(['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASSWORD', 'EMAIL_FROM'])('answers 503 and sends nothing when %s is blank', async (variable) => {
         vi.stubEnv(variable, '');
 
         const response = await POST();
@@ -102,7 +101,7 @@ describe('/api/email/resend-verification', () => {
     it('answers 502 when the send throws', async () => {
         const consoleErrorMock = vi.spyOn(console, 'error');
 
-        sendVerificationEmailMock.mockRejectedValue(new Error('resend unavailable'));
+        sendVerificationEmailMock.mockRejectedValue(new Error('smtp unavailable'));
 
         const response = await POST();
 
