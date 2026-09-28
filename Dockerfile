@@ -30,7 +30,9 @@ RUN bun run build
 FROM oven/bun:1-alpine AS prod
 WORKDIR /app
 ENV NODE_ENV=production
-ENV HOSTNAME=0.0.0.0
+# Bind dual-stack: "localhost" resolves to ::1 first inside the container, so an IPv4-only
+# bind (0.0.0.0) makes the Coolify healthcheck on http://localhost:3000/login fail.
+ENV HOSTNAME=::
 ENV PORT=3000
 # `output: 'standalone'` traces the runtime deps into .next/standalone, so the
 # prod image ships that tree instead of a full node_modules + source checkout.
