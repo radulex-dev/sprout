@@ -1,11 +1,11 @@
 import type { NextConfig } from 'next';
 
+const buildId = process.env.NEXT_PUBLIC_BUILD_ID;
+
 const nextConfig: NextConfig = {
-    // Vercel builds its own output layout and `standalone` breaks it on Next 16.3.x
-    // (ENOENT .next/next-server.js.nft.json). The Docker prod target still gets it.
-    output: process.env.VERCEL ? undefined : 'standalone',
+    output: 'standalone',
     env: {
-        NEXT_PUBLIC_BUILD_ID: process.env.NEXT_PUBLIC_BUILD_ID ?? process.env.VERCEL_GIT_COMMIT_SHA ?? 'dev'
+        NEXT_PUBLIC_BUILD_ID: buildId === '' || buildId === undefined ? 'dev' : buildId
     },
     poweredByHeader: false,
     reactStrictMode: true,
