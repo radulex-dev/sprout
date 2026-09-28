@@ -73,7 +73,7 @@ const sendToSubscription = async (subscription: PushSubscriptionRow, payload: Pu
 
         return PushOutcome.Sent;
     } catch (error) {
-        if (error instanceof WebPushError && error.statusCode === 410) {
+        if (error instanceof WebPushError && (error.statusCode === 410 || error.statusCode === 403)) {
             return pruneSubscription(subscription.endpoint);
         }
 
