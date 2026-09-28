@@ -19,6 +19,11 @@ FROM base AS build
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 COPY . .
+ARG DATABASE_URL
+ARG BETTER_AUTH_SECRET
+ARG BETTER_AUTH_URL
+ARG NEXT_PUBLIC_BUILD_ID
+ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY
 RUN bun run build
 
 FROM oven/bun:1-alpine AS prod
@@ -31,5 +36,8 @@ ENV PORT=3000
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
+COPY --from=build /app/package.json /app/drizzle.config.ts ./
+COPY --from=build /app/drizzle ./drizzle
+RUN bun add --no-save drizzle-kit@0.31.10
 EXPOSE 3000
 CMD ["bun", "server.js"]
