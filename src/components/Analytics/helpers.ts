@@ -1,18 +1,22 @@
-import type { BeforeSendEvent } from '@vercel/analytics';
-import type { BeforeSend } from '@vercel/analytics/next';
-
 // Constants
 import { PLANT_DETAIL_NORMALISED, PLANT_DETAIL_PATTERN } from './constants';
 
-export const beforeSend: BeforeSend = (event: BeforeSendEvent) => {
-    const url = new URL(event.url, globalThis.location.origin);
+// Types
+import type { UmamiBeforeSend } from './types';
+
+export const beforeSend: UmamiBeforeSend = (...[, payload]) => {
+    if (typeof payload.url !== 'string' || payload.url.length === 0) {
+        return payload;
+    }
+
+    const url = new URL(payload.url, globalThis.location.origin);
 
     if (!PLANT_DETAIL_PATTERN.test(url.pathname)) {
-        return event;
+        return payload;
     }
 
     url.pathname = PLANT_DETAIL_NORMALISED;
-    event.url = url.href;
+    payload.url = url.href;
 
-    return event;
+    return payload;
 };
