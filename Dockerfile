@@ -19,6 +19,7 @@ FROM base AS build
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 COPY . .
+# Build-time only: Coolify must send placeholders for DATABASE_URL and BETTER_AUTH_SECRET; BETTER_AUTH_URL and NEXT_PUBLIC_* are inlined and need real values.
 ARG DATABASE_URL
 ARG BETTER_AUTH_SECRET
 ARG BETTER_AUTH_URL
@@ -36,8 +37,9 @@ ENV PORT=3000
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
-COPY --from=build /app/package.json /app/drizzle.config.ts ./
+COPY --from=build /app/drizzle.config.ts ./drizzle.config.ts
 COPY --from=build /app/drizzle ./drizzle
-RUN bun add --no-save drizzle-kit@0.31.10
+RUN printf '%s' '{"name":"@radulex-dev/sprout","private":true,"type":"module","dependencies":{"drizzle-orm":"0.45.2"},"scripts":{"db:migrate":"drizzle-kit migrate"}}' > package.json \
+    && bun add --no-save drizzle-kit@0.31.10
 EXPOSE 3000
 CMD ["bun", "server.js"]
