@@ -4,13 +4,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { EMAIL_USER_AGENT, ERROR_NOT_CONFIGURED, ERROR_SEND_FAILED, RESEND_ENDPOINT } from './constants';
 
 // Helpers
-import { mockResponse, stubFetch } from '@test/vitest/helpers';
+import { mockResponse, stubFetch } from '@test/vitest/helpers/mockApi';
 
 // Services
 import { sendEmail } from './index';
 
 // Types
-import { FetchMock } from '@test/vitest/types';
+import { FetchMock } from '@test/vitest/helpers/mockApi/types';
 
 describe('sendEmail', () => {
     let fetchMock: FetchMock;
