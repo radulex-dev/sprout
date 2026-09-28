@@ -12,6 +12,24 @@ import { recordNotified } from '@/lib/db/actions';
 // Types
 import type { Plant } from '@/types';
 
+const hasMatchingApplicationServerKey = (subscription: PushSubscription, currentKey: Uint8Array): boolean => {
+    const existingKey = subscription.options.applicationServerKey;
+
+    if (!existingKey) {
+        return false;
+    }
+
+    const existingBytes = new Uint8Array(existingKey);
+
+    if (existingBytes.length !== currentKey.length) {
+        return false;
+    }
+
+    return existingBytes.every((byte, index) => {
+        return byte === currentKey[index];
+    });
+};
+
 const fetchPlants = async (): Promise<Plant[]> => {
     try {
         const response = await fetch('/api/plants', {
@@ -43,18 +61,27 @@ export const ensurePushSubscription = async (): Promise<void> => {
             return;
         }
 
+        const currentKey = decodeVapidPublicKey(key);
         const existing = await pushManager.getSubscription();
-        const subscription = existing ?? await pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: decodeVapidPublicKey(key)
-        });
+        const isExistingCurrentKey = existing ? hasMatchingApplicationServerKey(existing, currentKey) : false;
+
+        if (existing && !isExistingCurrentKey) {
+            await existing.unsubscribe();
+        }
+
+        const resolved = existing && isExistingCurrentKey
+            ? existing
+            : await pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: currentKey
+                });
 
         await fetch('/api/push/subscribe', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(subscription)
+            body: JSON.stringify(resolved)
         });
     } catch (error) {
         console.error('Failed to register the push subscription', error);

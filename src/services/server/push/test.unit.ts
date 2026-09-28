@@ -123,6 +123,38 @@ describe('sendPushToSubscriptions', () => {
         });
     });
 
+    it.each([{
+        statusCode: 403,
+        removed: 1
+    }, {
+        statusCode: 500,
+        removed: 0
+    }])('handles a $statusCode rejection with removed=$removed', async ({ statusCode, removed }) => {
+        const ErrorClass = WebPushError as unknown as new (message: string, statusCode: number) => Error;
+        const subscription: PushSubscriptionRow = {
+            id: 'id-https://push.example/a',
+            userId: 'user-1',
+            endpoint: 'https://push.example/a',
+            p256dh: 'p256dh-value',
+            auth: 'auth-value',
+            createdAt: NOW
+        };
+
+        mockSend.mockRejectedValue(new ErrorClass('Push rejected', statusCode));
+
+        const result = await sendPushToSubscriptions([subscription], {
+            title: 'Time to water Fern',
+            body: 'Fern is due for watering today.',
+            tag: 'sprout-plant-1-water',
+            url: '/'
+        });
+
+        expect(result).toEqual({
+            sent: 0,
+            removed
+        });
+    });
+
     it('leaves a non-410 failure uncounted and unpruned', async () => {
         const ErrorClass = WebPushError as unknown as new (message: string, statusCode: number) => Error;
         const subscription: PushSubscriptionRow = {
