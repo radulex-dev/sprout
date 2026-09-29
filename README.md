@@ -14,8 +14,8 @@ reminders when each plant needs watering, fertilising or repotting.
   by the identified genus, falling back to family and then to a generic 7/30/18 default — and the form
   says which of the three it used, so an unsourced default is never presented as plant-specific.
 - **🔔 Reminders** — Web Push notifications when care is due (at most one per task per day), so they
-  arrive with the app closed; a daily Vercel Cron sends what is due, and an in-app watcher also
-  checks on open, on focus, and hourly while open.
+  arrive with the app closed; a daily Coolify Scheduled Task sends what is due, and an in-app watcher
+  also checks on open, on focus, and hourly while open.
 - **📱 Installable PWA** — home-screen icon, standalone display, notification click handling.
 
 ## Run it
@@ -80,9 +80,9 @@ Copy `.env.example` to `.env.local` and set:
 | Local dev | `docker-compose.yml` | `db` (Postgres) + `app` (Next dev) containers |
 
 Reminders arrive as Web Push, so they reach you with the app closed. On iOS 16.4+ the app must be
-added to the Home Screen first, since Safari only delivers push to installed web apps. One Vercel
-Cron sends a daily digest of everything due (Hobby plans allow cron jobs only once per day), and the
-in-app watcher additionally checks on open and on focus.
+added to the Home Screen first, since Safari only delivers push to installed web apps. One Coolify
+Scheduled Task sends a daily digest of everything due, and the in-app watcher additionally checks on
+open and on focus.
 
 Web Push needs four environment variables in the deployment — `NEXT_PUBLIC_VAPID_PUBLIC_KEY`,
 `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` and `CRON_SECRET`. Without them the app runs normally, but
