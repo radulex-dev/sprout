@@ -10,7 +10,7 @@ import { getPushSubscriptionsForUser } from '@/lib/db/queries';
 import { pushSubscriptions } from '@/lib/db/schema';
 
 // Types
-import { PushOutcome, type PushPayload, type PushSendResult, type PushSubscriptionInput } from './types';
+import { PushOutcome, PushStopReason, type PushPayload, type PushSendResult, type PushSubscriptionInput } from './types';
 import type { PushSubscriptionRow } from '@/lib/db/types';
 
 export const subscribe = async (userId: string, input: PushSubscriptionInput): Promise<void> => {
@@ -58,6 +58,20 @@ const pruneSubscription = async (endpoint: string): Promise<PushOutcome> => {
     }
 };
 
+const isPrunableError = (error: unknown): boolean => {
+    if (!(error instanceof WebPushError)) {
+        return false;
+    }
+
+    if (error.statusCode === 410 || error.statusCode === 403) {
+        return true;
+    }
+
+    // Apple reports a rotated VAPID key as a `VapidPkHashMismatch` reason in the body
+    // rather than a 403, so status alone leaves the dead row retried on every send forever.
+    return typeof error.body === 'string' && error.body.includes(PushStopReason.VapidKeyMismatch);
+};
+
 const sendToSubscription = async (subscription: PushSubscriptionRow, payload: PushPayload): Promise<PushOutcome> => {
     try {
         await sendNotification({
@@ -73,7 +87,7 @@ const sendToSubscription = async (subscription: PushSubscriptionRow, payload: Pu
 
         return PushOutcome.Sent;
     } catch (error) {
-        if (error instanceof WebPushError && (error.statusCode === 410 || error.statusCode === 403)) {
+        if (isPrunableError(error)) {
             return pruneSubscription(subscription.endpoint);
         }
 

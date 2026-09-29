@@ -26,10 +26,12 @@ const { mockDelete } = vi.hoisted(() => {
 vi.mock('web-push', () => {
     class WebPushError extends Error {
         statusCode: number;
+        body?: string;
 
-        constructor(message: string, statusCode: number) {
+        constructor(message: string, statusCode: number, body?: string) {
             super(message);
             this.statusCode = statusCode;
+            this.body = body;
         }
     }
 
@@ -179,6 +181,60 @@ describe('sendPushToSubscriptions', () => {
             sent: 0,
             removed: 0
         });
+    });
+
+    it('prunes a non-403/410 rejection whose body reports the VAPID key mismatch', async () => {
+        const ErrorClass = WebPushError as unknown as new (message: string, statusCode: number, body: string) => Error;
+        const subscription: PushSubscriptionRow = {
+            id: 'id-https://push.example/a',
+            userId: 'user-1',
+            endpoint: 'https://push.example/a',
+            p256dh: 'p256dh-value',
+            auth: 'auth-value',
+            createdAt: NOW
+        };
+
+        mockSend.mockRejectedValue(new ErrorClass('Push rejected', 400, '{"reason":"VapidPkHashMismatch"}'));
+
+        const result = await sendPushToSubscriptions([subscription], {
+            title: 'Time to water Fern',
+            body: 'Fern is due for watering today.',
+            tag: 'sprout-plant-1-water',
+            url: '/'
+        });
+
+        expect(result).toEqual({
+            sent: 0,
+            removed: 1
+        });
+        expect(mockDelete).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps a non-403/410 rejection whose body reports a different reason', async () => {
+        const ErrorClass = WebPushError as unknown as new (message: string, statusCode: number, body: string) => Error;
+        const subscription: PushSubscriptionRow = {
+            id: 'id-https://push.example/a',
+            userId: 'user-1',
+            endpoint: 'https://push.example/a',
+            p256dh: 'p256dh-value',
+            auth: 'auth-value',
+            createdAt: NOW
+        };
+
+        mockSend.mockRejectedValue(new ErrorClass('Push rejected', 400, '{"reason":"BadJwtToken"}'));
+
+        const result = await sendPushToSubscriptions([subscription], {
+            title: 'Time to water Fern',
+            body: 'Fern is due for watering today.',
+            tag: 'sprout-plant-1-water',
+            url: '/'
+        });
+
+        expect(result).toEqual({
+            sent: 0,
+            removed: 0
+        });
+        expect(mockDelete).not.toHaveBeenCalled();
     });
 
     it('tallies a successful send, a prune and a failure in one batch', async () => {
