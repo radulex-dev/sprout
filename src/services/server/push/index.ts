@@ -67,8 +67,6 @@ const isPrunableError = (error: unknown): boolean => {
         return true;
     }
 
-    // Apple reports a rotated VAPID key as a `VapidPkHashMismatch` reason in the body
-    // rather than a 403, so status alone leaves the dead row retried on every send forever.
     return typeof error.body === 'string' && error.body.includes(PushStopReason.VapidKeyMismatch);
 };
 

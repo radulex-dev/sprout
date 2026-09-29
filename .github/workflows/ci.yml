@@ -23,3 +23,9 @@ jobs:
       - run: bun run test:coverage
       - run: bun run build
       - run: bun run test:size
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: shellcheck .github/scripts/*.sh

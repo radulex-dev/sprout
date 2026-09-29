@@ -15,6 +15,7 @@
     "lint:fix": "bun run lint:js -- --fix && stylelint \"src/**/*.css\" --fix && eslint \"src/**/*.css\" --fix",
     "lint:staged": "lint-staged",
     "lint:commits": "commitlint --from HEAD~1 --to HEAD",
+    "lint:sh": "shellcheck .github/scripts/*.sh",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:size": "size-limit",
