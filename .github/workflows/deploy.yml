@@ -42,11 +42,13 @@ jobs:
           response_file="$(mktemp)"
           http_code="$(curl --silent --show-error --connect-timeout 10 --max-time 30 \
               --output "${response_file}" --write-out '%{http_code}' \
+              --request POST \
+
               --header "Authorization: Bearer ${COOLIFY_TOKEN}" \
               "${COOLIFY_BASE_URL}/api/v1/deploy?uuid=${COOLIFY_APP_UUID}" || true)"
 
           if [ "${http_code:-000}" != '200' ]; then
-              echo "::error title=Coolify deploy request failed::GET /api/v1/deploy answered HTTP ${http_code:-no response}."
+              echo "::error title=Coolify deploy request failed::POST /api/v1/deploy answered HTTP ${http_code:-no response}."
               cat "${response_file}"
               exit 1
           fi
