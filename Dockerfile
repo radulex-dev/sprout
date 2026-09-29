@@ -27,7 +27,13 @@ ARG NEXT_PUBLIC_BUILD_ID
 ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY
 ARG NEXT_PUBLIC_UMAMI_SCRIPT_URL
 ARG NEXT_PUBLIC_UMAMI_WEBSITE_ID
-RUN bun run build
+# SOURCE_COMMIT is Coolify's per-build commit argument, so the build id follows the commit
+# instead of the static build variable - but Coolify only sends it when Configuration →
+# Advanced → "Include Source Commit in Build" is enabled. The build id is inlined by
+# next.config.ts and keys the service worker's `?v=` cache, so a stale value freezes an
+# installed PWA's shell cache; the fallbacks are the static variable, then 'dev'.
+ARG SOURCE_COMMIT
+RUN NEXT_PUBLIC_BUILD_ID="${SOURCE_COMMIT:-${NEXT_PUBLIC_BUILD_ID:-dev}}" bun run build
 
 FROM oven/bun:1-alpine AS prod
 WORKDIR /app
