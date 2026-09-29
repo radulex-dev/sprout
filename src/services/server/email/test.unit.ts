@@ -132,4 +132,29 @@ describe('sendEmail', () => {
         expect(vi.mocked(console.error)).toHaveBeenCalledTimes(1);
         expect(vi.mocked(console.error)).toHaveBeenCalledWith(ERROR_SEND_FAILED, expect.any(Error));
     });
+
+    it.each([{
+        port: '465',
+        secure: true
+    }, {
+        port: '587',
+        secure: false
+    }])('requires TLS and derives secure=$secure for port $port', async ({ port, secure }) => {
+        vi.stubEnv('SMTP_HOST', `tls-${port}.example.test`);
+        vi.stubEnv('SMTP_PORT', port);
+        sendMailMock.mockResolvedValue({
+            accepted: ['user@example.test']
+        });
+
+        await sendEmail({
+            to: 'user@example.test',
+            subject: 'Verify your email',
+            html: '<p>Verify</p>'
+        });
+
+        expect(createTransportMock).toHaveBeenCalledWith(expect.objectContaining({
+            requireTLS: true,
+            secure
+        }));
+    });
 });
