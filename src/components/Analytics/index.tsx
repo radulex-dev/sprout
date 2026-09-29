@@ -11,10 +11,6 @@ import { beforeSend } from './helpers';
 
 const Analytics: React.FunctionComponent = () => {
     useEffect(() => {
-        // Umami's data-before-send hook is resolved by name off `window`, which is why
-        // it is a global rather than a closure. If it is ever missing when the tracker
-        // sends, pageviews still send — just UNNORMALISED, with the raw /plants/<uuid>
-        // path; a silent failure worth knowing about.
         window[UMAMI_BEFORE_SEND_GLOBAL] = beforeSend;
     }, []);
 

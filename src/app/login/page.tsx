@@ -8,9 +8,6 @@ export const metadata: Metadata = {
     description: 'Sign in to your Sprout account.'
 };
 
-// Must stay dynamic: GOOGLE_CLIENT_ID is a runtime variable, so prerendering would
-// bake in whatever the build machine had (nothing) instead of the deployed value,
-// and the sign-in screen would render its degraded "unavailable" branch forever.
 export const dynamic = 'force-dynamic';
 
 const LoginPage = () => {

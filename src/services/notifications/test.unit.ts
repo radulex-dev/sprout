@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 // Helpers
 import { decodeVapidPublicKey } from '@/helpers/push';
+import { stubServiceWorker, unstubServiceWorker } from '@test/vitest/helpers/mockServiceWorker';
 
 // Services
 import { ensurePushSubscription } from './index';
@@ -12,23 +13,8 @@ vi.mock('@/lib/db/actions', () => {
     };
 });
 
-const stubServiceWorker = (pushManager: PushManager) => {
-    vi.stubGlobal('Notification', {
-        permission: 'granted'
-    });
-
-    Object.defineProperty(globalThis.navigator, 'serviceWorker', {
-        configurable: true,
-        value: {
-            ready: Promise.resolve({
-                pushManager
-            })
-        }
-    });
-};
-
 afterEach(() => {
-    Reflect.deleteProperty(globalThis.navigator, 'serviceWorker');
+    unstubServiceWorker();
     vi.unstubAllGlobals();
     vi.unstubAllEnvs();
 });

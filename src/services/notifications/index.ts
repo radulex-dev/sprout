@@ -3,6 +3,7 @@ import { CARE_CHECK_INTERVAL_MS } from './constants';
 import { CARE_META } from '@/helpers/care/constants';
 
 // Helpers
+import { subscribeToPush } from './helpers';
 import { dueTasks, isNotifiedToday } from '@/helpers/care';
 import { decodeVapidPublicKey } from '@/helpers/push';
 
@@ -74,19 +75,12 @@ export const ensurePushSubscription = async (): Promise<void> => {
             }
         }
 
-        const resolved = existing && isExistingCurrentKey
-            ? existing
-            : await pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: currentKey
-                });
-
         await fetch('/api/push/subscribe', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(resolved)
+            body: JSON.stringify(existing && isExistingCurrentKey ? existing : await subscribeToPush(pushManager, currentKey))
         });
     } catch (error) {
         console.error('Failed to register the push subscription', error);
