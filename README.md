@@ -50,6 +50,8 @@ Copy `.env.example` to `.env.local` and set:
 | `BETTER_AUTH_URL` | Base URL (`http://localhost:3000` in dev). |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth ([console.cloud.google.com](https://console.cloud.google.com/apis/credentials)). Redirect URI: `http://localhost:3000/api/auth/callback/google`. |
 | `PLANTNET_API_KEY` | Shared PlantNet key for plant recognition. Required for the Identify screen. |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` | Transactional email, sent over SMTP (Resend: `smtp.resend.com`, port 587, STARTTLS). Left unset the app still runs, but nothing is sent and the resend route answers 503. |
+| `EMAIL_FROM` | The verified sender address (`no-reply@mail.radualex.me`). |
 
 - **Real plant recognition**: the app uses one shared key (created at
   [my.plantnet.org](https://my.plantnet.org)).
