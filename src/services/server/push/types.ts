@@ -20,3 +20,7 @@ export enum PushOutcome {
     Removed = 'removed',
     Failed = 'failed'
 }
+
+export enum PushStopReason {
+    VapidKeyMismatch = 'VapidPkHashMismatch'
+}
