@@ -66,7 +66,12 @@ export const ensurePushSubscription = async (): Promise<void> => {
         const isExistingCurrentKey = existing ? hasMatchingApplicationServerKey(existing, currentKey) : false;
 
         if (existing && !isExistingCurrentKey) {
-            await existing.unsubscribe();
+            // A refused unsubscribe leaves the stale-key subscription in place, and subscribing would return it unchanged.
+            const didUnsubscribe = await existing.unsubscribe();
+
+            if (!didUnsubscribe) {
+                return;
+            }
         }
 
         const resolved = existing && isExistingCurrentKey

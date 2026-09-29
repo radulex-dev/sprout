@@ -43,6 +43,7 @@ const getTransporter = (): ReturnType<typeof nodemailer.createTransport> | undef
         host: environment.host,
         port,
         secure: port === 465,
+        requireTLS: true,
         auth: {
             user: environment.user,
             pass: environment.password

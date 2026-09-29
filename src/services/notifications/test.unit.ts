@@ -132,6 +132,34 @@ describe('ensurePushSubscription', () => {
         }));
     });
 
+    it('does not re-post when unsubscribing a stale-key subscription is refused', async () => {
+        const unsubscribe = vi.fn().mockResolvedValue(false);
+        const subscribe = vi.fn();
+        const fetchMock = vi.fn().mockResolvedValue({
+            ok: true
+        });
+        const existing = {
+            endpoint: 'https://push.example/stale',
+            options: {
+                applicationServerKey: new Uint8Array([9, 9, 9, 9]).buffer
+            },
+            unsubscribe
+        };
+
+        vi.stubEnv('NEXT_PUBLIC_VAPID_PUBLIC_KEY', 'AQIDBA');
+        vi.stubGlobal('fetch', fetchMock);
+        stubServiceWorker({
+            getSubscription: vi.fn().mockResolvedValue(existing),
+            subscribe
+        } as unknown as PushManager);
+
+        await ensurePushSubscription();
+
+        expect(unsubscribe).toHaveBeenCalledTimes(1);
+        expect(subscribe).not.toHaveBeenCalled();
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
     it.each([{
         applicationServerKey: undefined,
         byteLength: 0
