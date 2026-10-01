@@ -1,14 +1,18 @@
 import { getSessionCookie } from 'better-auth/cookies';
 import { NextResponse, type NextRequest } from 'next/server';
 
+// Constants
+import { RESET_PASSWORD_PATH } from '@/lib/auth/constants';
+
 // Optimistic, cookie-only auth check. Real session validation happens in
 // server components / server actions via `requireUser`.
 export const proxy = (request: NextRequest) => {
     const { pathname } = request.nextUrl;
     const isLoggedIn = Boolean(getSessionCookie(request));
     const isAuthPage = pathname === '/login' || pathname === '/signup';
+    const isPublicPage = isAuthPage || pathname === '/forgot-password' || pathname.startsWith(`${RESET_PASSWORD_PATH}/`);
 
-    if (!isLoggedIn && !isAuthPage) {
+    if (!isLoggedIn && !isPublicPage) {
         return NextResponse.redirect(new URL('/login', request.url));
     }
 

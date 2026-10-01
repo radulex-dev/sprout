@@ -8,7 +8,7 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Sprout } from 'lucide-react';
 
 // Constants
-import { ERROR_GOOGLE_SIGN_IN, GIS_RENDER_TIMEOUT_MS, GOOGLE_BUTTON_WIDTH } from './constants';
+import { ERROR_GOOGLE_SIGN_IN, FORGOT_PASSWORD_LABEL, GIS_RENDER_TIMEOUT_MS, GOOGLE_BUTTON_WIDTH, RESET_SUCCESS_TEXT } from './constants';
 import { CONFIRM_LABEL, INSTALL_GUIDE_CONTENT } from '@/containers/SettingsScreen/InstallGuide/constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
 
@@ -33,9 +33,10 @@ import styles from './styles.module.css';
 export interface Props extends React.ComponentProps<'main'> {
     mode: 'login' | 'signup';
     clientId: string;
+    resetSuccess?: boolean;
 }
 
-const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, className, ...props }) => {
+const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, resetSuccess = false, className, ...props }) => {
     const classes = classNames(styles.root, className);
 
     const router = useRouter();
@@ -221,6 +222,12 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, className,
             {renderInstallButton()}
 
             <form className={styles.form} onSubmit={handleSubmit}>
+                {resetSuccess && (
+                    <p className={styles.success} role="status">
+                        {RESET_SUCCESS_TEXT}
+                    </p>
+                )}
+
                 {isSignup && (
                     <label className={styles.field}>
                         Name
@@ -263,6 +270,14 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, className,
                     {isSignup ? 'Sign in' : 'Create account'}
                 </Link>
             </p>
+
+            {!isSignup && (
+                <p className={styles.forgot}>
+                    <Link href="/forgot-password">
+                        {FORGOT_PASSWORD_LABEL}
+                    </Link>
+                </p>
+            )}
 
             {renderInstallGuide()}
         </main>

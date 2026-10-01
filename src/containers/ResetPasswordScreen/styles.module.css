@@ -1,0 +1,53 @@
+@reference "../../app/globals.css";
+
+.root {
+    @apply m-auto flex min-h-dvh w-full max-w-100 flex-col justify-center gap-5 p-6;
+}
+
+.card {
+    @apply flex flex-col gap-3.5;
+}
+
+.title {
+    @apply m-0 text-center text-[1.75rem] text-green-900;
+}
+
+.form {
+    @apply flex flex-col gap-3.5;
+}
+
+.field {
+    @apply flex flex-col gap-1.5 text-note font-semibold text-ink;
+
+    input {
+        @apply w-full rounded-card bg-surface px-3.5 py-3 text-base font-normal text-ink;
+
+        border: 1px solid rgb(28 37 32 / 12%);
+        outline: none;
+
+        &:focus {
+            border-color: var(--color-green-500);
+            box-shadow: 0 0 0 3px rgb(76 143 95 / 15%);
+        }
+    }
+}
+
+.error {
+    @apply m-0 rounded-btn-sm px-3 py-2.5 text-note text-red-ink;
+
+    background: rgb(192 69 47 / 10%);
+}
+
+.switch {
+    @apply m-0 text-center text-sm text-ink-soft;
+
+    a {
+        @apply font-bold text-green-700 no-underline;
+
+        @media (hover: hover) {
+            &:hover {
+                @apply underline;
+            }
+        }
+    }
+}

@@ -4,9 +4,10 @@ import { nextCookies } from 'better-auth/next-js';
 import { after } from 'next/server';
 
 // Constants
-import { SEND_VERIFICATION_PATH, VERIFY_EMAIL_SUBJECT, VERIFY_EMAIL_TOKEN_TTL_SECONDS } from './constants';
+import { RESET_TOKEN_TTL_SECONDS, SEND_VERIFICATION_PATH, VERIFY_EMAIL_SUBJECT, VERIFY_EMAIL_TOKEN_TTL_SECONDS } from './constants';
 
 // Services
+import { sendPasswordResetEmail } from '@/services/server/auth/reset';
 import { sendEmail } from '@/services/server/email';
 
 // Database
@@ -26,7 +27,20 @@ export const auth = betterAuth({
     }),
     disabledPaths: [SEND_VERIFICATION_PATH],
     emailAndPassword: {
-        enabled: true
+        enabled: true,
+        resetPasswordTokenExpiresIn: RESET_TOKEN_TTL_SECONDS,
+        revokeSessionsOnPasswordReset: true,
+        sendResetPassword: ({ user, url, token }) => {
+            after(() => {
+                return sendPasswordResetEmail({
+                    user,
+                    url,
+                    token
+                });
+            });
+
+            return Promise.resolve();
+        }
     },
     emailVerification: {
         sendOnSignUp: false,

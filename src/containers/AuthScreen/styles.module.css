@@ -79,3 +79,23 @@
 
     background: rgb(192 69 47 / 10%);
 }
+
+.success {
+    @apply m-0 rounded-btn-sm px-3 py-2.5 text-note text-green-700;
+
+    background: rgb(76 143 95 / 10%);
+}
+
+.forgot {
+    @apply text-center text-sm;
+
+    a {
+        @apply font-bold text-green-700 no-underline;
+
+        @media (hover: hover) {
+            &:hover {
+                @apply underline;
+            }
+        }
+    }
+}

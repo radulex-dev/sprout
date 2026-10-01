@@ -10,8 +10,18 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
-const LoginPage = () => {
-    return <AuthScreen mode="login" clientId={process.env.GOOGLE_CLIENT_ID ?? ''} />;
+interface LoginSearchParameters {
+    reset?: string;
+}
+
+interface Props {
+    searchParams: Promise<LoginSearchParameters>;
+}
+
+const LoginPage = async ({ searchParams }: Props) => {
+    const { reset } = await searchParams;
+
+    return <AuthScreen mode="login" clientId={process.env.GOOGLE_CLIENT_ID ?? ''} resetSuccess={reset === 'success'} />;
 };
 
 export default LoginPage;
