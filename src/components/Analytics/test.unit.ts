@@ -21,6 +21,18 @@ describe('Helpers', () => {
             url: 'https://sprout.radualex.me/plants/4f2a9c1e/photo',
             expected: 'https://sprout.radualex.me/plants/4f2a9c1e/photo'
         }, {
+            url: 'https://sprout.radualex.me/reset-password/eyJhbGciOiJIUzI1NiJ9.abc123',
+            expected: 'https://sprout.radualex.me/reset-password/[token]'
+        }, {
+            url: 'https://sprout.radualex.me/reset-password/eyJhbGciOiJIUzI1NiJ9.abc123/',
+            expected: 'https://sprout.radualex.me/reset-password/[token]'
+        }, {
+            url: '/reset-password/eyJhbGciOiJIUzI1NiJ9.abc123',
+            expected: `${globalThis.location.origin}/reset-password/[token]`
+        }, {
+            url: 'https://sprout.radualex.me/reset-password',
+            expected: 'https://sprout.radualex.me/reset-password'
+        }, {
             url: 'https://sprout.radualex.me/care',
             expected: 'https://sprout.radualex.me/care'
         }, {

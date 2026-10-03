@@ -1,5 +1,5 @@
 // Constants
-import { PLANT_DETAIL_NORMALISED, PLANT_DETAIL_PATTERN } from './constants';
+import { URL_NORMALISATIONS } from './constants';
 
 // Types
 import type { UmamiBeforeSend } from './types';
@@ -10,12 +10,15 @@ export const beforeSend: UmamiBeforeSend = (...[, payload]) => {
     }
 
     const url = new URL(payload.url, globalThis.location.origin);
+    const match = URL_NORMALISATIONS.find((candidate) => {
+        return candidate.pattern.test(url.pathname);
+    });
 
-    if (!PLANT_DETAIL_PATTERN.test(url.pathname)) {
+    if (match === undefined) {
         return payload;
     }
 
-    url.pathname = PLANT_DETAIL_NORMALISED;
+    url.pathname = match.normalised;
     payload.url = url.href;
 
     return payload;
