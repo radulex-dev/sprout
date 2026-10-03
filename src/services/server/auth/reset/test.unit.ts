@@ -155,22 +155,6 @@ describe('sendPasswordResetEmail', () => {
         vi.restoreAllMocks();
     });
 
-    it('returns before any DB read when the account is unverified', async () => {
-        await sendPasswordResetEmail({
-            user: {
-                id: 'user-1',
-                email: 'user@example.test',
-                emailVerified: false
-            },
-            url: 'http://localhost:3000/api/auth/reset-password/tok123?callbackURL=',
-            token: 'tok123'
-        });
-
-        expect(selectMock).not.toHaveBeenCalled();
-        expect(sendEmailMock).not.toHaveBeenCalled();
-        expect(vi.mocked(console.warn)).not.toHaveBeenCalled();
-    });
-
     it('suppresses the send when a sibling reset was requested 30 seconds ago', async () => {
         selectMock.mockReturnValueOnce({
             from: () => {
@@ -188,8 +172,7 @@ describe('sendPasswordResetEmail', () => {
         await sendPasswordResetEmail({
             user: {
                 id: 'user-1',
-                email: 'user@example.test',
-                emailVerified: true
+                email: 'user@example.test'
             },
             url: 'http://localhost:3000/api/auth/reset-password/tok123?callbackURL=',
             token: 'tok123'
@@ -225,8 +208,7 @@ describe('sendPasswordResetEmail', () => {
         await sendPasswordResetEmail({
             user: {
                 id: 'user-1',
-                email: 'user@example.test',
-                emailVerified: true
+                email: 'user@example.test'
             },
             url: 'http://localhost:3000/api/auth/reset-password/tok123?callbackURL=',
             token: 'tok123'

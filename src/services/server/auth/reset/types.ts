@@ -13,5 +13,4 @@ export interface SendPasswordResetEmailProps {
 export interface SendPasswordResetEmailUser {
     id: string;
     email: string;
-    emailVerified: boolean;
 }

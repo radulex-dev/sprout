@@ -45,10 +45,6 @@ export const hasCredentialPassword = async (userId: string): Promise<boolean> =>
 };
 
 export const sendPasswordResetEmail = async ({ user, url, token }: SendPasswordResetEmailProps): Promise<void> => {
-    if (!user.emailVerified) {
-        return;
-    }
-
     if (await isResetThrottled(user.id, token)) {
         console.warn('Password reset email suppressed by the 60-second throttle.');
 
