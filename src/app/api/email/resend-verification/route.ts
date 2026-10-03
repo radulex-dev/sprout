@@ -2,6 +2,7 @@ import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 // Services
+import { claimVerificationSend } from '@/services/server/auth/verification';
 import { isEmailConfigured } from '@/services/server/email';
 
 // Auth
@@ -24,6 +25,16 @@ export const POST = async () => {
             error: 'Email delivery is not configured on this server.'
         }, {
             status: 503
+        });
+    }
+
+    const isWithinThrottle = !await claimVerificationSend(session.user.email);
+
+    if (isWithinThrottle) {
+        console.warn('Verification email suppressed by the per-address throttle.');
+
+        return NextResponse.json({
+            status: true
         });
     }
 
