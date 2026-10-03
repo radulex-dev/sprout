@@ -1,9 +1,3 @@
-export interface BuildResetEmailProps {
-    to: string;
-    resetUrl: string;
-    hasPassword: boolean;
-}
-
 export interface SendPasswordResetEmailProps {
     user: SendPasswordResetEmailUser;
     url: string;
@@ -13,4 +7,9 @@ export interface SendPasswordResetEmailProps {
 export interface SendPasswordResetEmailUser {
     id: string;
     email: string;
+}
+
+export interface ResetTokenRow {
+    identifier: string;
+    createdAt: Date;
 }

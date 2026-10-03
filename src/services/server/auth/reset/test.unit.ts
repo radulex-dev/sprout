@@ -5,13 +5,15 @@ import { RESET_EMAIL_SUBJECT, RESET_THROTTLE_SECONDS } from '@/lib/auth/constant
 import { RESET_IDENTIFIER_PREFIX } from './constants';
 
 // Helpers
-import { buildResetEmail, hasRecentSiblingReset } from './helpers';
+import { mockDeleteChain, mockSelectChain } from '@test/vitest/helpers/mockDb';
+import { buildResetEmail, isCurrentTokenNewest, isRecentSibling } from './helpers';
 
 // Services
 import { sendPasswordResetEmail } from './index';
 
-const { selectMock, sendEmailMock } = vi.hoisted(() => {
+const { deleteMock, selectMock, sendEmailMock } = vi.hoisted(() => {
     return {
+        deleteMock: vi.fn(),
         selectMock: vi.fn(),
         sendEmailMock: vi.fn()
     };
@@ -20,6 +22,7 @@ const { selectMock, sendEmailMock } = vi.hoisted(() => {
 vi.mock('@/lib/db', () => {
     return {
         database: {
+            delete: deleteMock,
             select: selectMock
         }
     };
@@ -31,122 +34,89 @@ vi.mock('@/services/server/email', () => {
     };
 });
 
-describe('hasRecentSiblingReset', () => {
-    it('returns false when only the current token row is present', () => {
-        const now = Date.now();
-
-        expect(hasRecentSiblingReset({
-            rows: [{
-                identifier: `${RESET_IDENTIFIER_PREFIX}current-token`,
-                createdAt: new Date(now)
-            }],
-            currentToken: 'current-token',
-            now
-        })).toBe(false);
+describe('isCurrentTokenNewest', () => {
+    it('returns false when there are no rows', () => {
+        expect(isCurrentTokenNewest([], 'tok')).toBe(false);
     });
 
-    it('returns true for a sibling row 30 seconds old', () => {
-        const now = Date.now();
-
-        expect(hasRecentSiblingReset({
-            rows: [{
-                identifier: `${RESET_IDENTIFIER_PREFIX}sibling-token`,
-                createdAt: new Date(now - 30_000)
-            }],
-            currentToken: 'current-token',
-            now
-        })).toBe(true);
+    it('returns true when the newest row is the current token', () => {
+        expect(isCurrentTokenNewest([{
+            identifier: `${RESET_IDENTIFIER_PREFIX}tok`,
+            createdAt: new Date()
+        }, {
+            identifier: `${RESET_IDENTIFIER_PREFIX}older`,
+            createdAt: new Date(Date.now() - 5000)
+        }], 'tok')).toBe(true);
     });
 
-    it('returns false for a sibling row 61 seconds old', () => {
-        const now = Date.now();
+    it('returns false when a newer sibling row supersedes the current token', () => {
+        expect(isCurrentTokenNewest([{
+            identifier: `${RESET_IDENTIFIER_PREFIX}newer`,
+            createdAt: new Date(Date.now() - 1000)
+        }, {
+            identifier: `${RESET_IDENTIFIER_PREFIX}tok`,
+            createdAt: new Date(Date.now() - 5000)
+        }], 'tok')).toBe(false);
+    });
+});
 
-        expect(hasRecentSiblingReset({
-            rows: [{
-                identifier: `${RESET_IDENTIFIER_PREFIX}sibling-token`,
-                createdAt: new Date(now - 61_000)
-            }],
-            currentToken: 'current-token',
-            now
-        })).toBe(false);
+describe('isRecentSibling', () => {
+    it('returns false for the current token row', () => {
+        expect(isRecentSibling({
+            identifier: `${RESET_IDENTIFIER_PREFIX}tok`,
+            createdAt: new Date(Date.now() - 1000)
+        }, 'tok', Date.now())).toBe(false);
     });
 
-    it('returns true for a sibling row exactly 60 seconds old', () => {
-        const now = Date.now();
-
-        expect(hasRecentSiblingReset({
-            rows: [{
-                identifier: `${RESET_IDENTIFIER_PREFIX}sibling-token`,
-                createdAt: new Date(now - RESET_THROTTLE_SECONDS * 1000)
-            }],
-            currentToken: 'current-token',
-            now
-        })).toBe(true);
-    });
-
-    it('returns true when the current token row sits beside a different token row', () => {
-        const now = Date.now();
-
-        expect(hasRecentSiblingReset({
-            rows: [{
-                identifier: `${RESET_IDENTIFIER_PREFIX}current-token`,
-                createdAt: new Date(now)
-            }, {
-                identifier: `${RESET_IDENTIFIER_PREFIX}other-token`,
-                createdAt: new Date(now - 5000)
-            }],
-            currentToken: 'current-token',
-            now
-        })).toBe(true);
+    it.each([{
+        ageMs: (RESET_THROTTLE_SECONDS * 1000) / 2,
+        expected: true
+    }, {
+        ageMs: RESET_THROTTLE_SECONDS * 1000,
+        expected: true
+    }, {
+        ageMs: RESET_THROTTLE_SECONDS * 1000 + 1000,
+        expected: false
+    }])('a sibling row $ageMs ms old is recent: $expected', ({ ageMs, expected }) => {
+        expect(isRecentSibling({
+            identifier: `${RESET_IDENTIFIER_PREFIX}other`,
+            createdAt: new Date(Date.now() - ageMs)
+        }, 'tok', Date.now())).toBe(expected);
     });
 });
 
 describe('buildResetEmail', () => {
     it('uses the reset subject and the passed recipient', () => {
-        const message = buildResetEmail({
-            to: 'user@example.test',
-            resetUrl: 'https://app.test/reset-password/abc',
-            hasPassword: true
-        });
+        const message = buildResetEmail('user@example.test', 'https://app.test/reset-password/abc', true);
 
         expect(message.subject).toBe(RESET_EMAIL_SUBJECT);
         expect(message.to).toBe('user@example.test');
     });
 
-    it('omits the Google sentence when the account has a password', () => {
-        const message = buildResetEmail({
-            to: 'user@example.test',
-            resetUrl: 'https://app.test/reset-password/abc',
-            hasPassword: true
-        });
-
-        expect(message.html).not.toContain('Your account normally signs in with Google');
-    });
-
-    it('includes the Google sentence when the account has no password', () => {
-        const message = buildResetEmail({
-            to: 'user@example.test',
-            resetUrl: 'https://app.test/reset-password/abc',
-            hasPassword: false
-        });
-
-        expect(message.html).toContain('Your account normally signs in with Google');
-    });
-
     it('renders the reset URL verbatim', () => {
-        const message = buildResetEmail({
-            to: 'user@example.test',
-            resetUrl: 'https://app.test/reset-password/abc',
-            hasPassword: true
-        });
+        const message = buildResetEmail('user@example.test', 'https://app.test/reset-password/abc', true);
 
         expect(message.html).toContain('https://app.test/reset-password/abc');
+    });
+
+    it.each([{
+        hasPassword: false,
+        expected: true
+    }, {
+        hasPassword: true,
+        expected: false
+    }])('hasPassword $hasPassword includes the Google sentence: $expected', ({ hasPassword, expected }) => {
+        const message = buildResetEmail('user@example.test', 'https://app.test/reset-password/abc', hasPassword);
+
+        expect(message.html.includes('Your account normally signs in with Google')).toBe(expected);
     });
 });
 
 describe('sendPasswordResetEmail', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        deleteMock.mockReset();
+        selectMock.mockReset();
         sendEmailMock.mockResolvedValue(undefined);
         vi.spyOn(console, 'warn').mockImplementation(vi.fn());
     });
@@ -155,19 +125,15 @@ describe('sendPasswordResetEmail', () => {
         vi.restoreAllMocks();
     });
 
-    it('suppresses the send when a sibling reset was requested 30 seconds ago', async () => {
-        selectMock.mockReturnValueOnce({
-            from: () => {
-                return {
-                    where: () => {
-                        return Promise.resolve([{
-                            identifier: `${RESET_IDENTIFIER_PREFIX}other`,
-                            createdAt: new Date(Date.now() - 30_000)
-                        }]);
-                    }
-                };
-            }
-        });
+    it('sends when the current token is newest and no recent sibling exists', async () => {
+        selectMock.mockReturnValueOnce(mockSelectChain([{
+            identifier: `${RESET_IDENTIFIER_PREFIX}tok`,
+            createdAt: new Date()
+        }]));
+        selectMock.mockReturnValueOnce(mockSelectChain([{
+            id: 'credential-1'
+        }]));
+        deleteMock.mockReturnValueOnce(mockDeleteChain());
 
         await sendPasswordResetEmail({
             user: {
@@ -175,7 +141,33 @@ describe('sendPasswordResetEmail', () => {
                 email: 'user@example.test'
             },
             url: 'http://localhost:3000/api/auth/reset-password/tok123?callbackURL=',
-            token: 'tok123'
+            token: 'tok'
+        });
+
+        expect(sendEmailMock).toHaveBeenCalledTimes(1);
+        expect(sendEmailMock).toHaveBeenCalledWith({
+            to: 'user@example.test',
+            subject: RESET_EMAIL_SUBJECT,
+            html: expect.stringContaining('http://localhost:3000/reset-password/tok')
+        });
+    });
+
+    it('suppresses when an older sibling was already sent inside the window', async () => {
+        selectMock.mockReturnValueOnce(mockSelectChain([{
+            identifier: `${RESET_IDENTIFIER_PREFIX}tok`,
+            createdAt: new Date()
+        }, {
+            identifier: `${RESET_IDENTIFIER_PREFIX}other`,
+            createdAt: new Date(Date.now() - (RESET_THROTTLE_SECONDS * 1000) / 2)
+        }]));
+
+        await sendPasswordResetEmail({
+            user: {
+                id: 'user-1',
+                email: 'user@example.test'
+            },
+            url: 'http://localhost:3000/api/auth/reset-password/tok123?callbackURL=',
+            token: 'tok'
         });
 
         expect(sendEmailMock).not.toHaveBeenCalled();
@@ -183,27 +175,14 @@ describe('sendPasswordResetEmail', () => {
         expect(vi.mocked(console.warn)).toHaveBeenCalledWith('Password reset email suppressed by the 60-second throttle.');
     });
 
-    it('sends the reset link with the app origin when the request is not throttled', async () => {
-        selectMock.mockReturnValueOnce({
-            from: () => {
-                return {
-                    where: () => {
-                        return Promise.resolve([]);
-                    }
-                };
-            }
-        });
-        selectMock.mockReturnValueOnce({
-            from: () => {
-                return {
-                    where: () => {
-                        return Promise.resolve([{
-                            id: 'credential-1'
-                        }]);
-                    }
-                };
-            }
-        });
+    it('suppresses when a newer sibling supersedes the current token', async () => {
+        selectMock.mockReturnValueOnce(mockSelectChain([{
+            identifier: `${RESET_IDENTIFIER_PREFIX}newer`,
+            createdAt: new Date(Date.now() - 1000)
+        }, {
+            identifier: `${RESET_IDENTIFIER_PREFIX}tok`,
+            createdAt: new Date(Date.now() - 5000)
+        }]));
 
         await sendPasswordResetEmail({
             user: {
@@ -211,14 +190,34 @@ describe('sendPasswordResetEmail', () => {
                 email: 'user@example.test'
             },
             url: 'http://localhost:3000/api/auth/reset-password/tok123?callbackURL=',
-            token: 'tok123'
+            token: 'tok'
+        });
+
+        expect(sendEmailMock).not.toHaveBeenCalled();
+    });
+
+    it('sends when the only sibling is past the window', async () => {
+        selectMock.mockReturnValueOnce(mockSelectChain([{
+            identifier: `${RESET_IDENTIFIER_PREFIX}tok`,
+            createdAt: new Date()
+        }, {
+            identifier: `${RESET_IDENTIFIER_PREFIX}old`,
+            createdAt: new Date(Date.now() - RESET_THROTTLE_SECONDS * 1000 - 1000)
+        }]));
+        selectMock.mockReturnValueOnce(mockSelectChain([{
+            id: 'credential-1'
+        }]));
+        deleteMock.mockReturnValueOnce(mockDeleteChain());
+
+        await sendPasswordResetEmail({
+            user: {
+                id: 'user-1',
+                email: 'user@example.test'
+            },
+            url: 'http://localhost:3000/api/auth/reset-password/tok123?callbackURL=',
+            token: 'tok'
         });
 
         expect(sendEmailMock).toHaveBeenCalledTimes(1);
-        expect(sendEmailMock).toHaveBeenCalledWith({
-            to: 'user@example.test',
-            subject: RESET_EMAIL_SUBJECT,
-            html: expect.stringContaining('http://localhost:3000/reset-password/tok123')
-        });
     });
 });

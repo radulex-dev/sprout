@@ -6,9 +6,9 @@ import { RESET_IDENTIFIER_PREFIX } from './constants';
 import type { EmailMessage } from '@/services/server/email/types';
 
 // Types
-import { type BuildResetEmailProps } from './types';
+import { type ResetTokenRow } from './types';
 
-export const buildResetEmail = ({ to, resetUrl, hasPassword }: BuildResetEmailProps): EmailMessage => {
+export const buildResetEmail = (to: string, resetUrl: string, hasPassword: boolean): EmailMessage => {
     const googleNote = hasPassword ? '' : '<p>Your account normally signs in with Google; setting a password also adds password sign-in.</p>';
 
     return {
@@ -18,20 +18,15 @@ export const buildResetEmail = ({ to, resetUrl, hasPassword }: BuildResetEmailPr
     };
 };
 
-export interface SiblingResetCheckProps {
-    rows: ResetTokenRow[];
-    currentToken: string;
-    now: number;
-}
+export const isCurrentTokenNewest = (rows: ResetTokenRow[], currentToken: string): boolean => {
+    if (rows.length === 0) {
+        return false;
+    }
 
-export interface ResetTokenRow {
-    identifier: string;
-    createdAt: Date;
-}
+    return rows.at(0)?.identifier === `${RESET_IDENTIFIER_PREFIX}${currentToken}`;
+};
 
-export const hasRecentSiblingReset = ({ rows, currentToken, now }: SiblingResetCheckProps): boolean => {
-    return rows.some((row) => {
-        return row.identifier !== `${RESET_IDENTIFIER_PREFIX}${currentToken}`
-            && now - row.createdAt.getTime() <= RESET_THROTTLE_SECONDS * 1000;
-    });
+export const isRecentSibling = (row: ResetTokenRow, currentToken: string, now: number): boolean => {
+    return row.identifier !== `${RESET_IDENTIFIER_PREFIX}${currentToken}`
+        && now - row.createdAt.getTime() <= RESET_THROTTLE_SECONDS * 1000;
 };
