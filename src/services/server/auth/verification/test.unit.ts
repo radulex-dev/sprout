@@ -50,7 +50,6 @@ describe('claimVerificationSend', () => {
         deleteMock.mockReset();
         insertMock.mockReset();
         selectMock.mockReset();
-        vi.spyOn(console, 'warn').mockImplementation(vi.fn());
     });
 
     afterEach(() => {

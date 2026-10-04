@@ -40,8 +40,6 @@ describe('sendEmail', () => {
         vi.stubEnv('SMTP_USER', 'smtp-user');
         vi.stubEnv('SMTP_PASSWORD', 'smtp-password');
         vi.stubEnv('EMAIL_FROM', 'no-reply@example.test');
-        vi.spyOn(console, 'error').mockImplementation(vi.fn());
-        vi.spyOn(console, 'warn').mockImplementation(vi.fn());
     });
 
     afterEach(() => {
@@ -50,6 +48,8 @@ describe('sendEmail', () => {
     });
 
     it.each(['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASSWORD', 'EMAIL_FROM'])('warns and skips the send when %s is blank', async (variable) => {
+        vi.spyOn(console, 'warn').mockImplementation(vi.fn());
+
         vi.stubEnv(variable, '');
 
         await sendEmail({
@@ -59,8 +59,8 @@ describe('sendEmail', () => {
         });
 
         expect(sendMailMock).not.toHaveBeenCalled();
-        expect(vi.mocked(console.warn)).toHaveBeenCalledTimes(1);
-        expect(vi.mocked(console.warn)).toHaveBeenCalledWith(ERROR_NOT_CONFIGURED);
+        expect(console.warn).toHaveBeenCalledTimes(1);
+        expect(console.warn).toHaveBeenCalledWith(ERROR_NOT_CONFIGURED);
     });
 
     it('sends the message through the transport and resolves', async () => {
@@ -105,6 +105,8 @@ describe('sendEmail', () => {
     });
 
     it('logs and resolves when the transport rejects the send', async () => {
+        vi.spyOn(console, 'error').mockImplementation(vi.fn());
+
         sendMailMock.mockRejectedValue(new Error('connection refused'));
 
         await expect(sendEmail({
@@ -113,11 +115,13 @@ describe('sendEmail', () => {
             html: '<p>Verify</p>'
         })).resolves.toBeUndefined();
 
-        expect(vi.mocked(console.error)).toHaveBeenCalledTimes(1);
-        expect(vi.mocked(console.error)).toHaveBeenCalledWith(ERROR_SEND_FAILED, expect.any(Error));
+        expect(console.error).toHaveBeenCalledTimes(1);
+        expect(console.error).toHaveBeenCalledWith(ERROR_SEND_FAILED, expect.any(Error));
     });
 
     it('logs and resolves when the transport cannot be created', async () => {
+        vi.spyOn(console, 'error').mockImplementation(vi.fn());
+
         vi.stubEnv('SMTP_HOST', 'broken.example.test');
         createTransportMock.mockImplementationOnce(() => {
             throw new Error('invalid transport options');
@@ -129,8 +133,8 @@ describe('sendEmail', () => {
             html: '<p>Verify</p>'
         })).resolves.toBeUndefined();
 
-        expect(vi.mocked(console.error)).toHaveBeenCalledTimes(1);
-        expect(vi.mocked(console.error)).toHaveBeenCalledWith(ERROR_SEND_FAILED, expect.any(Error));
+        expect(console.error).toHaveBeenCalledTimes(1);
+        expect(console.error).toHaveBeenCalledWith(ERROR_SEND_FAILED, expect.any(Error));
     });
 
     it.each([{

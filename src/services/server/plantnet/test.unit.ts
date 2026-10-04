@@ -55,8 +55,6 @@ describe('identifySpecies', () => {
         fetchMock = vi.fn();
         vi.stubGlobal('fetch', fetchMock);
         vi.stubEnv('PLANTNET_API_KEY', 'env-test-key');
-        vi.spyOn(console, 'error').mockImplementation(vi.fn());
-        vi.spyOn(console, 'warn').mockImplementation(vi.fn());
         mockLoadCareReference.mockResolvedValue({
             alias: {
                 'dracaena trifasciata': 'sansevieria'
@@ -160,6 +158,8 @@ describe('identifySpecies', () => {
     });
 
     it('logs the upstream message when a 502 has a body', async () => {
+        vi.spyOn(console, 'error').mockImplementation(vi.fn());
+
         fetchMock.mockResolvedValue(mockResponse({
             statusCode: 500,
             error: 'Internal Server Error',
@@ -175,10 +175,12 @@ describe('identifySpecies', () => {
 
         expect(error.httpStatus).toBe(502);
         expect(error.message).toBe(ERROR_UNAVAILABLE);
-        expect(vi.mocked(console.error)).toHaveBeenCalledWith('PlantNet request failed', 500, 'upstream boom');
+        expect(console.error).toHaveBeenCalledWith('PlantNet request failed', 500, 'upstream boom');
     });
 
     it('throws friendly copy and logs the PlantNet detail when it rejects the image', async () => {
+        vi.spyOn(console, 'error').mockImplementation(vi.fn());
+
         fetchMock.mockResolvedValue(mockResponse({
             statusCode: 400,
             error: 'Bad Request',
@@ -194,7 +196,7 @@ describe('identifySpecies', () => {
 
         expect(error.httpStatus).toBe(400);
         expect(error.message).toBe(ERROR_BAD_IMAGE);
-        expect(vi.mocked(console.error)).toHaveBeenCalledWith('PlantNet request failed', 400, 'Unsupported file type for image[0] (jpeg or png)');
+        expect(console.error).toHaveBeenCalledWith('PlantNet request failed', 400, 'Unsupported file type for image[0] (jpeg or png)');
     });
 
     it('falls back to a generic message when a 400 has no body', async () => {
@@ -343,6 +345,8 @@ describe('identifySpecies', () => {
     });
 
     it('warns with the identification when no care data matches', async () => {
+        vi.spyOn(console, 'warn').mockImplementation(vi.fn());
+
         fetchMock.mockResolvedValue(mockResponse({
             results: [{
                 species: {
@@ -366,7 +370,7 @@ describe('identifySpecies', () => {
         const [identified] = await identifySpecies(form);
 
         expect(identified.careSource).toBe(CareSource.None);
-        expect(vi.mocked(console.warn)).toHaveBeenCalledWith('No care data for identified plant', {
+        expect(console.warn).toHaveBeenCalledWith('No care data for identified plant', {
             family: 'Unknownaceae',
             genus: 'Unknownia',
             species: 'Ficus unknownia'
@@ -374,6 +378,8 @@ describe('identifySpecies', () => {
     });
 
     it('does not warn when the genus resolves', async () => {
+        vi.spyOn(console, 'warn').mockImplementation(vi.fn());
+
         fetchMock.mockResolvedValue(mockResponse({
             results: [{
                 species: {
@@ -397,7 +403,7 @@ describe('identifySpecies', () => {
         const [identified] = await identifySpecies(form);
 
         expect(identified.careSource).toBe(CareSource.Genus);
-        expect(vi.mocked(console.warn)).not.toHaveBeenCalled();
+        expect(console.warn).not.toHaveBeenCalled();
     });
 
     it('returns an empty list when PlantNet omits results', async () => {

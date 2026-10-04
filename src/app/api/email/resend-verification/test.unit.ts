@@ -48,7 +48,6 @@ describe('/api/email/resend-verification', () => {
         vi.stubEnv('SMTP_USER', 'smtp-user');
         vi.stubEnv('SMTP_PASSWORD', 'smtp-password');
         vi.stubEnv('EMAIL_FROM', 'no-reply@example.test');
-        vi.spyOn(console, 'warn').mockImplementation(vi.fn());
         headersMock.mockResolvedValue(new Headers());
         requireUserMock.mockResolvedValue({
             user: {
@@ -109,7 +108,7 @@ describe('/api/email/resend-verification', () => {
     });
 
     it('answers 502 when the send throws', async () => {
-        const consoleErrorMock = vi.spyOn(console, 'error');
+        vi.spyOn(console, 'error').mockImplementation(vi.fn());
 
         sendVerificationEmailMock.mockRejectedValue(new Error('smtp unavailable'));
 
@@ -117,12 +116,12 @@ describe('/api/email/resend-verification', () => {
 
         expect(response.status).toBe(502);
         expect(sendVerificationEmailMock).toHaveBeenCalledTimes(1);
-        expect(consoleErrorMock).toHaveBeenCalledTimes(1);
-
-        consoleErrorMock.mockRestore();
+        expect(console.error).toHaveBeenCalledTimes(1);
     });
 
     it('answers the uniform 200 and sends nothing when the address is inside the throttle', async () => {
+        vi.spyOn(console, 'warn').mockImplementation(vi.fn());
+
         claimVerificationSendMock.mockResolvedValue(false);
 
         const response = await POST();

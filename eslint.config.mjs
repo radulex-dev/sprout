@@ -181,6 +181,10 @@ const config = configure([{
             }]
         }]
     }
+}, {
+    linterOptions: {
+        reportUnusedDisableDirectives: 'error'
+    }
 }, eslintPluginBetterTailwindcss.configs.recommended, {
     settings: {
         'better-tailwindcss': {
@@ -209,7 +213,7 @@ const config = configure([{
 // top level, which ESLint 10 rejects when the `css/css` language from the block
 // above is active. Scope every un-scoped JS/TS rule set to JS/TS files so the
 // Tailwind/CSS block is the only thing that applies to `*.css`.
-export default config.map((entry) => {
+const scopedConfig = config.map((entry) => {
     if (Array.isArray(entry) || entry.files || entry.ignores || isTailwindConfig(entry)) {
         return entry;
     }
@@ -222,4 +226,33 @@ export default config.map((entry) => {
     }
 
     return entry;
+});
+
+const promoteRuleWarnings = (rules) => {
+    return Object.fromEntries(Object.entries(rules).map(([rule, setting]) => {
+        const severity = Array.isArray(setting) ? setting.at(0) : setting;
+
+        if (severity !== 'warn' && severity !== 1) {
+            return [rule, setting];
+        }
+
+        const parsedErrorSetting = Array.isArray(setting) ? ['error', ...setting.slice(1)] : 'error';
+
+        return [rule, parsedErrorSetting];
+    }));
+};
+
+const promoteWarningsToErrors = (entry) => {
+    if (entry === null || typeof entry !== 'object' || !entry.rules) {
+        return entry;
+    }
+
+    return {
+        ...entry,
+        rules: promoteRuleWarnings(entry.rules)
+    };
+};
+
+export default scopedConfig.flat().map((entry) => {
+    return promoteWarningsToErrors(entry);
 });

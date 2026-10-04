@@ -129,7 +129,6 @@ describe('getResetTokenStatus', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         selectMock.mockReset();
-        vi.spyOn(console, 'error').mockImplementation(vi.fn());
     });
 
     afterEach(() => {
@@ -209,7 +208,7 @@ describe('getResetTokenStatus', () => {
     });
 
     it('returns Valid and logs when the database read throws', async () => {
-        vi.mocked(console.error);
+        vi.spyOn(console, 'error').mockImplementation(vi.fn());
 
         selectMock.mockImplementationOnce(() => {
             throw new Error('database unavailable');
@@ -229,7 +228,6 @@ describe('sendPasswordResetEmail', () => {
         deleteMock.mockReset();
         selectMock.mockReset();
         sendEmailMock.mockResolvedValue(undefined);
-        vi.spyOn(console, 'warn').mockImplementation(vi.fn());
     });
 
     afterEach(() => {
@@ -264,7 +262,7 @@ describe('sendPasswordResetEmail', () => {
     });
 
     it('suppresses when an older sibling was already sent inside the window', async () => {
-        vi.mocked(console.warn);
+        vi.spyOn(console, 'warn').mockImplementation(vi.fn());
 
         selectMock.mockReturnValueOnce(mockSelectChain([{
             identifier: `${RESET_IDENTIFIER_PREFIX}tok`,
@@ -339,7 +337,6 @@ describe('dispatchResetRequest', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         claimVerificationSendMock.mockReset();
-        vi.spyOn(console, 'warn').mockImplementation(vi.fn());
     });
 
     afterEach(() => {
@@ -372,7 +369,7 @@ describe('dispatchResetRequest', () => {
     });
 
     it('suppresses the verification email when the per-address claim fails', async () => {
-        vi.mocked(console.warn);
+        vi.spyOn(console, 'warn').mockImplementation(vi.fn());
 
         claimVerificationSendMock.mockResolvedValue(false);
         const sendReset = vi.fn();
