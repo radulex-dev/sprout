@@ -38,6 +38,14 @@
     background: rgb(192 69 47 / 10%);
 }
 
+.expired {
+    @apply flex flex-col gap-3.5;
+}
+
+.notice {
+    @apply m-0 text-center text-sm text-ink-soft;
+}
+
 .switch {
     @apply m-0 text-center text-sm text-ink-soft;
 

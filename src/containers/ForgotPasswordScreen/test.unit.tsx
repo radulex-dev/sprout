@@ -36,6 +36,18 @@ describe('ForgotPasswordScreen', () => {
         });
     });
 
+    it('pre-fills the address from the initialEmail prop', () => {
+        render(<ForgotPasswordScreen {...props} initialEmail="a@b.com" />);
+
+        expect(screen.getByLabelText(FORGOT_PASSWORD_EMAIL_LABEL)).toHaveValue('a@b.com');
+    });
+
+    it('starts with an empty address when no initialEmail is provided', () => {
+        render(<ForgotPasswordScreen {...props} />);
+
+        expect(screen.getByLabelText(FORGOT_PASSWORD_EMAIL_LABEL)).toHaveValue('');
+    });
+
     it('requests a reset link once for the entered address', async () => {
         const user = userEvent.setup();
 

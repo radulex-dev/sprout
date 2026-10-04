@@ -1,7 +1,13 @@
 import type { Metadata } from 'next';
 
+// Constants
+import { ResetTokenState } from '@/services/server/auth/reset/constants';
+
 // Components
 import ResetPasswordScreen from '@/containers/ResetPasswordScreen';
+
+// Services
+import { getResetTokenStatus } from '@/services/server/auth/reset';
 
 export const metadata: Metadata = {
     title: 'Choose a new password',
@@ -15,7 +21,10 @@ interface Props {
 const ResetPasswordPage = async ({ params }: Props) => {
     const { token } = await params;
 
-    return <ResetPasswordScreen token={token} />;
+    const status = await getResetTokenStatus(token);
+    const isTokenExpired = status.state === ResetTokenState.Expired;
+
+    return <ResetPasswordScreen token={token} email={status.email} emailVerified={status.emailVerified} tokenExpired={isTokenExpired} />;
 };
 
 export default ResetPasswordPage;

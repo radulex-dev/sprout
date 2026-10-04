@@ -16,12 +16,14 @@ import { authClient } from '@/lib/auth/auth-client';
 // Styles
 import styles from './styles.module.css';
 
-export interface Props extends React.ComponentProps<'main'> {}
+export interface Props extends React.ComponentProps<'main'> {
+    initialEmail?: string;
+}
 
-const ForgotPasswordScreen: React.FunctionComponent<Props> = ({ className, ...props }) => {
+const ForgotPasswordScreen: React.FunctionComponent<Props> = ({ initialEmail = '', className, ...props }) => {
     const classes = classNames(styles.root, className);
 
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState(initialEmail);
     const [status, setStatus] = useState(ForgotPasswordStatus.Idle);
     const [cooldown, setCooldown] = useState(0);
 

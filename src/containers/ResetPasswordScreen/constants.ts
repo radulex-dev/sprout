@@ -8,6 +8,8 @@ export const RESET_PASSWORD_TOO_LONG = 'Use at most 128 characters.';
 export const RESET_PASSWORD_TOKEN_ERROR = 'This reset link is invalid or has expired.';
 export const RESET_PASSWORD_GENERIC_ERROR = 'Something went wrong. Please try again.';
 export const RESET_PASSWORD_FRESH_LINK_LABEL = 'Request a fresh link';
+export const RESET_PASSWORD_EXPIRED_NOTICE = 'Your email is verified. Request a fresh reset link to set a new password.';
+export const RESET_PASSWORD_EXPIRED_NOTICE_UNVERIFIED = 'This reset link has expired. Request a fresh link to set a new password.';
 export const RESET_PASSWORD_MIN_LENGTH = 8;
 export const RESET_PASSWORD_MAX_LENGTH = 128;
 

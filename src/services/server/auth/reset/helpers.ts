@@ -1,5 +1,5 @@
 // Constants
-import { RESET_EMAIL_SUBJECT, RESET_THROTTLE_SECONDS } from '@/lib/auth/constants';
+import { RESET_EMAIL_SUBJECT, RESET_PASSWORD_PATH, RESET_THROTTLE_SECONDS } from '@/lib/auth/constants';
 import { RESET_IDENTIFIER_PREFIX } from './constants';
 
 // Services
@@ -16,6 +16,10 @@ export const buildResetEmail = (to: string, resetUrl: string, hasPassword: boole
         subject: RESET_EMAIL_SUBJECT,
         html: `<p>We received a request to reset your Sprout password.</p>${googleNote}<p><a href="${resetUrl}">Choose a new password</a></p><p>This link expires in 24 hours. If you did not request it, ignore this email.</p>`
     };
+};
+
+export const buildResetUrl = (url: string, token: string): string => {
+    return `${new URL(url).origin}${RESET_PASSWORD_PATH}/${token}`;
 };
 
 export const isCurrentTokenNewest = (rows: ResetTokenRow[], currentToken: string): boolean => {

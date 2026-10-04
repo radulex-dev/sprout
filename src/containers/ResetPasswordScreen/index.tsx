@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useId, useReducer } from 'react';
 
 // Constants
-import { RESET_PASSWORD_CONFIRM_LABEL, RESET_PASSWORD_FRESH_LINK_LABEL, RESET_PASSWORD_GENERIC_ERROR, RESET_PASSWORD_MAX_LENGTH, RESET_PASSWORD_MIN_LENGTH, RESET_PASSWORD_MISMATCH, RESET_PASSWORD_NEW_LABEL, RESET_PASSWORD_SUBMIT_LABEL, RESET_PASSWORD_TITLE, RESET_PASSWORD_TOKEN_ERROR, RESET_PASSWORD_TOO_LONG, RESET_PASSWORD_TOO_SHORT, ResetPasswordActionType, ResetPasswordErrorCode, ResetPasswordStatus } from './constants';
+import { RESET_PASSWORD_CONFIRM_LABEL, RESET_PASSWORD_EXPIRED_NOTICE, RESET_PASSWORD_EXPIRED_NOTICE_UNVERIFIED, RESET_PASSWORD_FRESH_LINK_LABEL, RESET_PASSWORD_GENERIC_ERROR, RESET_PASSWORD_MAX_LENGTH, RESET_PASSWORD_MIN_LENGTH, RESET_PASSWORD_MISMATCH, RESET_PASSWORD_NEW_LABEL, RESET_PASSWORD_SUBMIT_LABEL, RESET_PASSWORD_TITLE, RESET_PASSWORD_TOKEN_ERROR, RESET_PASSWORD_TOO_LONG, RESET_PASSWORD_TOO_SHORT, ResetPasswordActionType, ResetPasswordErrorCode, ResetPasswordStatus } from './constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
 
 // Components
@@ -14,6 +14,9 @@ import Button from '@/design-system/Button';
 
 // Helpers
 import { initialState, resetPasswordReducer } from './helpers';
+
+// Database
+import { rememberResetEmail } from '@/lib/db/actions';
 
 // Auth
 import { authClient } from '@/lib/auth/auth-client';
@@ -23,9 +26,12 @@ import styles from './styles.module.css';
 
 export interface Props extends React.ComponentProps<'main'> {
     token: string;
+    email?: string;
+    emailVerified?: boolean;
+    tokenExpired?: boolean;
 }
 
-const ResetPasswordScreen: React.FunctionComponent<Props> = ({ token, className, ...props }) => {
+const ResetPasswordScreen: React.FunctionComponent<Props> = ({ token, email, emailVerified = false, tokenExpired = false, className, ...props }) => {
     const classes = classNames(styles.root, className);
 
     const router = useRouter();
@@ -135,47 +141,63 @@ const ResetPasswordScreen: React.FunctionComponent<Props> = ({ token, className,
                     {RESET_PASSWORD_TITLE}
                 </h1>
 
-                <form className={styles.form} onSubmit={handleSubmit}>
-                    <label className={styles.field}>
-                        {RESET_PASSWORD_NEW_LABEL}
-                        <input type="password" value={newPassword} onChange={handleNewPasswordChange} autoComplete="new-password" aria-describedby={fieldError ? fieldErrorId : undefined} required />
-                    </label>
-
-                    {fieldError && (
-                        <p className={styles.error} role="alert" id={fieldErrorId}>
-                            {fieldError}
+                {tokenExpired ? (
+                    <div className={styles.expired}>
+                        <p className={styles.notice}>
+                            {emailVerified ? RESET_PASSWORD_EXPIRED_NOTICE : RESET_PASSWORD_EXPIRED_NOTICE_UNVERIFIED}
                         </p>
-                    )}
 
-                    <label className={styles.field}>
-                        {RESET_PASSWORD_CONFIRM_LABEL}
-                        <input type="password" value={confirmPassword} onChange={handleConfirmPasswordChange} autoComplete="new-password" required />
-                    </label>
+                        <form className={styles.switch} action={rememberResetEmail}>
+                            <input type="hidden" name="email" value={email ?? ''} />
 
-                    {status === ResetPasswordStatus.TokenError && (
-                        <p className={styles.error} role="alert">
-                            {RESET_PASSWORD_TOKEN_ERROR}
-                        </p>
-                    )}
-
-                    {status === ResetPasswordStatus.GenericError && (
-                        <p className={styles.error} role="alert">
-                            {RESET_PASSWORD_GENERIC_ERROR}
-                        </p>
-                    )}
-
-                    {status === ResetPasswordStatus.TokenError && (
-                        <p className={styles.switch}>
-                            <Link href="/forgot-password">
+                            <Button variant={ButtonVariant.Primary} type="submit">
                                 {RESET_PASSWORD_FRESH_LINK_LABEL}
-                            </Link>
-                        </p>
-                    )}
+                            </Button>
+                        </form>
+                    </div>
+                ) : (
+                    <form className={styles.form} onSubmit={handleSubmit}>
+                        <label className={styles.field}>
+                            {RESET_PASSWORD_NEW_LABEL}
+                            <input type="password" value={newPassword} onChange={handleNewPasswordChange} autoComplete="new-password" aria-describedby={fieldError ? fieldErrorId : undefined} required />
+                        </label>
 
-                    <Button variant={ButtonVariant.Primary} block type="submit" disabled={isSubmitting}>
-                        {RESET_PASSWORD_SUBMIT_LABEL}
-                    </Button>
-                </form>
+                        {fieldError && (
+                            <p className={styles.error} role="alert" id={fieldErrorId}>
+                                {fieldError}
+                            </p>
+                        )}
+
+                        <label className={styles.field}>
+                            {RESET_PASSWORD_CONFIRM_LABEL}
+                            <input type="password" value={confirmPassword} onChange={handleConfirmPasswordChange} autoComplete="new-password" required />
+                        </label>
+
+                        {status === ResetPasswordStatus.TokenError && (
+                            <p className={styles.error} role="alert">
+                                {RESET_PASSWORD_TOKEN_ERROR}
+                            </p>
+                        )}
+
+                        {status === ResetPasswordStatus.GenericError && (
+                            <p className={styles.error} role="alert">
+                                {RESET_PASSWORD_GENERIC_ERROR}
+                            </p>
+                        )}
+
+                        {status === ResetPasswordStatus.TokenError && (
+                            <p className={styles.switch}>
+                                <Link href="/forgot-password">
+                                    {RESET_PASSWORD_FRESH_LINK_LABEL}
+                                </Link>
+                            </p>
+                        )}
+
+                        <Button variant={ButtonVariant.Primary} block type="submit" disabled={isSubmitting}>
+                            {RESET_PASSWORD_SUBMIT_LABEL}
+                        </Button>
+                    </form>
+                )}
             </div>
         </main>
     );

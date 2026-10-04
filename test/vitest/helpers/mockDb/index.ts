@@ -11,7 +11,10 @@ export const mockSelectChain = <T>(rows: T[]) => {
 
     const where = vi.fn(() => {
         return Object.assign(Promise.resolve(rows), {
-            orderBy
+            orderBy,
+            limit: vi.fn(() => {
+                return Promise.resolve(rows);
+            })
         });
     });
 

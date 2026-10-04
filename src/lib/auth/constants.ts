@@ -13,3 +13,5 @@ export const RESET_TOKEN_TTL_SECONDS = 86_400;
 export const RESET_THROTTLE_SECONDS = 60;
 
 export const RESET_PASSWORD_PATH = '/reset-password';
+
+export const RESET_PREFILL_COOKIE = 'sprout_reset_prefill';

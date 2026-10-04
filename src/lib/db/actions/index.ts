@@ -1,8 +1,11 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 // Constants
+import { RESET_PREFILL_COOKIE } from '@/lib/auth/constants';
 import { ALL_PATH, PLANT_ID_SCHEMA } from '@/lib/db/constants';
 
 // Services
@@ -67,4 +70,21 @@ export const deletePlant = async (id: string): Promise<void> => {
     await serviceDeletePlant(session.user.id, parsedId);
 
     revalidatePath(ALL_PATH, 'layout');
+};
+
+export const rememberResetEmail = async (formData: FormData): Promise<void> => {
+    const email = formData.get('email');
+
+    if (typeof email === 'string' && email !== '') {
+        const store = await cookies();
+
+        store.set(RESET_PREFILL_COOKIE, encodeURIComponent(email), {
+            httpOnly: true,
+            sameSite: 'lax',
+            path: '/forgot-password',
+            maxAge: 120
+        });
+    }
+
+    redirect('/forgot-password');
 };

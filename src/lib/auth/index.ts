@@ -7,7 +7,7 @@ import { after } from 'next/server';
 import { RESET_TOKEN_TTL_SECONDS, SEND_VERIFICATION_PATH, VERIFY_EMAIL_SUBJECT, VERIFY_EMAIL_TOKEN_TTL_SECONDS } from './constants';
 
 // Services
-import { sendPasswordResetEmail } from '@/services/server/auth/reset';
+import { dispatchResetRequest, sendPasswordResetEmail } from '@/services/server/auth/reset';
 import { sendEmail } from '@/services/server/email';
 
 // Database
@@ -32,10 +32,18 @@ export const auth = betterAuth({
         revokeSessionsOnPasswordReset: true,
         sendResetPassword: ({ user, url, token }) => {
             after(() => {
-                return sendPasswordResetEmail({
+                return dispatchResetRequest({
                     user,
                     url,
-                    token
+                    token,
+                    sendReset: async (props) => {
+                        await sendPasswordResetEmail(props);
+                    },
+                    sendVerification: async (props) => {
+                        await auth.api.sendVerificationEmail({
+                            body: props
+                        });
+                    }
                 });
             });
 
@@ -47,15 +55,11 @@ export const auth = betterAuth({
         autoSignInAfterVerification: false,
         expiresIn: VERIFY_EMAIL_TOKEN_TTL_SECONDS,
         sendVerificationEmail: ({ user, url }) => {
-            after(() => {
-                return sendEmail({
-                    to: user.email,
-                    subject: VERIFY_EMAIL_SUBJECT,
-                    html: `<p>Confirm your email address for Sprout:</p><p><a href="${url}">Verify your email</a></p>`
-                });
+            return sendEmail({
+                to: user.email,
+                subject: VERIFY_EMAIL_SUBJECT,
+                html: `<p>Confirm your email address for Sprout:</p><p><a href="${url}">Verify your email</a></p>`
             });
-
-            return Promise.resolve();
         }
     },
     socialProviders: {
