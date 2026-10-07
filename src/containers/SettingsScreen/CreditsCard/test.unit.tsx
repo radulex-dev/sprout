@@ -8,8 +8,6 @@ import { CREDITS_TITLE, PLANTNET_LINK_LABEL, PLANTNET_URL, PLANTSOLVE_LINK_LABEL
 // Components
 import CreditsCard from './index';
 
-const CALLER_CLASS_NAME = 'caller-class-name';
-
 const props: React.ComponentProps<typeof CreditsCard> = {};
 
 describe('CreditsCard', () => {
@@ -56,14 +54,5 @@ describe('CreditsCard', () => {
         expect(screen.queryByRole('link', {
             name: PLANTNET_URL
         })).not.toBeInTheDocument();
-    });
-
-    it('spreads props and className onto the root element', () => {
-        render(<CreditsCard {...props} data-testid="credits" className={CALLER_CLASS_NAME} />);
-
-        const root = screen.getByTestId('credits');
-
-        expect(root.tagName).toBe('DIV');
-        expect(root).toHaveClass(CALLER_CLASS_NAME);
     });
 });

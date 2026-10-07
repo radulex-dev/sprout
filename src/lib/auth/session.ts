@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { cache } from 'react';
 
 // Auth
+import { assertVerified } from '@/lib/auth/errors';
 import { auth } from '@/lib/auth';
 
 export const requireUser = cache(async () => {
@@ -16,3 +17,11 @@ export const requireUser = cache(async () => {
 
     return session;
 });
+
+export const requireVerifiedUser = async () => {
+    const session = await requireUser();
+
+    assertVerified(session.user.emailVerified);
+
+    return session;
+};

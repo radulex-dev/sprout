@@ -1,10 +1,12 @@
 'use client';
 
 import classNames from 'classnames';
+import Link from 'next/link';
 import React, { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 // Constants
+import { IDENTIFY_COPY } from './constants';
 import { ERROR_UNREADABLE_IMAGE } from '@/helpers/image/constants';
 
 // Components
@@ -32,12 +34,15 @@ import styles from './styles.module.css';
 import type { PlantInput } from '@/types';
 import type { Phase } from './types';
 
-export interface Props extends React.ComponentProps<'div'> {}
+export interface Props extends React.ComponentProps<'div'> {
+    emailVerified: boolean;
+}
 
-const IdentifyScreen: React.FunctionComponent<Props> = ({ className, ...props }) => {
+const IdentifyScreen: React.FunctionComponent<Props> = ({ emailVerified, className, ...props }) => {
     const classes = classNames(styles.root, className);
     const errorNoticeClasses = classNames(styles.notice, styles.error);
     const router = useRouter();
+
     const [phase, setPhase] = useState<Phase>('capture');
     const [photo, setPhoto] = useState<Blob | undefined>(undefined);
     const [results, setResults] = useState<IdentifyResult[]>([]);
@@ -143,10 +148,28 @@ const IdentifyScreen: React.FunctionComponent<Props> = ({ className, ...props })
         );
     };
 
+    const renderVerifyNotice = () => {
+        const noticeClasses = classNames(styles.notice, styles.noticeWarn);
+
+        return (
+            <div className={noticeClasses}>
+                <p className={styles.noticeTitle}>
+                    {IDENTIFY_COPY.noticeTitle}
+                </p>
+                <p className={styles.noticeBody}>
+                    {IDENTIFY_COPY.noticeBody}
+                </p>
+                <Link href="/settings" className={styles.noticeLink}>
+                    {IDENTIFY_COPY.noticeLink}
+                </Link>
+            </div>
+        );
+    };
+
     const renderContent = () => {
         return (
             <React.Fragment>
-                {renderCaptureStage()}
+                {emailVerified ? renderCaptureStage() : renderVerifyNotice()}
                 {renderResultsStage()}
                 {renderFormStage()}
             </React.Fragment>

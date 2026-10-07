@@ -27,7 +27,6 @@ const props: React.ComponentProps<typeof ForgotPasswordScreen> = {};
 
 describe('ForgotPasswordScreen', () => {
     beforeEach(() => {
-        vi.clearAllMocks();
         requestPasswordResetMock.mockResolvedValue({
             data: {
                 status: true

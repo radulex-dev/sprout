@@ -1,6 +1,6 @@
 import type React from 'react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
 
 // Components
@@ -107,18 +107,12 @@ const advanceCooldown = async (seconds: number): Promise<void> => {
 
 describe('SettingsScreen', () => {
     beforeEach(() => {
-        vi.clearAllMocks();
         vi.useFakeTimers();
         vi.stubGlobal('fetch', fetchMock);
         fetchMock.mockResolvedValue({
             ok: true,
             status: 200
         });
-    });
-
-    afterEach(() => {
-        vi.useRealTimers();
-        vi.unstubAllGlobals();
     });
 
     it('requests one verification email and blocks a resend while the cooldown runs', async () => {

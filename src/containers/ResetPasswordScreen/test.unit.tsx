@@ -47,7 +47,6 @@ const props: React.ComponentProps<typeof ResetPasswordScreen> = {
 
 describe('ResetPasswordScreen', () => {
     beforeEach(() => {
-        vi.clearAllMocks();
         rememberResetEmailMock.mockResolvedValue(undefined);
     });
 

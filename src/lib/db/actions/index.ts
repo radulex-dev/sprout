@@ -13,13 +13,13 @@ import { createPlant as serviceCreatePlant, deletePlant as serviceDeletePlant, m
 import { CareKindSchema, LastCareDateSchema, NotifiedAtSchema, parsePlantInput, UpdatePlantSchema, type UpdatePlantInput } from '@/services/server/plants/schema';
 
 // Auth
-import { requireUser } from '@/lib/auth/session';
+import { requireUser, requireVerifiedUser } from '@/lib/auth/session';
 
 // Types
 import type { CareKind, PlantInput } from '@/types';
 
 export const createPlant = async (input: PlantInput): Promise<string> => {
-    const session = await requireUser();
+    const session = await requireVerifiedUser();
     const parsed = parsePlantInput(input);
     const id = await serviceCreatePlant(session.user.id, parsed);
 

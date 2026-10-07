@@ -53,7 +53,6 @@ describe('CaptureStage', () => {
     });
 
     afterEach(() => {
-        vi.restoreAllMocks();
         getUserMedia.mockReset();
     });
 

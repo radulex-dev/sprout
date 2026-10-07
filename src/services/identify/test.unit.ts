@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 // Services
 import { identifyPlant } from './index';
@@ -14,11 +14,6 @@ const stubFetch = (): FetchMock => {
 };
 
 describe('identifyPlant', () => {
-    afterEach(() => {
-        vi.restoreAllMocks();
-        vi.unstubAllGlobals();
-    });
-
     it('uploads the photo to the identify endpoint', async () => {
         const fetchMock = stubFetch();
 

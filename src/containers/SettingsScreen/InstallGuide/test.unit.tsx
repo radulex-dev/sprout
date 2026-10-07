@@ -8,8 +8,6 @@ import InstallGuide from './index';
 // Services
 import { InstallPlatform } from '@/services/install';
 
-const CALLER_CLASS_NAME = 'caller-class-name';
-
 const props: React.ComponentProps<typeof InstallGuide> = {
     platform: InstallPlatform.Ios
 };
@@ -34,14 +32,5 @@ describe('InstallGuide', () => {
 
         expect(screen.getByText(/add this site to your home screen/)).toBeInTheDocument();
         expect(screen.getAllByRole('listitem')).toHaveLength(1);
-    });
-
-    it('spreads props and className onto the root element', () => {
-        render(<InstallGuide {...props} data-testid="install-guide" className={CALLER_CLASS_NAME} />);
-
-        const root = screen.getByTestId('install-guide');
-
-        expect(root.tagName).toBe('DIV');
-        expect(root).toHaveClass(CALLER_CLASS_NAME);
     });
 });

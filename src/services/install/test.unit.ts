@@ -26,8 +26,6 @@ afterEach(() => {
     Reflect.deleteProperty(globalThis.navigator, 'platform');
     Reflect.deleteProperty(globalThis.navigator, 'standalone');
     Reflect.deleteProperty(globalThis.navigator, 'userAgent');
-    vi.restoreAllMocks();
-    vi.unstubAllGlobals();
 });
 
 describe('isStandalone', () => {

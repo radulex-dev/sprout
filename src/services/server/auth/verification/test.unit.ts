@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Constants
 import { VERIFY_THROTTLE_SECONDS } from '@/lib/auth/constants';
@@ -46,14 +46,9 @@ describe('isMarkerRecent', () => {
 
 describe('claimVerificationSend', () => {
     beforeEach(() => {
-        vi.clearAllMocks();
         deleteMock.mockReset();
         insertMock.mockReset();
         selectMock.mockReset();
-    });
-
-    afterEach(() => {
-        vi.restoreAllMocks();
     });
 
     it('claims and inserts a marker when no prior marker exists', async () => {

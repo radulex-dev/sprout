@@ -1,11 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { revalidatePath } from 'next/cache';
 
+// Mocks
+import { VERIFIED_SESSION } from '@test/vitest/data/session.mock';
+
 // Services
 import { createPlant as serviceCreatePlant, deletePlant as serviceDeletePlant, markCareDone as serviceMarkCareDone, recordNotified as serviceRecordNotified, updatePlant as serviceUpdatePlant } from '@/services/server/plants';
 
 // Database
 import { createPlant, deletePlant, markCareDone, recordNotified, updatePlant } from './index';
+
+// Auth
+import { UnverifiedEmailError } from '@/lib/auth/errors';
+import { requireUser, requireVerifiedUser } from '@/lib/auth/session';
 
 // Types
 import { CareKind } from '@/types';
@@ -25,13 +32,8 @@ vi.mock('@/services/server/plants', () => {
 
 vi.mock('@/lib/auth/session', () => {
     return {
-        requireUser: () => {
-            return Promise.resolve({
-                user: {
-                    id: 'user-1'
-                }
-            });
-        }
+        requireUser: vi.fn(),
+        requireVerifiedUser: vi.fn()
     };
 });
 
@@ -42,7 +44,8 @@ vi.mock('next/cache', () => {
 });
 
 beforeEach(() => {
-    vi.clearAllMocks();
+    vi.mocked(requireUser).mockResolvedValue(VERIFIED_SESSION);
+    vi.mocked(requireVerifiedUser).mockResolvedValue(VERIFIED_SESSION);
     vi.mocked(serviceCreatePlant).mockResolvedValue('plant-1');
     vi.mocked(serviceUpdatePlant).mockResolvedValue(undefined);
     vi.mocked(serviceMarkCareDone).mockResolvedValue(undefined);
@@ -64,6 +67,25 @@ describe('createPlant', () => {
             acquiredAt: 1_700_000_000_000
         })).rejects.toThrow();
 
+        expect(serviceCreatePlant).not.toHaveBeenCalled();
+    });
+
+    it('rejects an unverified session before calling the service', async () => {
+        vi.mocked(requireVerifiedUser).mockRejectedValue(new UnverifiedEmailError());
+
+        await expect(createPlant({
+            nickname: 'Kitchen monstera',
+            species: 'Monstera deliciosa',
+            commonName: 'Swiss cheese plant',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1_700_000_000_000
+        })).rejects.toBeInstanceOf(UnverifiedEmailError);
+
+        expect(requireVerifiedUser).toHaveBeenCalledTimes(1);
         expect(serviceCreatePlant).not.toHaveBeenCalled();
     });
 

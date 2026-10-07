@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+import { describe, expect, it, vi, type Mock } from 'vitest';
 import { sendNotification, WebPushError } from 'web-push';
 
 // Mocks
@@ -61,10 +61,6 @@ const mockSend = vi.mocked(sendNotification) as unknown as Mock;
 const mockGetSubscriptions = vi.mocked(getPushSubscriptionsForUser);
 
 describe('sendPushToSubscriptions', () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
-
     it('counts every successful send and removes nothing', async () => {
         const subscriptionA: PushSubscriptionRow = {
             id: 'id-https://push.example/a',
@@ -361,10 +357,6 @@ describe('sendPushToSubscriptions', () => {
 });
 
 describe('sendPushToUser', () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
-
     it('loads the user subscriptions and sends to them', async () => {
         const subscription: PushSubscriptionRow = {
             id: 'id-https://push.example/a',

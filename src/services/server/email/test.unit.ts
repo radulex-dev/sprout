@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Constants
 import { ERROR_NOT_CONFIGURED, ERROR_SEND_FAILED } from './constants';
@@ -29,7 +29,6 @@ vi.mock('nodemailer', () => {
 
 describe('sendEmail', () => {
     beforeEach(() => {
-        vi.clearAllMocks();
         createTransportMock.mockImplementation(() => {
             return {
                 sendMail: sendMailMock
@@ -40,11 +39,6 @@ describe('sendEmail', () => {
         vi.stubEnv('SMTP_USER', 'smtp-user');
         vi.stubEnv('SMTP_PASSWORD', 'smtp-password');
         vi.stubEnv('EMAIL_FROM', 'no-reply@example.test');
-    });
-
-    afterEach(() => {
-        vi.unstubAllEnvs();
-        vi.restoreAllMocks();
     });
 
     it.each(['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASSWORD', 'EMAIL_FROM'])('warns and skips the send when %s is blank', async (variable) => {

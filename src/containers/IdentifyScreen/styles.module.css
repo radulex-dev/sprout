@@ -12,6 +12,13 @@
     @apply ui-app-sub;
 }
 
+.captureColumn {
+    @variant desktop {
+        width: min(100%, 32rem, calc((100dvh - 14rem) * 0.75));
+        margin-inline: auto;
+    }
+}
+
 .notice {
     @apply ui-notice;
 }
@@ -20,9 +27,18 @@
     @apply ui-notice-error;
 }
 
-.captureColumn {
-    @variant desktop {
-        width: min(100%, 32rem, calc((100dvh - 14rem) * 0.75));
-        margin-inline: auto;
-    }
+.noticeWarn {
+    @apply ui-notice-warn;
+}
+
+.noticeTitle {
+    @apply m-0 text-note font-semibold;
+}
+
+.noticeBody {
+    @apply m-0 mt-1;
+}
+
+.noticeLink {
+    @apply mt-2 ui-chip ui-chip-due;
 }

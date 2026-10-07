@@ -15,8 +15,6 @@ vi.mock('@/lib/db/actions', () => {
 
 afterEach(() => {
     unstubServiceWorker();
-    vi.unstubAllGlobals();
-    vi.unstubAllEnvs();
 });
 
 describe('ensurePushSubscription', () => {

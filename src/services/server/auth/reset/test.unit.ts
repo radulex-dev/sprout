@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Constants
 import { RESET_EMAIL_SUBJECT, RESET_THROTTLE_SECONDS } from '@/lib/auth/constants';
@@ -127,13 +127,7 @@ describe('buildResetUrl', () => {
 
 describe('getResetTokenStatus', () => {
     beforeEach(() => {
-        vi.clearAllMocks();
         selectMock.mockReset();
-    });
-
-    afterEach(() => {
-        vi.useRealTimers();
-        vi.restoreAllMocks();
     });
 
     it('returns Invalid when no token row exists', async () => {
@@ -224,14 +218,9 @@ describe('getResetTokenStatus', () => {
 
 describe('sendPasswordResetEmail', () => {
     beforeEach(() => {
-        vi.clearAllMocks();
         deleteMock.mockReset();
         selectMock.mockReset();
         sendEmailMock.mockResolvedValue(undefined);
-    });
-
-    afterEach(() => {
-        vi.restoreAllMocks();
     });
 
     it('sends when the current token is newest and no recent sibling exists', async () => {
@@ -335,12 +324,7 @@ describe('sendPasswordResetEmail', () => {
 
 describe('dispatchResetRequest', () => {
     beforeEach(() => {
-        vi.clearAllMocks();
         claimVerificationSendMock.mockReset();
-    });
-
-    afterEach(() => {
-        vi.restoreAllMocks();
     });
 
     it('sends a verification email for an unverified account when the claim succeeds', async () => {

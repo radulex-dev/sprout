@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Routes
 import { POST } from './route';
@@ -42,7 +42,6 @@ vi.mock('@/services/server/auth/verification', () => {
 
 describe('/api/email/resend-verification', () => {
     beforeEach(() => {
-        vi.clearAllMocks();
         vi.stubEnv('SMTP_HOST', 'smtp.example.test');
         vi.stubEnv('SMTP_PORT', '587');
         vi.stubEnv('SMTP_USER', 'smtp-user');
@@ -60,11 +59,6 @@ describe('/api/email/resend-verification', () => {
         sendVerificationEmailMock.mockResolvedValue({
             status: true
         });
-    });
-
-    afterEach(() => {
-        vi.unstubAllEnvs();
-        vi.restoreAllMocks();
     });
 
     it('sends to the session address and answers 200', async () => {
