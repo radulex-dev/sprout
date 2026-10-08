@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
+// Constants
+import { ANALYTICS_CONSENT_KEY } from './constants';
+
 // Helpers
-import { readConsent, writeConsent } from './helpers';
+import { parseConsent, readConsent, writeConsent } from './helpers';
 
 // Types
 import type { AnalyticsConsentState } from './types';
@@ -15,6 +18,26 @@ export const useAnalyticsConsent = (): AnalyticsConsentState => {
 
         setConsent(stored);
         setIsLoaded(true);
+    }, []);
+
+    useEffect(() => {
+        const handleStorage = (event: StorageEvent) => {
+            if (event.storageArea !== localStorage) {
+                return;
+            }
+
+            if (event.key !== ANALYTICS_CONSENT_KEY && event.key !== null) {
+                return;
+            }
+
+            setConsent(parseConsent(event.newValue));
+        };
+
+        globalThis.addEventListener('storage', handleStorage);
+
+        return () => {
+            globalThis.removeEventListener('storage', handleStorage);
+        };
     }, []);
 
     const accept = useCallback(() => {

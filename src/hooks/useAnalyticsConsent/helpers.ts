@@ -1,14 +1,16 @@
 // Constants
 import { ANALYTICS_CONSENT_KEY } from './constants';
 
-export const readConsent = (): boolean | undefined => {
-    const stored = localStorage.getItem(ANALYTICS_CONSENT_KEY);
-
-    if (!stored) {
+export const parseConsent = (value: string | null): boolean | undefined => {
+    if (!value) {
         return;
     }
 
-    return stored === 'true';
+    return value === 'true';
+};
+
+export const readConsent = (): boolean | undefined => {
+    return parseConsent(localStorage.getItem(ANALYTICS_CONSENT_KEY));
 };
 
 export const writeConsent = (hasConsented: boolean): void => {

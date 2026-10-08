@@ -115,4 +115,52 @@ describe('AnalyticsConsent', () => {
         expect(screen.queryByText(ANALYTICS_CONSENT_MESSAGE)).not.toBeInTheDocument();
         expect(screen.queryByText('Umami')).not.toBeInTheDocument();
     });
+
+    it('hides the banner and loads analytics on a cross-tab accept without advancing timers', () => {
+        render(<AnalyticsConsent {...props} />);
+
+        act(() => {
+            dispatchEvent(new StorageEvent('storage', {
+                key: ANALYTICS_CONSENT_KEY,
+                newValue: 'true',
+                storageArea: localStorage
+            }));
+        });
+
+        expect(screen.queryByText(ANALYTICS_CONSENT_MESSAGE)).not.toBeInTheDocument();
+        expect(screen.getByText('Umami')).toBeInTheDocument();
+    });
+
+    it('hides the banner and loads no analytics on a cross-tab decline without advancing timers', () => {
+        render(<AnalyticsConsent {...props} />);
+
+        act(() => {
+            dispatchEvent(new StorageEvent('storage', {
+                key: ANALYTICS_CONSENT_KEY,
+                newValue: 'false',
+                storageArea: localStorage
+            }));
+        });
+
+        expect(screen.queryByText(ANALYTICS_CONSENT_MESSAGE)).not.toBeInTheDocument();
+        expect(screen.queryByText('Umami')).not.toBeInTheDocument();
+    });
+
+    it('re-shows the banner on a cross-tab reset without a reload or timers', () => {
+        localStorage.setItem(ANALYTICS_CONSENT_KEY, 'false');
+
+        render(<AnalyticsConsent {...props} />);
+
+        expect(screen.queryByText(ANALYTICS_CONSENT_MESSAGE)).not.toBeInTheDocument();
+
+        act(() => {
+            dispatchEvent(new StorageEvent('storage', {
+                key: ANALYTICS_CONSENT_KEY,
+                storageArea: localStorage
+            }));
+        });
+
+        expect(screen.getByText(ANALYTICS_CONSENT_MESSAGE)).toBeInTheDocument();
+        expect(screen.queryByText('Umami')).not.toBeInTheDocument();
+    });
 });
