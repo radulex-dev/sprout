@@ -12,7 +12,7 @@
     ;
 
     padding-top: calc(1rem + env(safe-area-inset-top));
-    padding-bottom: calc(var(--nav-h) + 1.5rem + env(safe-area-inset-bottom));
+    padding-bottom: 1.5rem;
     animation: fade-in var(--dur-base) var(--ease-out);
 
     @variant desktop {
