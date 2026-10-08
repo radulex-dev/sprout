@@ -123,11 +123,11 @@ describe('sendPushToSubscriptions', () => {
 
     it.each([{
         statusCode: 403,
-        removed: 1
+        removed: 0
     }, {
         statusCode: 500,
         removed: 0
-    }])('handles a $statusCode rejection with removed=$removed', async ({ statusCode, removed }) => {
+    }])('keeps a $statusCode rejection unpruned when nothing in the batch sent (removed=$removed)', async ({ statusCode, removed }) => {
         const ErrorClass = WebPushError as unknown as new (message: string, statusCode: number) => Error;
         const subscription: PushSubscriptionRow = {
             id: 'id-https://push.example/a',
@@ -179,7 +179,7 @@ describe('sendPushToSubscriptions', () => {
         });
     });
 
-    it('prunes a non-403/410 rejection whose body reports the VAPID key mismatch', async () => {
+    it('keeps a key-mismatch rejection unpruned when no send in the batch succeeded', async () => {
         const ErrorClass = WebPushError as unknown as new (message: string, statusCode: number, body: string) => Error;
         const subscription: PushSubscriptionRow = {
             id: 'id-https://push.example/a',
@@ -201,6 +201,41 @@ describe('sendPushToSubscriptions', () => {
 
         expect(result).toEqual({
             sent: 0,
+            removed: 0
+        });
+        expect(mockDelete).not.toHaveBeenCalled();
+    });
+
+    it('prunes a key-mismatch rejection once another send in the same batch succeeded', async () => {
+        const ErrorClass = WebPushError as unknown as new (message: string, statusCode: number, body?: string) => Error;
+        const subscriptionA: PushSubscriptionRow = {
+            id: 'id-https://push.example/a',
+            userId: 'user-1',
+            endpoint: 'https://push.example/a',
+            p256dh: 'p256dh-value',
+            auth: 'auth-value',
+            createdAt: NOW
+        };
+        const subscriptionB: PushSubscriptionRow = {
+            id: 'id-https://push.example/b',
+            userId: 'user-1',
+            endpoint: 'https://push.example/b',
+            p256dh: 'p256dh-value',
+            auth: 'auth-value',
+            createdAt: NOW
+        };
+
+        mockSend.mockRejectedValueOnce(new ErrorClass('Push rejected', 400, '{"reason":"VapidPkHashMismatch"}')).mockResolvedValueOnce(undefined);
+
+        const result = await sendPushToSubscriptions([subscriptionA, subscriptionB], {
+            title: 'Time to water Fern',
+            body: 'Fern is due for watering today.',
+            tag: 'sprout-plant-1-water',
+            url: '/'
+        });
+
+        expect(result).toEqual({
+            sent: 1,
             removed: 1
         });
         expect(mockDelete).toHaveBeenCalledTimes(1);

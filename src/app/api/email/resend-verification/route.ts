@@ -1,6 +1,9 @@
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 
+// Constants
+import { HttpStatus } from '@/lib/http/constants';
+
 // Services
 import { claimVerificationSend } from '@/services/server/auth/verification';
 import { isEmailConfigured } from '@/services/server/email';
@@ -16,7 +19,7 @@ export const POST = async () => {
         return NextResponse.json({
             error: 'This address is already verified.'
         }, {
-            status: 409
+            status: HttpStatus.Conflict
         });
     }
 
@@ -24,7 +27,7 @@ export const POST = async () => {
         return NextResponse.json({
             error: 'Email delivery is not configured on this server.'
         }, {
-            status: 503
+            status: HttpStatus.ServiceUnavailable
         });
     }
 
@@ -51,7 +54,7 @@ export const POST = async () => {
         return NextResponse.json({
             error: 'The verification email could not be sent.'
         }, {
-            status: 502
+            status: HttpStatus.BadGateway
         });
     }
 

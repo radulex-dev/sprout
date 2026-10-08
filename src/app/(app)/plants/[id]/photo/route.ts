@@ -1,3 +1,6 @@
+// Constants
+import { HttpStatus } from '@/lib/http/constants';
+
 // Services
 import { readPlantPhoto } from '@/services/server/plants';
 
@@ -18,7 +21,7 @@ export const GET = async (_request: Request, { params }: Props) => {
 
     if (!photo) {
         return new Response('Not found', {
-            status: 404
+            status: HttpStatus.NotFound
         });
     }
 

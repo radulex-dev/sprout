@@ -18,6 +18,7 @@ export interface PushSendResult {
 export enum PushOutcome {
     Sent = 'sent',
     Removed = 'removed',
+    Prunable = 'prunable',
     Failed = 'failed'
 }
 

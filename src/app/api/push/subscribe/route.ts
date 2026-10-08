@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+// Constants
+import { HttpStatus } from '@/lib/http/constants';
+
 // Services
 import { subscribe, unsubscribe } from '@/services/server/push';
 import { PushSubscriptionInputSchema } from '@/services/server/push/schema';
@@ -20,7 +23,7 @@ export const POST = async (request: Request) => {
         return NextResponse.json({
             error: 'Invalid push subscription.'
         }, {
-            status: 400
+            status: HttpStatus.BadRequest
         });
     }
 
@@ -40,7 +43,7 @@ export const DELETE = async (request: Request) => {
         return NextResponse.json({
             error: 'Invalid endpoint.'
         }, {
-            status: 400
+            status: HttpStatus.BadRequest
         });
     }
 

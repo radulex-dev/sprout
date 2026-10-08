@@ -1,4 +1,5 @@
 import { and, eq } from 'drizzle-orm';
+import { countBy } from 'lodash-es';
 import { sendNotification, setVapidDetails, WebPushError } from 'web-push';
 
 // Constants
@@ -58,12 +59,16 @@ const pruneSubscription = async (endpoint: string): Promise<PushOutcome> => {
     }
 };
 
-const isPrunableError = (error: unknown): boolean => {
+const isGoneError = (error: unknown): error is WebPushError => {
+    return error instanceof WebPushError && error.statusCode === 410;
+};
+
+const isKeyMismatchError = (error: unknown): error is WebPushError => {
     if (!(error instanceof WebPushError)) {
         return false;
     }
 
-    if (error.statusCode === 410 || error.statusCode === 403) {
+    if (error.statusCode === 403) {
         return true;
     }
 
@@ -85,8 +90,12 @@ const sendToSubscription = async (subscription: PushSubscriptionRow, payload: Pu
 
         return PushOutcome.Sent;
     } catch (error) {
-        if (isPrunableError(error)) {
+        if (isGoneError(error)) {
             return pruneSubscription(subscription.endpoint);
+        }
+
+        if (isKeyMismatchError(error)) {
+            return PushOutcome.Prunable;
         }
 
         console.error('Failed to send push notification', error);
@@ -102,30 +111,33 @@ export const sendPushToSubscriptions = async (subscriptions: PushSubscriptionRow
         process.env.VAPID_PRIVATE_KEY ?? ''
     );
 
-    const outcomes = await Promise.all(subscriptions.map((subscription) => {
+    const pushOutcomes = await Promise.all(subscriptions.map((subscription) => {
         return sendToSubscription(subscription, payload);
     }));
-
-    return outcomes.reduce<PushSendResult>((result, outcome) => {
-        if (outcome === PushOutcome.Sent) {
-            return {
-                ...result,
-                sent: result.sent + 1
-            };
-        }
-
-        if (outcome === PushOutcome.Removed) {
-            return {
-                ...result,
-                removed: result.removed + 1
-            };
-        }
-
-        return result;
-    }, {
-        sent: 0,
-        removed: 0
+    const pushOutcomesCount = countBy(pushOutcomes);
+    const sent = pushOutcomesCount[PushOutcome.Sent] ?? 0;
+    const goneRemoved = pushOutcomesCount[PushOutcome.Removed] ?? 0;
+    const prunableEndpoints = pushOutcomes.flatMap((outcome, index) => {
+        return outcome === PushOutcome.Prunable ? [subscriptions[index].endpoint] : [];
     });
+    const isKeyRefusedBatch = prunableEndpoints.length > 0 && sent === 0;
+
+    if (isKeyRefusedBatch) {
+        console.warn('Kept key-refused push subscriptions because no send succeeded', {
+            kept: prunableEndpoints.length
+        });
+    }
+
+    const removalTargets = isKeyRefusedBatch ? [] : prunableEndpoints;
+    const pruned = await Promise.all(removalTargets.map((endpoint) => {
+        return pruneSubscription(endpoint);
+    }));
+    const mismatchRemoved = countBy(pruned)[PushOutcome.Removed] ?? 0;
+
+    return {
+        sent,
+        removed: goneRemoved + mismatchRemoved
+    };
 };
 
 export const sendPushToUser = async (userId: string, payload: PushPayload): Promise<PushSendResult> => {

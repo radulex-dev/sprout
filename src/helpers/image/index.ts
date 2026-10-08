@@ -1,7 +1,8 @@
 import Compressor from 'compressorjs';
 
 // Constants
-import { ERROR_IMAGE_TOO_LARGE, ERROR_UNREADABLE_IMAGE, JPEG_MIME_TYPE, JPEG_QUALITY, MAX_IMAGE_DIMENSION, MAX_PHOTO_BYTES } from './constants';
+import { ERROR_UNREADABLE_IMAGE, JPEG_MIME_TYPE, JPEG_QUALITY, MAX_IMAGE_DIMENSION, MAX_PHOTO_BYTES } from './constants';
+import { ERROR_IMAGE_TOO_LARGE } from '@/services/server/plantnet/constants';
 
 export const compressPhoto = (photo: Blob): Promise<Blob> => {
     return new Promise((resolve, reject) => {

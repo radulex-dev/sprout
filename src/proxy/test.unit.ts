@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { NextRequest } from 'next/server';
 
+// Constants
+import { HttpStatus } from '@/lib/http/constants';
+
 const { proxy } = await import('../proxy');
 
 describe('proxy', () => {
@@ -8,20 +11,20 @@ describe('proxy', () => {
         const response = proxy(new NextRequest('http://localhost:3000/reset-password/abc'));
 
         expect(response.headers.get('location')).toBeNull();
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(HttpStatus.Ok);
     });
 
     it('lets a signed-out user reach forgot-password', () => {
         const response = proxy(new NextRequest('http://localhost:3000/forgot-password'));
 
         expect(response.headers.get('location')).toBeNull();
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(HttpStatus.Ok);
     });
 
     it('redirects a signed-out user from a private page to login', () => {
         const response = proxy(new NextRequest('http://localhost:3000/plants'));
 
-        expect(response.status).toBe(307);
+        expect(response.status).toBe(HttpStatus.TemporaryRedirect);
         expect(response.headers.get('location')).toBe('http://localhost:3000/login');
     });
 
@@ -32,7 +35,7 @@ describe('proxy', () => {
             }
         }));
 
-        expect(response.status).toBe(307);
+        expect(response.status).toBe(HttpStatus.TemporaryRedirect);
         expect(response.headers.get('location')).toBe('http://localhost:3000/');
     });
 
@@ -44,6 +47,6 @@ describe('proxy', () => {
         }));
 
         expect(response.headers.get('location')).toBeNull();
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(HttpStatus.Ok);
     });
 });

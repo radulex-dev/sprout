@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+// Constants
+import { HttpStatus } from '@/lib/http/constants';
+
 // Routes
 import { POST } from './route';
 
@@ -68,7 +71,7 @@ describe('/api/email/resend-verification', () => {
 
         const response = await POST();
 
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(HttpStatus.Ok);
         expect(sendVerificationEmailMock).toHaveBeenCalledWith({
             body: {
                 email: 'ada@example.test'
@@ -82,7 +85,7 @@ describe('/api/email/resend-verification', () => {
 
         const response = await POST();
 
-        expect(response.status).toBe(503);
+        expect(response.status).toBe(HttpStatus.ServiceUnavailable);
         expect(sendVerificationEmailMock).not.toHaveBeenCalled();
     });
 
@@ -97,7 +100,7 @@ describe('/api/email/resend-verification', () => {
 
         const response = await POST();
 
-        expect(response.status).toBe(409);
+        expect(response.status).toBe(HttpStatus.Conflict);
         expect(sendVerificationEmailMock).not.toHaveBeenCalled();
     });
 
@@ -108,7 +111,7 @@ describe('/api/email/resend-verification', () => {
 
         const response = await POST();
 
-        expect(response.status).toBe(502);
+        expect(response.status).toBe(HttpStatus.BadGateway);
         expect(sendVerificationEmailMock).toHaveBeenCalledTimes(1);
         expect(console.error).toHaveBeenCalledTimes(1);
     });
@@ -120,7 +123,7 @@ describe('/api/email/resend-verification', () => {
 
         const response = await POST();
 
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(HttpStatus.Ok);
         await expect(response.json()).resolves.toEqual({
             status: true
         });

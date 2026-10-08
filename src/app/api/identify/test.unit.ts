@@ -1,4 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+// Constants
+import { HttpStatus } from '@/lib/http/constants';
 
 // Mocks
 import { VERIFIED_SESSION } from '@test/vitest/data/session.mock';
@@ -10,18 +13,19 @@ import { UnverifiedEmailError } from '@/lib/auth/errors';
 // Routes
 import { POST } from './route';
 
-const { identifySpeciesMock, PlantNetError, requireVerifiedUserMock } = vi.hoisted(() => {
+const { identifySpeciesMock, PlantNetError, readIdentifyFormMock, requireVerifiedUserMock } = vi.hoisted(() => {
     return {
         identifySpeciesMock: vi.fn(),
         PlantNetError: class PlantNetError extends Error {
-            readonly httpStatus: 400 | 502;
+            readonly httpStatus: number;
 
-            constructor(message: string, httpStatus: 400 | 502) {
+            constructor(message: string, httpStatus: number) {
                 super(message);
                 this.name = 'PlantNetError';
                 this.httpStatus = httpStatus;
             }
         },
+        readIdentifyFormMock: vi.fn(),
         requireVerifiedUserMock: vi.fn()
     };
 });
@@ -35,11 +39,16 @@ vi.mock('@/lib/auth/session', () => {
 vi.mock('@/services/server/plantnet', () => {
     return {
         identifySpecies: identifySpeciesMock,
-        PlantNetError
+        PlantNetError,
+        readIdentifyForm: readIdentifyFormMock
     };
 });
 
 describe('/api/identify', () => {
+    beforeEach(() => {
+        readIdentifyFormMock.mockResolvedValue(new FormData());
+    });
+
     it('answers 403 with the verify message and does not call PlantNet when the session is unverified', async () => {
         requireVerifiedUserMock.mockRejectedValue(new UnverifiedEmailError());
 
@@ -48,7 +57,7 @@ describe('/api/identify', () => {
             body: new FormData()
         }));
 
-        expect(response.status).toBe(403);
+        expect(response.status).toBe(HttpStatus.Forbidden);
         await expect(response.json()).resolves.toEqual({
             error: VERIFY_REQUIRED_MESSAGE,
             code: 'unverified'
@@ -76,7 +85,7 @@ describe('/api/identify', () => {
             body: new FormData()
         }));
 
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(HttpStatus.Ok);
         await expect(response.json()).resolves.toEqual(results);
         expect(identifySpeciesMock).toHaveBeenCalledTimes(1);
     });
@@ -100,9 +109,25 @@ describe('/api/identify', () => {
             body: new FormData()
         }));
 
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(HttpStatus.BadRequest);
         await expect(response.json()).resolves.toEqual({
             error: 'bad image'
         });
+    });
+
+    it('answers 413 and never calls identifySpecies when the upload is too large', async () => {
+        requireVerifiedUserMock.mockResolvedValue(VERIFIED_SESSION);
+        readIdentifyFormMock.mockRejectedValue(new PlantNetError('too large', 413));
+
+        const response = await POST(new Request('http://localhost/api/identify', {
+            method: 'POST',
+            body: new FormData()
+        }));
+
+        expect(response.status).toBe(HttpStatus.PayloadTooLarge);
+        await expect(response.json()).resolves.toEqual({
+            error: 'too large'
+        });
+        expect(identifySpeciesMock).not.toHaveBeenCalled();
     });
 });

@@ -3,6 +3,7 @@ import { groupBy } from 'lodash-es';
 
 // Constants
 import { CARE_META } from '@/helpers/care/constants';
+import { HttpStatus } from '@/lib/http/constants';
 
 // Helpers
 import { dueTasks, isNotifiedToday } from '@/helpers/care';
@@ -20,7 +21,7 @@ export const GET = async (request: Request) => {
 
     if (!secret || authorization !== `Bearer ${secret}`) {
         return new NextResponse('Unauthorized', {
-            status: 401
+            status: HttpStatus.Unauthorized
         });
     }
 

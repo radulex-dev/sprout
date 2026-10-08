@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 // Constants
 import { PUSH_TEST_PAYLOAD } from '@/services/server/push/constants';
+import { HttpStatus } from '@/lib/http/constants';
 
 // Services
 import { sendPushToUser } from '@/services/server/push';
@@ -20,7 +21,7 @@ export const POST = async () => {
         return NextResponse.json({
             error: 'No push subscription is registered for this device.'
         }, {
-            status: 409
+            status: HttpStatus.Conflict
         });
     }
 
@@ -30,7 +31,7 @@ export const POST = async () => {
         return NextResponse.json({
             error: 'The push service rejected the message.'
         }, {
-            status: 502
+            status: HttpStatus.BadGateway
         });
     }
 

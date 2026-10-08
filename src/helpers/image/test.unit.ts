@@ -2,7 +2,8 @@ import type Compressor from 'compressorjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Constants
-import { ERROR_IMAGE_TOO_LARGE, ERROR_UNREADABLE_IMAGE, JPEG_QUALITY, MAX_IMAGE_DIMENSION, MAX_PHOTO_BYTES } from './constants';
+import { ERROR_UNREADABLE_IMAGE, JPEG_QUALITY, MAX_IMAGE_DIMENSION, MAX_PHOTO_BYTES } from './constants';
+import { ERROR_IMAGE_TOO_LARGE } from '@/services/server/plantnet/constants';
 
 // Helpers
 import { compressPhoto } from './index';

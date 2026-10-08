@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 
+// Constants
+import { HttpStatus } from '@/lib/http/constants';
+
 // Services
-import { identifySpecies, PlantNetError } from '@/services/server/plantnet';
+import { identifySpecies, PlantNetError, readIdentifyForm } from '@/services/server/plantnet';
 
 // Auth
 import { VERIFY_REQUIRED_MESSAGE } from '@/lib/auth/constants';
@@ -17,16 +20,16 @@ export const POST = async (request: Request) => {
                 error: VERIFY_REQUIRED_MESSAGE,
                 code: 'unverified'
             }, {
-                status: 403
+                status: HttpStatus.Forbidden
             });
         }
 
         throw error;
     }
 
-    const form = await request.formData();
-
     try {
+        const form = await readIdentifyForm(request);
+
         return NextResponse.json(await identifySpecies(form));
     } catch (error) {
         if (error instanceof PlantNetError) {
