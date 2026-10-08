@@ -7,6 +7,7 @@ vi.mock('server-only', () => {
 });
 
 beforeEach(() => {
+    localStorage.clear();
     vi.clearAllMocks();
 });
 

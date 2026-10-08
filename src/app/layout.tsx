@@ -3,7 +3,7 @@ import localFont from 'next/font/local';
 import type { Metadata, Viewport } from 'next';
 
 // Components
-import Analytics from '@/components/Analytics';
+import AnalyticsConsent from '@/components/AnalyticsConsent';
 import SiteCore from '@/components/SiteCore';
 
 // Styles
@@ -62,7 +62,7 @@ const RootLayout = ({ children, className, ...props }: Props) => {
                 <SiteCore>
                     {children}
                 </SiteCore>
-                <Analytics />
+                <AnalyticsConsent />
             </body>
         </html>
     );

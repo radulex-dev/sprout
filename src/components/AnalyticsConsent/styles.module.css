@@ -1,0 +1,44 @@
+@reference "../../app/globals.css";
+
+.root {
+    @apply fixed inset-x-0 z-20 mx-auto flex max-w-120 flex-col gap-3 bg-surface py-6 shadow-card;
+
+    bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 0.625rem);
+    padding-inline: calc(1rem + env(safe-area-inset-left)) calc(1rem + env(safe-area-inset-right));
+    border-top: 1px solid rgb(28 37 32 / 8%);
+    animation: fade-in 400ms var(--ease-out);
+
+    @variant tablet {
+        @apply max-w-2xl;
+    }
+
+    @variant desktop {
+        @apply max-w-4xl;
+
+        bottom: 0;
+    }
+}
+
+.leaving {
+    animation: fade-out 400ms var(--ease-out) forwards;
+}
+
+@keyframes fade-out {
+    from {
+        transform: none;
+        opacity: 1;
+    }
+
+    to {
+        transform: translateY(0.25rem);
+        opacity: 0;
+    }
+}
+
+.message {
+    @apply m-0 text-center text-note leading-[1.45] text-ink;
+}
+
+.actions {
+    @apply ui-field-row justify-center;
+}
