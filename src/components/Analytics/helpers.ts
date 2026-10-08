@@ -23,3 +23,7 @@ export const beforeSend: UmamiBeforeSend = (...[, payload]) => {
 
     return payload;
 };
+
+export const isAnalyticsConfigured = (): boolean => {
+    return Boolean(process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL && process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID);
+};

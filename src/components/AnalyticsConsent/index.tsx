@@ -11,6 +11,9 @@ import { ButtonSize, ButtonVariant } from '@/design-system/Button/constants';
 import Analytics from '@/components/Analytics';
 import Button from '@/design-system/Button';
 
+// Helpers
+import { isAnalyticsConfigured } from '@/components/Analytics/helpers';
+
 // Hooks
 import { useAnalyticsConsent } from '@/hooks';
 
@@ -47,6 +50,10 @@ const AnalyticsConsent: React.FunctionComponent<Props> = ({ className, role = 'r
             clearTimeout(timeout);
         };
     }, [isLeaving]);
+
+    if (!isAnalyticsConfigured()) {
+        return;
+    }
 
     if (!isLeaving && isLoaded && consent === true) {
         return <Analytics />;

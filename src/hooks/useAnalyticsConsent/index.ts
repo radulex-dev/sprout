@@ -22,15 +22,19 @@ export const useAnalyticsConsent = (): AnalyticsConsentState => {
 
     useEffect(() => {
         const handleStorage = (event: StorageEvent) => {
-            if (event.storageArea !== localStorage) {
+            try {
+                if (event.storageArea !== localStorage) {
+                    return;
+                }
+
+                if (event.key !== ANALYTICS_CONSENT_KEY && event.key !== null) {
+                    return;
+                }
+
+                setConsent(parseConsent(event.newValue));
+            } catch {
                 return;
             }
-
-            if (event.key !== ANALYTICS_CONSENT_KEY && event.key !== null) {
-                return;
-            }
-
-            setConsent(parseConsent(event.newValue));
         };
 
         globalThis.addEventListener('storage', handleStorage);

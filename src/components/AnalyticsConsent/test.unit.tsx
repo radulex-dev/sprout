@@ -1,6 +1,6 @@
 import userEvent from '@testing-library/user-event';
 import type React from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
 
 // Constants
@@ -19,6 +19,11 @@ vi.mock('@/components/Analytics', () => {
 });
 
 const props: React.ComponentProps<typeof AnalyticsConsent> = {};
+
+beforeEach(() => {
+    vi.stubEnv('NEXT_PUBLIC_UMAMI_SCRIPT_URL', 'https://umami.example.com/script.js');
+    vi.stubEnv('NEXT_PUBLIC_UMAMI_WEBSITE_ID', 'test-website-id');
+});
 
 describe('AnalyticsConsent', () => {
     it('shows the banner and loads no analytics when no choice is stored', () => {
@@ -159,6 +164,35 @@ describe('AnalyticsConsent', () => {
                 storageArea: localStorage
             }));
         });
+
+        expect(screen.getByText(ANALYTICS_CONSENT_MESSAGE)).toBeInTheDocument();
+        expect(screen.queryByText('Umami')).not.toBeInTheDocument();
+    });
+
+    it('shows no banner and loads no analytics when analytics is not configured', () => {
+        vi.unstubAllEnvs();
+
+        render(<AnalyticsConsent {...props} />);
+
+        expect(screen.queryByText(ANALYTICS_CONSENT_MESSAGE)).not.toBeInTheDocument();
+        expect(screen.queryByText('Umami')).not.toBeInTheDocument();
+    });
+
+    it('shows the banner and loads no analytics for an unrecognised stored value', () => {
+        localStorage.setItem(ANALYTICS_CONSENT_KEY, 'garbage');
+
+        render(<AnalyticsConsent {...props} />);
+
+        expect(screen.getByText(ANALYTICS_CONSENT_MESSAGE)).toBeInTheDocument();
+        expect(screen.queryByText('Umami')).not.toBeInTheDocument();
+    });
+
+    it('shows the banner and loads no analytics when storage is unreadable', () => {
+        vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+            throw new Error('storage unavailable');
+        });
+
+        render(<AnalyticsConsent {...props} />);
 
         expect(screen.getByText(ANALYTICS_CONSENT_MESSAGE)).toBeInTheDocument();
         expect(screen.queryByText('Umami')).not.toBeInTheDocument();

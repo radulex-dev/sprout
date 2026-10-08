@@ -20,6 +20,19 @@ describe('useAnalyticsConsent', () => {
         expect(result.current.consent).toBeUndefined();
     });
 
+    it('reports no choice once loaded when storage is unreadable', () => {
+        vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+            throw new Error('storage unavailable');
+        });
+
+        const { result } = renderHook(() => {
+            return useAnalyticsConsent();
+        });
+
+        expect(result.current.isLoaded).toBe(true);
+        expect(result.current.consent).toBeUndefined();
+    });
+
     it.each([{
         expected: true,
         stored: 'true'
@@ -144,6 +157,26 @@ describe('useAnalyticsConsent', () => {
         expect(result.current.consent).toBeUndefined();
     });
 
+    it('survives a storage event while storage is unreadable', () => {
+        const { result } = renderHook(() => {
+            return useAnalyticsConsent();
+        });
+
+        vi.spyOn(globalThis, 'localStorage', 'get').mockImplementation(() => {
+            throw new Error('storage unavailable');
+        });
+
+        act(() => {
+            globalThis.dispatchEvent(new StorageEvent('storage', {
+                key: ANALYTICS_CONSENT_KEY,
+                newValue: 'true',
+                storageArea: globalThis.sessionStorage
+            }));
+        });
+
+        expect(result.current.consent).toBeUndefined();
+    });
+
     it('removes the storage listener on unmount', () => {
         const removeSpy = vi.spyOn(globalThis, 'removeEventListener');
         const { unmount } = renderHook(() => {
@@ -166,7 +199,7 @@ describe('useAnalyticsConsent', () => {
             expected: false,
             value: 'false'
         }, {
-            expected: false,
+            expected: undefined,
             value: 'garbage'
         }])('parseConsent($value) returns $expected', ({ value, expected }) => {
             expect(parseConsent(value)).toBe(expected);
@@ -180,6 +213,14 @@ describe('useAnalyticsConsent', () => {
             expect(readConsent()).toBeUndefined();
         });
 
+        it('treats an unreadable choice as undefined', () => {
+            vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+                throw new Error('storage unavailable');
+            });
+
+            expect(readConsent()).toBeUndefined();
+        });
+
         it.each([{
             expected: true,
             stored: 'true'
@@ -187,7 +228,7 @@ describe('useAnalyticsConsent', () => {
             expected: false,
             stored: 'false'
         }, {
-            expected: false,
+            expected: undefined,
             stored: 'garbage'
         }])('reads a stored $stored value as $expected', ({ expected, stored }) => {
             localStorage.setItem(ANALYTICS_CONSENT_KEY, stored);
@@ -205,6 +246,18 @@ describe('useAnalyticsConsent', () => {
             writeConsent(value);
 
             expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe(expected);
+        });
+
+        it('logs when the choice cannot be persisted', () => {
+            vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+                throw new Error('quota');
+            });
+            const errorSpy = vi.spyOn(console, 'error').mockImplementation(vi.fn());
+
+            expect(() => {
+                writeConsent(true);
+            }).not.toThrow();
+            expect(errorSpy).toHaveBeenCalled();
         });
     });
 });

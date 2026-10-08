@@ -2,7 +2,7 @@
 import { ANALYTICS_CONSENT_KEY } from './constants';
 
 export const parseConsent = (value: string | null): boolean | undefined => {
-    if (!value) {
+    if (value !== 'true' && value !== 'false') {
         return;
     }
 
@@ -10,9 +10,17 @@ export const parseConsent = (value: string | null): boolean | undefined => {
 };
 
 export const readConsent = (): boolean | undefined => {
-    return parseConsent(localStorage.getItem(ANALYTICS_CONSENT_KEY));
+    try {
+        return parseConsent(localStorage.getItem(ANALYTICS_CONSENT_KEY));
+    } catch {
+        return;
+    }
 };
 
 export const writeConsent = (hasConsented: boolean): void => {
-    localStorage.setItem(ANALYTICS_CONSENT_KEY, String(hasConsented));
+    try {
+        localStorage.setItem(ANALYTICS_CONSENT_KEY, String(hasConsented));
+    } catch (error) {
+        console.error('Failed to persist analytics consent', error);
+    }
 };
