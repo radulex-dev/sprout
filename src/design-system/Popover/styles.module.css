@@ -16,9 +16,3 @@
 .popup[data-ending-style] {
     @apply scale-95 opacity-0;
 }
-
-@media (prefers-reduced-motion: reduce) {
-    .popup {
-        @apply transition-none;
-    }
-}

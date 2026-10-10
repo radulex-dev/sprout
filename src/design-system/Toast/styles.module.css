@@ -136,12 +136,6 @@
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .ring {
-        @apply hidden;
-    }
-}
-
 @media (hover: hover) and (pointer: fine) {
     .close:hover {
         @apply text-ink;

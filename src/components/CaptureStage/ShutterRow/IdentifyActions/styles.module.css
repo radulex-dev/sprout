@@ -11,9 +11,3 @@
 .srOnly {
     @apply sr-only;
 }
-
-@media (prefers-reduced-motion: reduce) {
-    .spinner {
-        animation: none;
-    }
-}

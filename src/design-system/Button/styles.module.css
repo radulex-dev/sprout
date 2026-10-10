@@ -109,21 +109,3 @@
         background-color: color-mix(in oklab, var(--color-red-100) 90%, var(--color-red));
     }
 }
-
-@media (prefers-reduced-motion: reduce) {
-    .root {
-        @apply transition-none;
-    }
-
-    .default,
-    .primary,
-    .accent,
-    .secondary,
-    .danger,
-    .soft,
-    .outline {
-        &:active {
-            @apply scale-100;
-        }
-    }
-}

@@ -53,15 +53,6 @@
     @apply mt-2 h-2.5 w-16;
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .title,
-    .subtitle,
-    .lineTitle,
-    .lineMeta {
-        animation: none;
-    }
-}
-
 @keyframes skeleton-pulse {
     0%,
     100% {

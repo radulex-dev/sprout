@@ -78,9 +78,3 @@
         @apply bg-green-100;
     }
 }
-
-@media (prefers-reduced-motion: reduce) {
-    .popup {
-        @apply transition-none;
-    }
-}
