@@ -1,0 +1,18 @@
+@reference "../../app/globals.css";
+
+.viewport {
+    @apply pointer-events-none fixed left-1/2 z-40 max-w-md;
+
+    top: calc(1.5rem + env(safe-area-inset-top));
+    width: calc(100% - 2rem);
+    transform: translateX(-50%);
+}
+
+@variant desktop {
+    .viewport {
+        @apply right-6 left-auto flex w-96 flex-col gap-2;
+
+        max-width: calc(100vw - 3rem);
+        transform: none;
+    }
+}

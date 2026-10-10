@@ -11,6 +11,7 @@ import { ArrowLeft } from 'lucide-react';
 import { HEADER_STYLE, SUB_STYLE } from './constants';
 import { FREQUENCY_TITLE } from '@/components/CareScheduleFields/constants';
 import { CARE_META } from '@/helpers/care/constants';
+import { ToastVariant } from '@/design-system/Toast/constants';
 
 // Components
 import PlantPhoto from '@/components/PlantPhoto';
@@ -27,6 +28,7 @@ import { displayName } from '@/helpers/plant';
 
 // Hooks
 import { useClock } from '@/hooks';
+import { useToast } from '@/design-system/hooks/useToast';
 
 // Database
 import { deletePlant, markCareDone, updatePlant } from '@/lib/db/actions';
@@ -43,66 +45,89 @@ export interface Props extends React.ComponentProps<'div'> {
 
 const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...props }) => {
     const classes = classNames(styles.root, className);
-    const errorNoticeClasses = classNames(styles.notice, styles.error);
 
     const router = useRouter();
     const now = useClock();
+    const showToast = useToast();
     const [isEditing, setIsEditing] = useState(false);
     const [isConfirmDelete, setIsConfirmDelete] = useState(false);
-    const [error, setError] = useState<string | undefined>(undefined);
 
     const handleMarkDone = useCallback(async (kind: CareKind) => {
-        setError(undefined);
         try {
             await markCareDone(plant.id, kind, startOfToday());
 
             router.refresh();
         } catch (reason) {
             console.error('Failed to log care', reason);
-            setError('Couldn\'t log that care. Please try again.');
+            showToast({
+                timeout: 5000,
+                variant: ToastVariant.Error,
+                title: 'Couldn\'t log that care. Please try again.'
+            });
         }
-    }, [plant, router]);
+    }, [plant, router, showToast]);
 
     const handleSetDate = useCallback(async (kind: CareKind, date: string) => {
-        setError(undefined);
         try {
             await markCareDone(plant.id, kind, parseDate(date).toDate(getLocalTimeZone()).getTime());
 
             router.refresh();
         } catch (reason) {
             console.error('Failed to log care', reason);
-            setError('Couldn\'t log that care. Please try again.');
+            showToast({
+                timeout: 5000,
+                variant: ToastVariant.Error,
+                title: 'Couldn\'t log that care. Please try again.'
+            });
         }
-    }, [plant, router]);
+    }, [plant, router, showToast]);
 
     const handleSaveEdited = useCallback(async (edited: Plant) => {
-        setError(undefined);
         try {
             await updatePlant(edited.id, {
                 nickname: edited.nickname,
                 care: edited.care
             });
 
+            showToast({
+                timeout: 5000,
+                variant: ToastVariant.Success,
+                title: 'Schedule saved.'
+            });
+
             setIsEditing(false);
             router.refresh();
         } catch (reason) {
             console.error('Failed to save schedule', reason);
-            setError('Couldn\'t save the schedule. Please try again.');
+            showToast({
+                timeout: 5000,
+                variant: ToastVariant.Error,
+                title: 'Couldn\'t save the schedule. Please try again.'
+            });
         }
-    }, [router]);
+    }, [router, showToast]);
 
     const handleRemove = useCallback(async () => {
-        setError(undefined);
         try {
             await deletePlant(plant.id);
+
+            showToast({
+                timeout: 5000,
+                variant: ToastVariant.Success,
+                title: 'Plant deleted.'
+            });
 
             router.push('/');
             router.refresh();
         } catch (reason) {
             console.error('Failed to delete plant', reason);
-            setError('Couldn\'t delete this plant. Please try again.');
+            showToast({
+                timeout: 5000,
+                variant: ToastVariant.Error,
+                title: 'Couldn\'t delete this plant. Please try again.'
+            });
         }
-    }, [plant, router]);
+    }, [plant, router, showToast]);
 
     const handleStartEdit = useCallback(() => {
         setIsEditing(true);
@@ -149,12 +174,6 @@ const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...prop
                             </div>
                         </div>
                     </header>
-
-                    {error && (
-                        <div className={errorNoticeClasses} role="status">
-                            {error}
-                        </div>
-                    )}
 
                     <dl className={styles.careStats}>
                         {[CareKind.Water, CareKind.Fertilize, CareKind.Repot].map((kind) => {

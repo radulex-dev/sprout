@@ -12,7 +12,6 @@ const props: React.ComponentProps<typeof AccountCard> = {
         emailVerified: false
     },
     verifyCooldown: 0,
-    verifyStatus: '',
     onVerify: vi.fn(),
     onSignOut: vi.fn()
 };
@@ -33,12 +32,6 @@ describe('AccountCard', () => {
             name: 'Try again in 42s'
         })).toBeDisabled();
         expect(screen.queryByText('Email verified')).not.toBeInTheDocument();
-    });
-
-    it('shows the verification status in a live region while the email is unverified', () => {
-        render(<AccountCard {...props} verifyStatus="Verification email requested. Check your inbox." />);
-
-        expect(screen.getByRole('status')).toHaveTextContent('Verification email requested. Check your inbox.');
     });
 
     it('renders the verified badge and no verify button once the email is verified', () => {

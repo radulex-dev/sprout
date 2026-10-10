@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { TEST_PUSH_COOLDOWN_SECONDS, VERIFY_COOLDOWN_SECONDS } from './constants';
 import { CONFIRM_LABEL, INSTALL_GUIDE_CONTENT } from './InstallGuide/constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
+import { ToastVariant } from '@/design-system/Toast/constants';
 
 // Components
 import AboutCard from './AboutCard';
@@ -20,6 +21,7 @@ import AlertDialog from '@/design-system/AlertDialog';
 // Hooks
 import { useInstall } from '@/hooks';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useToast } from '@/design-system/hooks/useToast';
 
 // Services
 import { InstallPlatform } from '@/services/install';
@@ -44,12 +46,11 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
     const classes = classNames(styles.root, className);
 
     const router = useRouter();
+    const showToast = useToast();
     const { isSupported, permission, requestPermission } = useNotifications();
     const { isStandalone, platform, canPrompt, promptInstall } = useInstall();
     const [isGuideOpen, setIsGuideOpen] = useState(false);
-    const [testStatus, setTestStatus] = useState('');
     const [testCooldown, setTestCooldown] = useState(0);
-    const [verifyStatus, setVerifyStatus] = useState('');
     const [verifyCooldown, setVerifyCooldown] = useState(0);
 
     const guidePlatform = platform ?? InstallPlatform.Other;
@@ -95,8 +96,6 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
     }, [router]);
 
     const handleEnableNotifications = useCallback(async () => {
-        setTestStatus('');
-
         const granted = await requestPermission();
 
         if (granted === 'granted') {
@@ -106,7 +105,6 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
 
     const handleTestNotification = useCallback(async () => {
         setTestCooldown(TEST_PUSH_COOLDOWN_SECONDS);
-        setTestStatus('Sending a test push…');
 
         try {
             const response = await fetch('/api/push/test', {
@@ -114,28 +112,43 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
             });
 
             if (response.status === 409) {
-                setTestStatus('No push subscription is registered for this device, so reminders cannot reach it.');
+                showToast({
+                    timeout: 5000,
+                    variant: ToastVariant.Warning,
+                    title: 'No push subscription is registered for this device, so reminders cannot reach it.'
+                });
 
                 return;
             }
 
             if (!response.ok) {
-                setTestStatus('The test push could not be sent.');
+                showToast({
+                    timeout: 5000,
+                    variant: ToastVariant.Error,
+                    title: 'The test push could not be sent.'
+                });
 
                 return;
             }
 
             const { sent } = await response.json() as { sent: number; };
 
-            setTestStatus(`Test push sent to ${sent} device${sent === 1 ? '' : 's'}.`);
+            showToast({
+                timeout: 5000,
+                variant: ToastVariant.Success,
+                title: `Test push sent to ${sent} device${sent === 1 ? '' : 's'}.`
+            });
         } catch (error) {
-            setTestStatus(error instanceof Error ? error.message : 'The test push could not be sent.');
+            showToast({
+                timeout: 5000,
+                variant: ToastVariant.Error,
+                title: error instanceof Error ? error.message : 'The test push could not be sent.'
+            });
         }
-    }, []);
+    }, [showToast]);
 
     const handleVerify = useCallback(async () => {
         setVerifyCooldown(VERIFY_COOLDOWN_SECONDS);
-        setVerifyStatus('Sending a verification email…');
 
         try {
             const response = await fetch('/api/email/resend-verification', {
@@ -143,28 +156,48 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
             });
 
             if (response.status === 503) {
-                setVerifyStatus('Email delivery is not configured on this server.');
+                showToast({
+                    timeout: 5000,
+                    variant: ToastVariant.Warning,
+                    title: 'Email delivery is not configured on this server.'
+                });
 
                 return;
             }
 
             if (response.status === 409) {
-                setVerifyStatus('This address is already verified.');
+                showToast({
+                    timeout: 5000,
+                    variant: ToastVariant.Info,
+                    title: 'This address is already verified.'
+                });
 
                 return;
             }
 
             if (!response.ok) {
-                setVerifyStatus('The verification email could not be sent.');
+                showToast({
+                    timeout: 5000,
+                    variant: ToastVariant.Error,
+                    title: 'The verification email could not be sent.'
+                });
 
                 return;
             }
 
-            setVerifyStatus('Verification email requested. Check your inbox.');
+            showToast({
+                timeout: 5000,
+                variant: ToastVariant.Success,
+                title: 'Verification email requested. Check your inbox.'
+            });
         } catch (error) {
-            setVerifyStatus(error instanceof Error ? error.message : 'The verification email could not be sent.');
+            showToast({
+                timeout: 5000,
+                variant: ToastVariant.Error,
+                title: error instanceof Error ? error.message : 'The verification email could not be sent.'
+            });
         }
-    }, []);
+    }, [showToast]);
 
     const handleInstall = useCallback(async () => {
         if (canPrompt) {
@@ -182,13 +215,13 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
 
     const renderAccountCard = () => {
         return (
-            <AccountCard user={user} verifyCooldown={verifyCooldown} verifyStatus={verifyStatus} onVerify={handleVerify} onSignOut={handleSignOut} />
+            <AccountCard user={user} verifyCooldown={verifyCooldown} onVerify={handleVerify} onSignOut={handleSignOut} />
         );
     };
 
     const renderRemindersCard = () => {
         return (
-            <RemindersCard isSupported={isSupported} perm={permission} isStandalone={isStandalone} testCooldown={testCooldown} onEnable={handleEnableNotifications} onInstall={handleInstall} onTest={handleTestNotification} testStatus={testStatus} />
+            <RemindersCard isSupported={isSupported} perm={permission} isStandalone={isStandalone} testCooldown={testCooldown} onEnable={handleEnableNotifications} onInstall={handleInstall} onTest={handleTestNotification} />
         );
     };
 

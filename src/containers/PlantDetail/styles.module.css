@@ -12,14 +12,6 @@
     @apply ui-app-sub flex flex-wrap items-center gap-x-1.5;
 }
 
-.notice {
-    @apply ui-notice;
-}
-
-.notice.error {
-    @apply ui-notice-error;
-}
-
 .sectionTitle {
     @apply ui-section-title;
 }

@@ -23,10 +23,6 @@
     @apply ui-notice;
 }
 
-.notice.error {
-    @apply ui-notice-error;
-}
-
 .noticeWarn {
     @apply ui-notice-warn;
 }

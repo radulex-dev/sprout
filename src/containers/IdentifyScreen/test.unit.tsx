@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
 
 // Components
+import ToastProvider from '@/design-system/ToastProvider';
 import IdentifyScreen from './index';
 
 // Mocks
@@ -41,7 +42,11 @@ const props: React.ComponentProps<typeof IdentifyScreen> = {
 
 describe('IdentifyScreen', () => {
     it('shows the capture flow and no verify notice for a verified user', () => {
-        render(<IdentifyScreen {...props} />);
+        render(
+            <ToastProvider>
+                <IdentifyScreen {...props} />
+            </ToastProvider>
+        );
 
         expect(screen.getByRole('button', {
             name: 'Open camera'
@@ -52,7 +57,11 @@ describe('IdentifyScreen', () => {
     });
 
     it('shows the persistent verify notice with a settings link for an unverified user', () => {
-        render(<IdentifyScreen {...props} emailVerified={false} />);
+        render(
+            <ToastProvider>
+                <IdentifyScreen {...props} emailVerified={false} />
+            </ToastProvider>
+        );
 
         expect(screen.getByText('Verify your email first')).toBeInTheDocument();
         expect(screen.getByRole('link', {
@@ -62,7 +71,11 @@ describe('IdentifyScreen', () => {
     });
 
     it('hides the capture flow for an unverified user', () => {
-        render(<IdentifyScreen {...props} emailVerified={false} />);
+        render(
+            <ToastProvider>
+                <IdentifyScreen {...props} emailVerified={false} />
+            </ToastProvider>
+        );
 
         expect(screen.queryByRole('button', {
             name: 'Open camera'
@@ -70,7 +83,11 @@ describe('IdentifyScreen', () => {
     });
 
     it('links the verify notice to /settings', () => {
-        render(<IdentifyScreen {...props} emailVerified={false} />);
+        render(
+            <ToastProvider>
+                <IdentifyScreen {...props} emailVerified={false} />
+            </ToastProvider>
+        );
 
         expect(screen.getByRole('link', {
             name: 'Go to Settings'
@@ -78,7 +95,11 @@ describe('IdentifyScreen', () => {
     });
 
     it('keeps the verify notice mounted across an effect flush', async () => {
-        render(<IdentifyScreen {...props} emailVerified={false} />);
+        render(
+            <ToastProvider>
+                <IdentifyScreen {...props} emailVerified={false} />
+            </ToastProvider>
+        );
 
         expect(screen.getByRole('link', {
             name: 'Go to Settings'
@@ -94,7 +115,11 @@ describe('IdentifyScreen', () => {
     });
 
     it('proves the capture bar and identify gate icons render', () => {
-        render(<IdentifyScreen {...props} />);
+        render(
+            <ToastProvider>
+                <IdentifyScreen {...props} />
+            </ToastProvider>
+        );
 
         expect(document.body.querySelector('svg')).not.toBeNull();
     });

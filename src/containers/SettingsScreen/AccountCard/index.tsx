@@ -18,12 +18,11 @@ import type { SettingsUser } from '../types';
 export interface Props extends React.ComponentProps<'div'> {
     user: SettingsUser;
     verifyCooldown: number;
-    verifyStatus: string;
     onVerify: () => void;
     onSignOut: () => void;
 }
 
-const AccountCard: React.FunctionComponent<Props> = ({ user, verifyCooldown, verifyStatus, onVerify, onSignOut, className, ...props }) => {
+const AccountCard: React.FunctionComponent<Props> = ({ user, verifyCooldown, onVerify, onSignOut, className, ...props }) => {
     const classes = classNames(styles.root, className);
 
     const renderVerification = () => {
@@ -46,11 +45,6 @@ const AccountCard: React.FunctionComponent<Props> = ({ user, verifyCooldown, ver
                 <Button block disabled={isVerifyCoolingDown} onClick={onVerify}>
                     {isVerifyCoolingDown ? `Try again in ${verifyCooldown}s` : VERIFY_LABEL}
                 </Button>
-                {verifyStatus !== '' && (
-                    <div className={styles.notice} role="status">
-                        {verifyStatus}
-                    </div>
-                )}
             </React.Fragment>
         );
     };

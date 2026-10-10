@@ -5,6 +5,7 @@ import { act, render, screen } from '@testing-library/react';
 
 // Components
 import SettingsScreen from './index';
+import ToastProvider from '@/design-system/ToastProvider';
 
 // Mocks
 import { makePlant } from '@test/vitest/data/plant.mock';
@@ -116,7 +117,11 @@ describe('SettingsScreen', () => {
     });
 
     it('requests one verification email and blocks a resend while the cooldown runs', async () => {
-        render(<SettingsScreen {...props} />);
+        render(
+            <ToastProvider>
+                <SettingsScreen {...props} />
+            </ToastProvider>
+        );
 
         await clickVerify('Verify account');
 
@@ -124,7 +129,7 @@ describe('SettingsScreen', () => {
         expect(fetchMock).toHaveBeenCalledWith('/api/email/resend-verification', {
             method: 'POST'
         });
-        expect(screen.getByRole('status')).toHaveTextContent('Verification email requested. Check your inbox.');
+        expect(screen.getByText('Verification email requested. Check your inbox.')).toBeInTheDocument();
         expect(screen.getByRole('button', {
             name: 'Try again in 60s'
         })).toBeDisabled();
@@ -135,7 +140,11 @@ describe('SettingsScreen', () => {
     });
 
     it('counts the cooldown down and re-enables the verify control after 60 seconds', async () => {
-        render(<SettingsScreen {...props} />);
+        render(
+            <ToastProvider>
+                <SettingsScreen {...props} />
+            </ToastProvider>
+        );
 
         await clickVerify('Verify account');
 
@@ -168,11 +177,15 @@ describe('SettingsScreen', () => {
             status
         });
 
-        render(<SettingsScreen {...props} />);
+        render(
+            <ToastProvider>
+                <SettingsScreen {...props} />
+            </ToastProvider>
+        );
 
         await clickVerify('Verify account');
 
-        expect(screen.getByRole('status')).toHaveTextContent(expectedCopy);
+        expect(screen.getByText(expectedCopy)).toBeInTheDocument();
     });
 
     it('shows the failure copy when the route answers an unexpected status', async () => {
@@ -181,20 +194,28 @@ describe('SettingsScreen', () => {
             status: 500
         });
 
-        render(<SettingsScreen {...props} />);
+        render(
+            <ToastProvider>
+                <SettingsScreen {...props} />
+            </ToastProvider>
+        );
 
         await clickVerify('Verify account');
 
-        expect(screen.getByRole('status')).toHaveTextContent('The verification email could not be sent.');
+        expect(screen.getByText('The verification email could not be sent.')).toBeInTheDocument();
     });
 
     it('shows the failure copy when the request rejects', async () => {
         fetchMock.mockRejectedValue(new Error('Failed to fetch'));
 
-        render(<SettingsScreen {...props} />);
+        render(
+            <ToastProvider>
+                <SettingsScreen {...props} />
+            </ToastProvider>
+        );
 
         await clickVerify('Verify account');
 
-        expect(screen.getByRole('status')).toHaveTextContent('Failed to fetch');
+        expect(screen.getByText('Failed to fetch')).toBeInTheDocument();
     });
 });

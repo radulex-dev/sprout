@@ -5,6 +5,7 @@ import type { Metadata, Viewport } from 'next';
 // Components
 import AnalyticsConsent from '@/components/AnalyticsConsent';
 import SiteCore from '@/components/SiteCore';
+import ToastProvider from '@/design-system/ToastProvider';
 
 // Styles
 import './globals.css';
@@ -59,10 +60,12 @@ const RootLayout = ({ children, className, ...props }: Props) => {
     return (
         <html lang="en" {...props} className={classes}>
             <body>
-                <SiteCore>
-                    {children}
-                </SiteCore>
-                <AnalyticsConsent />
+                <ToastProvider>
+                    <SiteCore>
+                        {children}
+                    </SiteCore>
+                    <AnalyticsConsent />
+                </ToastProvider>
             </body>
         </html>
     );

@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 // Constants
 import { IDENTIFY_COPY } from './constants';
 import { ERROR_UNREADABLE_IMAGE } from '@/helpers/image/constants';
+import { ToastVariant } from '@/design-system/Toast/constants';
 
 // Components
 import AddPlantForm from '@/components/AddPlantForm';
@@ -19,6 +20,7 @@ import { compressPhoto } from '@/helpers/image';
 
 // Hooks
 import { useObjectUrl } from '@/hooks';
+import { useToast } from '@/design-system/hooks/useToast';
 
 // Services
 import { identifyPlant } from '@/services/identify';
@@ -40,48 +42,61 @@ export interface Props extends React.ComponentProps<'div'> {
 
 const IdentifyScreen: React.FunctionComponent<Props> = ({ emailVerified, className, ...props }) => {
     const classes = classNames(styles.root, className);
-    const errorNoticeClasses = classNames(styles.notice, styles.error);
     const router = useRouter();
+    const showToast = useToast();
 
     const [phase, setPhase] = useState<Phase>('capture');
     const [photo, setPhoto] = useState<Blob | undefined>(undefined);
     const [results, setResults] = useState<IdentifyResult[]>([]);
     const [picked, setPicked] = useState<IdentifyResult | undefined>(undefined);
-    const [error, setError] = useState<string | undefined>(undefined);
 
     const photoUrl = useObjectUrl(photo);
 
     const handlePhoto = useCallback(async (nextPhoto: Blob) => {
-        setError(undefined);
-
         try {
             setPhoto(await compressPhoto(nextPhoto));
         } catch (reason) {
             console.error('Failed to process photo', reason);
-            setError(ERROR_UNREADABLE_IMAGE);
+            showToast({
+                timeout: 5000,
+                variant: ToastVariant.Error,
+                title: ERROR_UNREADABLE_IMAGE
+            });
         }
-    }, []);
+    }, [showToast]);
 
     const handleIdentifyError = useCallback((message: string) => {
-        setError(message);
-    }, []);
+        if (!message) {
+            return;
+        }
+
+        showToast({
+            timeout: 5000,
+            variant: ToastVariant.Error,
+            title: message
+        });
+    }, [showToast]);
 
     const handleIdentify = useCallback(async () => {
         if (!photo) {
             return;
         }
         setPhase('identifying');
-        setError(undefined);
         try {
             const result = await identifyPlant(photo);
+
             setResults(result);
             setPicked(result.at(0));
             setPhase('results');
         } catch (reason) {
-            setError(reason instanceof Error ? reason.message : 'Identification failed.');
+            showToast({
+                timeout: 5000,
+                variant: ToastVariant.Error,
+                title: reason instanceof Error ? reason.message : 'Identification failed.'
+            });
             setPhase('capture');
         }
-    }, [photo]);
+    }, [photo, showToast]);
 
     const handleReset = useCallback(() => {
         setPhoto(undefined);
@@ -103,18 +118,26 @@ const IdentifyScreen: React.FunctionComponent<Props> = ({ emailVerified, classNa
     }, []);
 
     const handleSave = useCallback(async (input: PlantInput) => {
-        setError(undefined);
-
         try {
             const id = await createPlant(input);
+
+            showToast({
+                timeout: 5000,
+                variant: ToastVariant.Success,
+                title: 'Plant added.'
+            });
 
             router.push(`/plants/${id}`);
             router.refresh();
         } catch (reason) {
             console.error('Failed to add plant', reason);
-            setError('Couldn\'t add your plant. Please try again.');
+            showToast({
+                timeout: 5000,
+                variant: ToastVariant.Error,
+                title: 'Couldn\'t add your plant. Please try again.'
+            });
         }
-    }, [router]);
+    }, [router, showToast]);
 
     const renderCaptureStage = () => {
         if (phase !== 'capture' && phase !== 'identifying') {
@@ -189,11 +212,6 @@ const IdentifyScreen: React.FunctionComponent<Props> = ({ emailVerified, classNa
                 </div>
             </header>
 
-            {error && (
-                <div className={errorNoticeClasses} role="status">
-                    {error}
-                </div>
-            )}
             {renderContent()}
         </div>
     );

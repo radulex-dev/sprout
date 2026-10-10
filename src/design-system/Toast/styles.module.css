@@ -1,0 +1,168 @@
+@reference "../../app/globals.css";
+
+.root {
+    @apply
+        pointer-events-auto absolute inset-x-0 top-0 origin-top rounded-card bg-surface p-3.5
+        shadow-card
+    ;
+
+    --gap: 0.5rem;
+    --peek: 0.9rem;
+    --scale: calc(max(0, 1 - (var(--toast-index) * 0.06)));
+    --height: var(--toast-frontmost-height, var(--toast-height));
+    --toast-accent: var(--color-green-500);
+    --toast-accent-bg: var(--color-green-100);
+
+    z-index: calc(1000 - var(--toast-index));
+    height: var(--height);
+    border-left: 0.25rem solid var(--toast-accent);
+    transform:
+        translateX(var(--toast-swipe-movement-x, 0))
+        translateY(calc(var(--toast-swipe-movement-y, 0px) + (var(--toast-index) * var(--peek))))
+        scale(var(--scale));
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        opacity var(--dur-base) var(--ease-out),
+        height var(--dur-base) var(--ease-out);
+}
+
+.root[data-expanded] {
+    height: var(--toast-height);
+    transform:
+        translateX(var(--toast-swipe-movement-x, 0))
+        translateY(calc(var(--toast-swipe-movement-y, 0px) + var(--toast-offset-y) + (var(--toast-index) * var(--gap))))
+        scale(1);
+}
+
+.root[data-starting-style],
+.root[data-ending-style] {
+    @apply opacity-0;
+}
+
+.info {
+    --toast-accent: var(--color-blue-ink);
+    --toast-accent-bg: var(--color-blue-100);
+}
+
+.success {
+    --toast-accent: var(--color-green-700);
+    --toast-accent-bg: var(--color-green-100);
+}
+
+.warning {
+    --toast-accent: var(--color-amber-ink);
+    --toast-accent-bg: #f6ecd9;
+}
+
+.error {
+    --toast-accent: var(--color-red-ink);
+    --toast-accent-bg: var(--color-red-100);
+}
+
+.content {
+    @apply flex items-start gap-3;
+
+    transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.content[data-behind] {
+    @apply opacity-0;
+}
+
+.content[data-expanded] {
+    @apply opacity-100;
+}
+
+.icon {
+    @apply flex size-6 shrink-0 items-center justify-center rounded-full;
+
+    background-color: var(--toast-accent-bg);
+    color: var(--toast-accent);
+}
+
+.body {
+    @apply ui-info;
+}
+
+.title {
+    @apply m-0 ui-title text-green-900;
+}
+
+.description {
+    @apply mt-0.5 text-note leading-[1.45] wrap-anywhere text-ink-soft;
+
+    &:empty {
+        @apply hidden;
+    }
+}
+
+.close {
+    @apply
+        relative -m-1 flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full
+        border-none bg-transparent text-ink-soft
+    ;
+
+    --ring-length: 75.4;
+
+    transition: color var(--dur-base) var(--ease-out);
+}
+
+.ring {
+    @apply pointer-events-none absolute inset-0 -rotate-90;
+}
+
+.ringCircle {
+    @apply fill-none stroke-2;
+
+    stroke: var(--toast-accent);
+    stroke-linecap: round;
+    stroke-dasharray: var(--ring-length);
+    animation-name: toast-countdown;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+}
+
+.root[data-expanded] .ringCircle {
+    animation-play-state: paused;
+}
+
+@keyframes toast-countdown {
+    from {
+        stroke-dashoffset: 0;
+    }
+
+    to {
+        stroke-dashoffset: var(--ring-length);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ring {
+        @apply hidden;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .close:hover {
+        @apply text-ink;
+    }
+}
+
+@variant desktop {
+    .root {
+        @apply relative inset-auto z-auto h-auto transform-none;
+    }
+
+    .root[data-expanded] {
+        @apply h-auto transform-none;
+    }
+
+    .root[data-starting-style],
+    .root[data-ending-style] {
+        transform: translateX(0.5rem);
+    }
+
+    .content[data-behind] {
+        @apply opacity-100;
+    }
+}

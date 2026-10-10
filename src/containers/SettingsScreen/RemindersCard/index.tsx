@@ -20,10 +20,9 @@ export interface Props extends React.ComponentProps<'div'> {
     onEnable: () => void;
     onInstall: () => void;
     onTest: () => void;
-    testStatus: string;
 }
 
-const RemindersCard: React.FunctionComponent<Props> = ({ isSupported, perm, isStandalone, testCooldown, onEnable, onInstall, onTest, testStatus, className, ...props }) => {
+const RemindersCard: React.FunctionComponent<Props> = ({ isSupported, perm, isStandalone, testCooldown, onEnable, onInstall, onTest, className, ...props }) => {
     const isInstallRequired = isSupported === false && isStandalone === false;
     const warnNoticeClasses = classNames(styles.notice, styles.warn);
     const classes = classNames(styles.root, className);
@@ -56,11 +55,6 @@ const RemindersCard: React.FunctionComponent<Props> = ({ isSupported, perm, isSt
                 <Button variant={ButtonVariant.Secondary} block disabled={isTestCoolingDown} onClick={onTest}>
                     {isTestCoolingDown ? `Try again in ${testCooldown}s` : 'Send a test notification'}
                 </Button>
-                {testStatus !== '' && (
-                    <div className={styles.notice} role="status">
-                        {testStatus}
-                    </div>
-                )}
             </React.Fragment>
         );
     };

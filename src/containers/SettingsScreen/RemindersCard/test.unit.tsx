@@ -13,8 +13,7 @@ const props: React.ComponentProps<typeof RemindersCard> = {
     testCooldown: 0,
     onEnable: vi.fn(),
     onInstall: vi.fn(),
-    onTest: vi.fn(),
-    testStatus: ''
+    onTest: vi.fn()
 };
 
 describe('RemindersCard', () => {
@@ -48,12 +47,6 @@ describe('RemindersCard', () => {
         expect(screen.queryByRole('button', {
             name: 'Install the app to enable reminders'
         })).not.toBeInTheDocument();
-    });
-
-    it('shows the test push status', () => {
-        render(<RemindersCard {...props} testStatus="Test push sent to 1 device." />);
-
-        expect(screen.getByRole('status')).toHaveTextContent('Test push sent to 1 device.');
     });
 
     it('disables the test button and shows the remaining cooldown', () => {
