@@ -182,6 +182,11 @@ const config = configure([{
         }]
     }
 }, {
+    files: ['src/**/*.stories.tsx'],
+    rules: {
+        'unicorn/prevent-abbreviations': 'off'
+    }
+}, {
     linterOptions: {
         reportUnusedDisableDirectives: 'error'
     }

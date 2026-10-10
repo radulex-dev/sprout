@@ -1,4 +1,4 @@
-import { CircleCheck, CircleX, Info, TriangleAlert, type LucideIcon } from 'lucide-react';
+import { CircleAlert, CircleCheck, CircleX, Info, type LucideIcon } from 'lucide-react';
 
 export enum ToastVariant {
     Info = 'info',
@@ -13,6 +13,6 @@ export const TOAST_TIMEOUT_INDEFINITE = 0;
 export const TOAST_VARIANT_ICON: Record<ToastVariant, LucideIcon> = {
     [ToastVariant.Info]: Info,
     [ToastVariant.Success]: CircleCheck,
-    [ToastVariant.Warning]: TriangleAlert,
+    [ToastVariant.Warning]: CircleAlert,
     [ToastVariant.Error]: CircleX
 };

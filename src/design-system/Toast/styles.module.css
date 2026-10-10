@@ -1,10 +1,7 @@
 @reference "../../app/globals.css";
 
 .root {
-    @apply
-        pointer-events-auto absolute inset-x-0 top-0 origin-top rounded-card bg-surface p-3.5
-        shadow-card
-    ;
+    @apply pointer-events-auto absolute inset-x-0 top-0 origin-top rounded-card p-3.5 shadow-card;
 
     --gap: 0.5rem;
     --peek: 0.9rem;
@@ -15,6 +12,7 @@
 
     z-index: calc(1000 - var(--toast-index));
     height: var(--height);
+    background-color: var(--toast-accent-bg);
     border-left: 0.25rem solid var(--toast-accent);
     transform:
         translateX(var(--toast-swipe-movement-x, 0))
@@ -76,8 +74,8 @@
 .icon {
     @apply flex size-6 shrink-0 items-center justify-center rounded-full;
 
-    background-color: var(--toast-accent-bg);
-    color: var(--toast-accent);
+    background-color: var(--toast-accent);
+    color: var(--color-surface);
 }
 
 .body {
@@ -85,7 +83,9 @@
 }
 
 .title {
-    @apply m-0 ui-title text-green-900;
+    @apply m-0 ui-title;
+
+    color: var(--toast-accent);
 }
 
 .description {

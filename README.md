@@ -26,6 +26,7 @@ cp .env.example .env.local   # then fill in secrets (see below)
 bun run db:up                # start Postgres (Docker)
 bun run db:migrate           # create tables
 bun run start                # http://localhost:3000
+bun run storybook:start      # design-system preview on http://localhost:8000
 ```
 
 Full dockerized dev (app + db in two containers) is also available:
@@ -58,6 +59,19 @@ Copy `.env.example` to `.env.local` and set:
 - **Notifications**: enable in **Settings → Care reminders**. On iOS (16.4+) you must install the
   app to the home screen first; web push in Safari only works from installed web apps.
 
+## Design system
+
+`src/design-system/` holds the owned building blocks — `Button` (union button/anchor), `Select`,
+`AlertDialog`, `DatePicker`, `DateSelect`, `Popover`, and the toast system (`Toast`, `ToastList`,
+`ToastProvider` plus the `useToast` hook). Feature code imports these, never a Base UI primitive
+directly.
+
+Every block has a co-located `index.stories.tsx`; the Storybook config lives in
+`src/design-system/.storybook/`, and the prose and token pages are `Introduction.mdx` / `Tokens.mdx`.
+`bun run storybook:start` serves the preview on :8000 and `bun run storybook:build` writes a static
+build to `storybook-static/` (gitignored). The preview loads the real `src/app/globals.css` and the
+self-hosted Manrope font, and ships autodocs prop tables plus the a11y panel.
+
 ## Architecture
 
 | Piece | Where | Notes |
@@ -72,7 +86,7 @@ Copy `.env.example` to `.env.local` and set:
 | Notifications | `src/services/notifications/` | Permission, de-duplicated due-task notifications, watcher |
 | Service worker | `public/sw.js` | Cache-first for a small static allowlist (icons, manifest) only; never caches documents, `/api`, RSC payloads or `/_next/static`; dev unregisters any existing worker and purges its caches |
 | UI | `src/containers/` | My Plants / Identify / Care / Detail / Settings screens |
-| Design system | `src/design-system/` | Owned building blocks: `Button` (union button/anchor), `Select`, `AlertDialog`, `DatePicker` and `Popover` — all Base UI-backed except `Button`'s anchor branch, which stays `next/link`; feature code imports these, never a Base UI primitive directly |
+| Design system | `src/design-system/` | Owned building blocks: `Button` (union button/anchor), `Select`, `AlertDialog`, `DatePicker`, `DateSelect`, `Popover` and the toast system (`Toast` / `ToastList` / `ToastProvider` + `useToast`) — all Base UI-backed except `Button`'s anchor branch, which stays `next/link`; feature code imports these, never a Base UI primitive directly. Previewed in Storybook (`bun run storybook:start`), with an `index.stories.tsx` beside each block |
 | Styling | `src/app/globals.css` + `src/styles/shared/ui.css` + co-located `styles.module.css` | Tailwind v4 (`@theme static` tokens, preflight omitted) + `@utility ui-*` atoms applied via `@apply`; no inline utility strings |
 | Font | `src/app/layout.tsx` + `src/app/globals.css` | Manrope (variable, latin) self-hosted via `next/font/local`; exposed as `--font-manrope` and wired to `--font-sans` in the `@theme static` block. No runtime request to a Google font host. |
 | Boundaries | `src/app/{error,not-found,global-error}.tsx`; `src/app/(app)/{error,not-found,loading}.tsx` | Root and shell-preserving error / not-found boundaries; `global-error` covers root-layout failures. The model's gaps are noted under the architecture table. |

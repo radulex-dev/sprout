@@ -1,0 +1,56 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Tokens" />
+
+# Tokens
+
+Declared once with `@theme static` in `src/app/globals.css` and consumed as Tailwind utilities
+(`bg-surface`, `text-ink-soft`, `rounded-card`) or as `var(--token)` inside CSS.
+
+export const COLORS = [
+    { token: '--color-bg', value: '#f4f1e8', use: 'app background' },
+    { token: '--color-surface', value: '#ffffff', use: 'cards and popups' },
+    { token: '--color-surface-2', value: '#ecf2ea', use: 'subtle fills, chips' },
+    { token: '--color-ink', value: '#1c2520', use: 'primary text' },
+    { token: '--color-ink-soft', value: '#5c6a60', use: 'secondary text' },
+    { token: '--color-green-900', value: '#1d3b2a', use: 'headings' },
+    { token: '--color-green-700', value: '#2e5d3f', use: 'primary action' },
+    { token: '--color-green-500', value: '#4c8f5f', use: 'focus ring' },
+    { token: '--color-green-100', value: '#ddebd9', use: 'thumbnail background' },
+    { token: '--color-amber', value: '#c97b1e', use: 'due accent' },
+    { token: '--color-amber-ink', value: '#8a5300', use: 'due text' },
+    { token: '--color-red', value: '#c0452f', use: 'danger accent' },
+    { token: '--color-red-ink', value: '#a8381f', use: 'danger text' },
+    { token: '--color-red-100', value: '#f7e3de', use: 'danger surface' },
+    { token: '--color-blue-ink', value: '#2f5673', use: 'info text' },
+    { token: '--color-blue-100', value: '#dbe7f1', use: 'info surface' }
+];
+
+## Colour
+
+<div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', margin: '1rem 0' }}>
+    {COLORS.map((color) => (
+        <div key={color.token} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <span style={{ display: 'inline-block', width: '1.5rem', height: '1.5rem', flex: '0 0 auto', borderRadius: '0.375rem', background: `var(${color.token})`, border: '1px solid rgb(28 37 32 / 14%)' }} />
+            <code>{color.token}</code>
+            <span style={{ opacity: 0.65 }}>{color.value}</span>
+            <span style={{ opacity: 0.65 }}>· {color.use}</span>
+        </div>
+    ))}
+</div>
+
+## Radius, shadow and motion
+
+- `--radius-btn` `0.875rem`, `--radius-btn-sm` `0.75rem`, `--radius-card` `1.125rem`
+- `--shadow-card`, `--shadow-card-hover`
+- `--dur-fast` `120ms`, `--dur-base` `180ms`, `--ease-out` `cubic-bezier(0.22, 1, 0.36, 1)`
+- `--nav-h` `4rem`, `--text-note` `0.875rem`, `--text-h1` `1.625rem`
+
+## Shared utilities
+
+`src/styles/shared/ui.css` defines the `@utility ui-*` atoms that component modules `@apply` —
+`ui-screen`, `ui-app-header`, `ui-field`, `ui-task-row`, `ui-chip`, `ui-notice`, `ui-empty` and the
+rest of the repeated patterns.
+
+Never put a class-descendant selector in a shared utility: CSS module class names are hashed, so the
+descendant would silently stop matching. Element descendants and `&`-pseudo selectors are fine.

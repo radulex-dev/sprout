@@ -1,6 +1,6 @@
 import type React from 'react';
 import userEvent from '@testing-library/user-event';
-import { CircleCheck, CircleX, Info, TriangleAlert } from 'lucide-react';
+import { CircleAlert, CircleCheck, CircleX, Info } from 'lucide-react';
 import { useCallback } from 'react';
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
@@ -17,6 +17,9 @@ import { countdownRingStyle } from './helpers';
 
 // Hooks
 import { useToast } from '@/design-system/hooks/useToast';
+
+// Styles
+import styles from './styles.module.css';
 
 const Trigger: React.FunctionComponent<{ variant: ToastVariant; timeout?: number; }> = ({ variant, timeout }) => {
     const showToast = useToast();
@@ -44,12 +47,28 @@ describe('Toast', () => {
         icon: CircleCheck
     }, {
         variant: ToastVariant.Warning,
-        icon: TriangleAlert
+        icon: CircleAlert
     }, {
         variant: ToastVariant.Error,
         icon: CircleX
     }])('maps the "$variant" variant to its icon', ({ variant, icon }) => {
         expect(TOAST_VARIANT_ICON[variant]).toBe(icon);
+    });
+
+    it.each([ToastVariant.Info, ToastVariant.Success, ToastVariant.Warning, ToastVariant.Error])('applies the "%s" variant class to the toast root', async (variant) => {
+        const user = userEvent.setup();
+
+        render(
+            <ToastProvider>
+                <Trigger variant={variant} />
+            </ToastProvider>
+        );
+
+        await user.click(screen.getByRole('button', {
+            name: 'Show'
+        }));
+
+        expect(await screen.findByRole('alert')).toHaveClass(styles[variant]);
     });
 
     it('sizes the countdown ring to the timeout', () => {

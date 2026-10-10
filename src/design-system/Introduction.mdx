@@ -1,0 +1,47 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Introduction" />
+
+# Sprout Design System
+
+The building blocks every screen is assembled from. Feature code imports these blocks — never a
+Base UI primitive directly — so interaction, focus and styling behaviour lives in one place.
+
+## What is here
+
+- **Button** — `variant` (default, primary, accent, secondary, danger, soft, outline, unstyled),
+  `size`, `block`, `grow`, `round`, `icon`, and an anchor branch via `href`.
+- **Select** — `label`, `value`, `options`, `icon`, `placeholder`, `hint`, `disabled`.
+- **AlertDialog** — `title`, `description`, `confirmLabel`, `cancelLabel`, `confirmVariant`,
+  `hideCancel`, and optional body content.
+- **DatePicker** — native date input with `label`, `value`, `hint`, `max`.
+- **DateSelect** — calendar popover with `label`, `value`, `max`.
+- **Popover** — a `trigger` plus arbitrary content.
+- **Toast**, **ToastList**, **ToastProvider** — one notification system, documented together in
+  `Components/Toast`.
+- **`useToast`** — the hook that raises a toast, documented in `Hooks/useToast`.
+
+## Styling
+
+Tokens are declared once with `@theme static` in `src/app/globals.css`, so they emit as live `:root`
+custom properties and are consumed as Tailwind utilities (`bg-surface`, `text-ink-soft`,
+`rounded-card`). Component styles are Tailwind CSS modules: each `styles.module.css` starts with
+`@reference "<relative>/app/globals.css"` and every rule is an `@apply`, including the shared `ui-*`
+atoms from `src/styles/shared/ui.css`.
+
+Tailwind preflight is deliberately omitted — the app ships its own reset in `globals.css`.
+
+## Conventions the lint enforces
+
+- Every component is `React.FunctionComponent<Props>` and spreads `{...props}` on its root element.
+- Event handlers are `handle*` arrow functions wrapped in `useCallback`; never inline in JSX.
+- Class names come from a CSS module via `const X = classNames(styles.root, {...})`; never a literal.
+- Object literals span multiple lines, and enums replace magic strings.
+- Values that must not scale stay in `rem`; only `0` is a bare number.
+
+## Running it
+
+```sh
+bun run storybook:start   # dev server on http://localhost:8000
+bun run storybook:build   # static output in storybook-static/
+```
