@@ -13,7 +13,7 @@ reminders when each plant needs watering, fertilising or repotting.
   start from reference data stored in the database (`care_reference`, seeded by migration), looked up
   by the identified genus, falling back to family and then to a generic 7/30/18 default — and the form
   says which of the three it used, so an unsourced default is never presented as plant-specific.
-- **🔔 Reminders** — Web Push notifications when care is due (at most one per task per day), so they
+- **🔔 Reminders** — Web Push notifications when care is due (a single combined notification per day), so they
   arrive with the app closed; a daily Coolify Scheduled Task sends what is due, and an in-app watcher
   also checks on open, on focus, and hourly while open.
 - **📱 Installable PWA** — home-screen icon, standalone display, notification click handling.
@@ -62,7 +62,7 @@ Copy `.env.example` to `.env.local` and set:
 ## Design system
 
 `src/design-system/` holds the owned building blocks — `Button` (union button/anchor), `Select`,
-`AlertDialog`, `DatePicker`, `DateSelect`, `Popover`, and the toast system (`Toast`, `ToastList`,
+`Switch`, `AlertDialog`, `DatePicker`, `DateSelect`, `Popover`, and the toast system (`Toast`, `ToastList`,
 `ToastProvider` plus the `useToast` hook). Feature code imports these, never a Base UI primitive
 directly.
 
@@ -86,7 +86,7 @@ self-hosted Manrope font, and ships autodocs prop tables plus the a11y panel.
 | Notifications | `src/services/notifications/` | Permission, de-duplicated due-task notifications, watcher |
 | Service worker | `public/sw.js` | Cache-first for a small static allowlist (icons, manifest) only; never caches documents, `/api`, RSC payloads or `/_next/static`; dev unregisters any existing worker and purges its caches |
 | UI | `src/containers/` | My Plants / Identify / Care / Detail / Settings screens |
-| Design system | `src/design-system/` | Owned building blocks: `Button` (union button/anchor), `Select`, `AlertDialog`, `DatePicker`, `DateSelect`, `Popover` and the toast system (`Toast` / `ToastList` / `ToastProvider` + `useToast`) — all Base UI-backed except `Button`'s anchor branch, which stays `next/link`; feature code imports these, never a Base UI primitive directly. Previewed in Storybook (`bun run storybook:start`), with an `index.stories.tsx` beside each block |
+| Design system | `src/design-system/` | Owned building blocks: `Button` (union button/anchor), `Select`, `Switch`, `AlertDialog`, `DatePicker`, `DateSelect`, `Popover` and the toast system (`Toast` / `ToastList` / `ToastProvider` + `useToast`) — all Base UI-backed except `Button`'s anchor branch, which stays `next/link`; feature code imports these, never a Base UI primitive directly. Previewed in Storybook (`bun run storybook:start`), with an `index.stories.tsx` beside each block |
 | Styling | `src/app/globals.css` + `src/styles/shared/ui.css` + co-located `styles.module.css` | Tailwind v4 (`@theme static` tokens, preflight omitted) + `@utility ui-*` atoms applied via `@apply`; no inline utility strings |
 | Font | `src/app/layout.tsx` + `src/app/globals.css` | Manrope (variable, latin) self-hosted via `next/font/local`; exposed as `--font-manrope` and wired to `--font-sans` in the `@theme static` block. No runtime request to a Google font host. |
 | Boundaries | `src/app/{error,not-found,global-error}.tsx`; `src/app/(app)/{error,not-found,loading}.tsx` | Root and shell-preserving error / not-found boundaries; `global-error` covers root-layout failures. The model's gaps are noted under the architecture table. |

@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { bigint, check, customType, index, integer, jsonb, pgTable, text, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+import { bigint, boolean, check, customType, index, integer, jsonb, pgTable, text, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 
 // Schema
 export { account, session, user, verification } from './auth-schema';
@@ -83,6 +83,7 @@ export const pushSubscriptions = pgTable(
         endpoint: text('endpoint').notNull(),
         p256dh: text('p256dh').notNull(),
         auth: text('auth').notNull(),
+        active: boolean('active').notNull().default(true),
         createdAt: bigint('created_at', {
             mode: 'number'
         }).notNull()

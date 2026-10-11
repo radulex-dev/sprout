@@ -1,10 +1,9 @@
 // Constants
-import { CARE_CHECK_INTERVAL_MS } from './constants';
-import { CARE_META } from '@/helpers/care/constants';
+import { CARE_CHECK_INTERVAL_MS, REMINDERS_OPTED_OUT_KEY } from './constants';
 
 // Helpers
 import { subscribeToPush } from './helpers';
-import { dueTasks, isNotifiedToday } from '@/helpers/care';
+import { buildCareNotification, dueTasks, isNotifiedToday } from '@/helpers/care';
 import { decodeVapidPublicKey } from '@/helpers/push';
 
 // Database
@@ -47,6 +46,71 @@ const fetchPlants = async (): Promise<Plant[]> => {
     }
 };
 
+const persistActivePreference = async (isEnabled: boolean): Promise<void> => {
+    if (!isNotificationsSupported()) {
+        return;
+    }
+
+    try {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+
+        if (!subscription) {
+            return;
+        }
+
+        await fetch('/api/push/subscribe', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                endpoint: subscription.endpoint,
+                active: isEnabled
+            })
+        });
+    } catch (error) {
+        console.error('Failed to persist the reminders preference', error);
+    }
+};
+
+export const isRemindersOptedOut = (): boolean => {
+    try {
+        return localStorage.getItem(REMINDERS_OPTED_OUT_KEY) === '1';
+    } catch {
+        return false;
+    }
+};
+
+export const setRemindersOptedOut = (isOptedOut: boolean): void => {
+    try {
+        if (isOptedOut) {
+            localStorage.setItem(REMINDERS_OPTED_OUT_KEY, '1');
+
+            return;
+        }
+
+        localStorage.removeItem(REMINDERS_OPTED_OUT_KEY);
+    } catch (error) {
+        console.error('Failed to persist the reminders opt-out flag', error);
+    }
+};
+
+export const hasPushSubscription = async (): Promise<boolean> => {
+    if (!isNotificationsSupported()) {
+        return false;
+    }
+
+    try {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+
+        return subscription !== null;
+    } catch {
+        return false;
+    }
+};
+
 export const ensurePushSubscription = async (): Promise<void> => {
     const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
@@ -82,6 +146,10 @@ export const ensurePushSubscription = async (): Promise<void> => {
             },
             body: JSON.stringify(existing && isExistingCurrentKey ? existing : await subscribeToPush(pushManager, currentKey))
         });
+
+        if (isRemindersOptedOut()) {
+            await persistActivePreference(false);
+        }
     } catch (error) {
         console.error('Failed to register the push subscription', error);
     }
@@ -106,6 +174,10 @@ export const requestNotificationPermission = async (): Promise<NotificationPermi
 };
 
 export const checkAndNotify = async (): Promise<number> => {
+    if (isRemindersOptedOut()) {
+        return 0;
+    }
+
     if (!isNotificationsSupported() || Notification.permission !== 'granted') {
         return 0;
     }
@@ -117,20 +189,20 @@ export const checkAndNotify = async (): Promise<number> => {
         return !isNotifiedToday(task.plant, task.kind, now);
     });
 
-    await Promise.all(pendingTasks.map(async (task) => {
-        const meta = CARE_META[task.kind];
-        const name = task.plant.nickname || task.plant.commonName || task.plant.species;
+    if (pendingTasks.length === 0) {
+        return 0;
+    }
 
-        await reg.showNotification(`Time to ${meta.label.toLowerCase()} ${name}`, {
-            body:
-                task.daysUntil < 0
-                    ? `${name} is ${-task.daysUntil} day${task.daysUntil === -1 ? '' : 's'} overdue for ${meta.label.toLowerCase()}ing.`
-                    : `${name} is due for ${meta.label.toLowerCase()}ing today.`,
-            tag: `sprout-${task.plant.id}-${task.kind}`,
-            icon: '/icon-192.png',
-            badge: '/icon-192.png'
-        });
-        await recordNotified(task.plant.id, task.kind, now);
+    const notification = buildCareNotification(pendingTasks);
+
+    await reg.showNotification(notification.title, {
+        body: notification.body,
+        tag: notification.tag,
+        icon: '/icon-192.png',
+        badge: '/icon-192.png'
+    });
+    await Promise.all(pendingTasks.map((task) => {
+        return recordNotified(task.plant.id, task.kind, now);
     }));
 
     return pendingTasks.length;
@@ -154,4 +226,21 @@ export const startCareWatcher = (): (() => void) => {
         window.removeEventListener('focus', handleFocus);
         clearInterval(interval);
     };
+};
+
+export const setRemindersEnabled = async (isEnabled: boolean): Promise<void> => {
+    if (isEnabled) {
+        setRemindersOptedOut(false);
+
+        if (isNotificationsSupported() && Notification.permission === 'granted') {
+            await ensurePushSubscription();
+        }
+
+        await persistActivePreference(true);
+
+        return;
+    }
+
+    setRemindersOptedOut(true);
+    await persistActivePreference(false);
 };

@@ -1,0 +1,43 @@
+@reference "../../app/globals.css";
+
+.root {
+    @apply
+        inline-flex cursor-pointer items-center gap-3 text-[0.9375rem] font-[650] text-ink select-none
+    ;
+}
+
+.label {
+    @apply text-ink;
+}
+
+.track {
+    @apply
+        relative inline-flex h-7 w-12 shrink-0 items-center rounded-full p-0.5 transition-colors
+        duration-150
+    ;
+
+    background: rgb(28 37 32 / 14%);
+}
+
+.root[data-checked] .track {
+    @apply bg-green-500;
+}
+
+.root:focus-visible .track {
+    outline: 0.125rem solid var(--color-green-500);
+    outline-offset: 0.125rem;
+}
+
+.thumb {
+    @apply size-6 rounded-full bg-surface transition-transform duration-150;
+
+    box-shadow: 0 0.0625rem 0.125rem rgb(28 37 32 / 24%);
+}
+
+.root[data-checked] .thumb {
+    @apply translate-x-5;
+}
+
+.root[data-disabled] {
+    @apply cursor-default opacity-50;
+}

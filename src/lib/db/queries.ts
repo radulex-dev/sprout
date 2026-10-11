@@ -91,6 +91,17 @@ export const getAllPushSubscriptions = async (): Promise<PushSubscriptionRow[]> 
     return database.select().from(pushSubscriptions);
 };
 
+export const getAllActivePushSubscriptions = async (): Promise<PushSubscriptionRow[]> => {
+    return database.select().from(pushSubscriptions).where(eq(pushSubscriptions.active, true));
+};
+
 export const getPushSubscriptionsForUser = async (userId: string): Promise<PushSubscriptionRow[]> => {
     return database.select().from(pushSubscriptions).where(eq(pushSubscriptions.userId, userId));
+};
+
+export const getActivePushSubscriptionsForUser = async (userId: string): Promise<PushSubscriptionRow[]> => {
+    return database
+        .select()
+        .from(pushSubscriptions)
+        .where(and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.active, true)));
 };

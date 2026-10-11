@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import Link from 'next/link';
 import React from 'react';
 import { Button as BaseButton } from '@base-ui/react/button';
+import { type LucideIcon } from 'lucide-react';
 
 // Constants
 import { ButtonSize, ButtonVariant } from './constants';
@@ -11,10 +12,30 @@ import { ButtonSize, ButtonVariant } from './constants';
 // Styles
 import styles from './styles.module.css';
 
-// Types
-import type { AnchorProps, ButtonProps } from './types';
+interface BaseProps {
+    variant?: ButtonVariant;
+    size?: ButtonSize;
+    block?: boolean;
+    grow?: boolean;
+    round?: boolean;
+    icon?: LucideIcon;
+}
 
-export type Props = ButtonProps | AnchorProps;
+interface ButtonProps extends BaseProps, React.ComponentPropsWithoutRef<'button'> {
+    href?: never;
+}
+
+interface AnchorProps extends BaseProps, React.ComponentPropsWithoutRef<'a'> {
+    href: string;
+    onClick?: never;
+}
+
+type Props = ButtonProps | AnchorProps;
+
+export interface DiscriminatedButtonProps {
+    Button: ButtonProps;
+    Anchor: AnchorProps;
+}
 
 const Button: React.FunctionComponent<Props> = ({ variant = ButtonVariant.Default, size = ButtonSize.Md, block = false, grow = false, round = false, className, icon: Icon, children, ...props }) => {
     const classes = classNames(styles.root, {

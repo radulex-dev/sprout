@@ -3,9 +3,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
 // Components
-import AccountCard from './index';
+import SettingsCard from './index';
 
-const props: React.ComponentProps<typeof AccountCard> = {
+const props: React.ComponentProps<typeof SettingsCard> = {
     user: {
         name: 'Ada Lovelace',
         email: 'ada@example.test',
@@ -16,9 +16,21 @@ const props: React.ComponentProps<typeof AccountCard> = {
     onSignOut: vi.fn()
 };
 
-describe('AccountCard', () => {
+describe('<SettingsCard />', () => {
+    it('renders the Account heading and the Preferences section', () => {
+        render(<SettingsCard {...props} />);
+
+        expect(screen.getByRole('heading', {
+            name: 'Account'
+        })).toBeInTheDocument();
+        expect(screen.getByRole('heading', {
+            name: 'Preferences'
+        })).toBeInTheDocument();
+        expect(screen.getByText('Notifications')).toBeInTheDocument();
+    });
+
     it('renders an enabled verify button while the email is unverified', () => {
-        render(<AccountCard {...props} />);
+        render(<SettingsCard {...props} />);
 
         expect(screen.getByRole('button', {
             name: 'Verify account'
@@ -26,7 +38,7 @@ describe('AccountCard', () => {
     });
 
     it('disables the verify button and shows the remaining cooldown', () => {
-        render(<AccountCard {...props} verifyCooldown={42} />);
+        render(<SettingsCard {...props} verifyCooldown={42} />);
 
         expect(screen.getByRole('button', {
             name: 'Try again in 42s'
@@ -41,7 +53,7 @@ describe('AccountCard', () => {
             emailVerified: true
         };
 
-        render(<AccountCard {...props} user={verifiedUser} />);
+        render(<SettingsCard {...props} user={verifiedUser} />);
 
         const badge = screen.getByText('Email verified');
 

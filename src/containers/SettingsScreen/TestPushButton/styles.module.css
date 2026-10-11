@@ -1,0 +1,37 @@
+@reference "../../../app/globals.css";
+
+.root {
+    @apply
+        relative flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full
+        bg-surface-2 text-green-900 transition-colors duration-150
+    ;
+
+    &:hover {
+        @apply bg-green-100;
+    }
+
+    &:focus-visible {
+        outline: 0.125rem solid var(--color-green-500);
+        outline-offset: 0.125rem;
+    }
+
+    &:disabled {
+        @apply cursor-default opacity-100;
+    }
+}
+
+.ring {
+    @apply pointer-events-none absolute inset-0 -rotate-90;
+}
+
+.ringCircle {
+    @apply fill-none stroke-2;
+
+    stroke: var(--color-green-500);
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s linear;
+}
+
+.countdown {
+    @apply text-note leading-none font-[650];
+}

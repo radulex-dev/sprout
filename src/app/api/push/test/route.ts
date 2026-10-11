@@ -8,14 +8,14 @@ import { HttpStatus } from '@/lib/http/constants';
 import { sendPushToUser } from '@/services/server/push';
 
 // Database
-import { getPushSubscriptionsForUser } from '@/lib/db/queries';
+import { getActivePushSubscriptionsForUser } from '@/lib/db/queries';
 
 // Auth
 import { requireUser } from '@/lib/auth/session';
 
 export const POST = async () => {
     const session = await requireUser();
-    const subscriptions = await getPushSubscriptionsForUser(session.user.id);
+    const subscriptions = await getActivePushSubscriptionsForUser(session.user.id);
 
     if (subscriptions.length === 0) {
         return NextResponse.json({

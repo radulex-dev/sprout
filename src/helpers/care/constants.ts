@@ -7,20 +7,27 @@ import type { CareMeta } from './types';
 export const DAY_MS = 24 * 60 * 60 * 1000;
 export const DAYS_PER_MONTH = 30;
 
+export const CARE_NOTIFICATION_TAG = 'sprout-care-today';
+
+export const MAX_LISTED_PLANTS = 3;
+
 export const CARE_META: Record<CareKind, CareMeta> = {
     [CareKind.Water]: {
         label: 'Water',
         verb: 'watered',
+        gerund: 'watering',
         icon: Droplets
     },
     [CareKind.Fertilize]: {
         label: 'Fertilise',
         verb: 'fertilised',
+        gerund: 'fertilising',
         icon: Leaf
     },
     [CareKind.Repot]: {
         label: 'Repot',
         verb: 'repotted',
+        gerund: 'repotting',
         icon: Flower2
     }
 };

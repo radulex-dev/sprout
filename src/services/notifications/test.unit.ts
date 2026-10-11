@@ -5,7 +5,11 @@ import { decodeVapidPublicKey } from '@/helpers/push';
 import { stubServiceWorker, unstubServiceWorker } from '@test/vitest/helpers/mockServiceWorker';
 
 // Services
-import { ensurePushSubscription } from './index';
+import { REMINDERS_OPTED_OUT_KEY } from './constants';
+import { checkAndNotify, ensurePushSubscription, isRemindersOptedOut, setRemindersEnabled, setRemindersOptedOut } from './index';
+
+// Database
+import { recordNotified } from '@/lib/db/actions';
 
 vi.mock('@/lib/db/actions', () => {
     return {
@@ -15,10 +19,11 @@ vi.mock('@/lib/db/actions', () => {
 
 afterEach(() => {
     unstubServiceWorker();
+    localStorage.removeItem(REMINDERS_OPTED_OUT_KEY);
 });
 
-describe('ensurePushSubscription', () => {
-    it('subscribes when there is no existing subscription', async () => {
+describe('notifications service', () => {
+    it('ensurePushSubscription subscribes when there is no existing subscription', async () => {
         const replacement = {
             endpoint: 'https://push.example/replacement'
         };
@@ -47,7 +52,7 @@ describe('ensurePushSubscription', () => {
         }));
     });
 
-    it('re-posts an existing subscription whose key matches without unsubscribing', async () => {
+    it('ensurePushSubscription re-posts an existing subscription whose key matches without unsubscribing', async () => {
         const unsubscribe = vi.fn().mockResolvedValue(true);
         const subscribe = vi.fn();
         const fetchMock = vi.fn().mockResolvedValue({
@@ -78,7 +83,7 @@ describe('ensurePushSubscription', () => {
         }));
     });
 
-    it('unsubscribes and replaces an existing subscription whose key does not match', async () => {
+    it('ensurePushSubscription unsubscribes and replaces an existing subscription whose key does not match', async () => {
         const unsubscribe = vi.fn().mockResolvedValue(true);
         const replacement = {
             endpoint: 'https://push.example/replacement'
@@ -116,7 +121,7 @@ describe('ensurePushSubscription', () => {
         }));
     });
 
-    it('does not re-post when unsubscribing a stale-key subscription is refused', async () => {
+    it('ensurePushSubscription does not re-post when unsubscribing a stale-key subscription is refused', async () => {
         const unsubscribe = vi.fn().mockResolvedValue(false);
         const subscribe = vi.fn();
         const fetchMock = vi.fn().mockResolvedValue({
@@ -150,7 +155,7 @@ describe('ensurePushSubscription', () => {
     }, {
         applicationServerKey: new Uint8Array([1, 2]).buffer,
         byteLength: 2
-    }])('replaces a subscription whose applicationServerKey is $byteLength bytes long', async ({ applicationServerKey }) => {
+    }])('ensurePushSubscription replaces a subscription whose applicationServerKey is $byteLength bytes long', async ({ applicationServerKey }) => {
         const unsubscribe = vi.fn().mockResolvedValue(true);
         const subscribe = vi.fn().mockResolvedValue({
             endpoint: 'https://push.example/replacement'
@@ -177,5 +182,121 @@ describe('ensurePushSubscription', () => {
 
         expect(unsubscribe).toHaveBeenCalledTimes(1);
         expect(subscribe).toHaveBeenCalledTimes(1);
+    });
+
+    it('isRemindersOptedOut reads false when the flag is unset', () => {
+        expect(isRemindersOptedOut()).toBe(false);
+    });
+
+    it('setRemindersOptedOut round-trips the opt-out flag through localStorage', () => {
+        setRemindersOptedOut(true);
+
+        expect(localStorage.getItem(REMINDERS_OPTED_OUT_KEY)).toBe('1');
+        expect(isRemindersOptedOut()).toBe(true);
+
+        setRemindersOptedOut(false);
+
+        expect(localStorage.getItem(REMINDERS_OPTED_OUT_KEY)).toBeNull();
+        expect(isRemindersOptedOut()).toBe(false);
+    });
+
+    it('checkAndNotify returns 0 without fetching or notifying while opted out', async () => {
+        const fetchMock = vi.fn();
+
+        vi.stubGlobal('fetch', fetchMock);
+        setRemindersOptedOut(true);
+
+        await expect(checkAndNotify()).resolves.toBe(0);
+
+        expect(fetchMock).not.toHaveBeenCalled();
+        expect(vi.mocked(recordNotified)).not.toHaveBeenCalled();
+    });
+
+    it('ensurePushSubscription PATCHes active:false after the POST when opted out', async () => {
+        const existing = {
+            endpoint: 'https://push.example/existing',
+            options: {
+                applicationServerKey: new Uint8Array([1, 2, 3, 4]).buffer
+            }
+        };
+        const fetchMock = vi.fn().mockResolvedValue({
+            ok: true
+        });
+
+        vi.stubEnv('NEXT_PUBLIC_VAPID_PUBLIC_KEY', 'AQIDBA');
+        vi.stubGlobal('fetch', fetchMock);
+        stubServiceWorker({
+            getSubscription: vi.fn().mockResolvedValue(existing)
+        } as unknown as PushManager);
+        setRemindersOptedOut(true);
+
+        await ensurePushSubscription();
+
+        expect(fetchMock).toHaveBeenCalledWith('/api/push/subscribe', expect.objectContaining({
+            method: 'PATCH',
+            body: JSON.stringify({
+                endpoint: 'https://push.example/existing',
+                active: false
+            })
+        }));
+    });
+
+    it('setRemindersEnabled sets the opt-out flag and PATCHes active:false when disabling', async () => {
+        const existing = {
+            endpoint: 'https://push.example/existing',
+            options: {
+                applicationServerKey: new Uint8Array([1, 2, 3, 4]).buffer
+            }
+        };
+        const fetchMock = vi.fn().mockResolvedValue({
+            ok: true
+        });
+
+        vi.stubEnv('NEXT_PUBLIC_VAPID_PUBLIC_KEY', 'AQIDBA');
+        vi.stubGlobal('fetch', fetchMock);
+        stubServiceWorker({
+            getSubscription: vi.fn().mockResolvedValue(existing)
+        } as unknown as PushManager);
+
+        await setRemindersEnabled(false);
+
+        expect(isRemindersOptedOut()).toBe(true);
+        expect(fetchMock).toHaveBeenCalledWith('/api/push/subscribe', expect.objectContaining({
+            method: 'PATCH',
+            body: JSON.stringify({
+                endpoint: 'https://push.example/existing',
+                active: false
+            })
+        }));
+    });
+
+    it('setRemindersEnabled clears the opt-out flag and PATCHes active:true when enabling', async () => {
+        const existing = {
+            endpoint: 'https://push.example/existing',
+            options: {
+                applicationServerKey: new Uint8Array([1, 2, 3, 4]).buffer
+            }
+        };
+        const fetchMock = vi.fn().mockResolvedValue({
+            ok: true
+        });
+
+        vi.stubEnv('NEXT_PUBLIC_VAPID_PUBLIC_KEY', 'AQIDBA');
+        vi.stubGlobal('fetch', fetchMock);
+        stubServiceWorker({
+            getSubscription: vi.fn().mockResolvedValue(existing)
+        } as unknown as PushManager);
+        setRemindersOptedOut(true);
+
+        await setRemindersEnabled(true);
+
+        expect(localStorage.getItem(REMINDERS_OPTED_OUT_KEY)).toBeNull();
+        expect(fetchMock).toHaveBeenCalledWith('/api/push/subscribe', expect.objectContaining({
+            method: 'PATCH',
+            body: JSON.stringify({
+                endpoint: 'https://push.example/existing',
+                active: true
+            })
+        }));
     });
 });

@@ -7,7 +7,7 @@ import { PUSH_TTL_SECONDS } from './constants';
 
 // Database
 import { database } from '@/lib/db';
-import { getPushSubscriptionsForUser } from '@/lib/db/queries';
+import { getActivePushSubscriptionsForUser } from '@/lib/db/queries';
 import { pushSubscriptions } from '@/lib/db/schema';
 
 // Types
@@ -35,6 +35,15 @@ export const subscribe = async (userId: string, input: PushSubscriptionInput): P
                 createdAt: now
             }
         });
+};
+
+export const setSubscriptionActive = async (userId: string, endpoint: string, isActive: boolean): Promise<void> => {
+    await database
+        .update(pushSubscriptions)
+        .set({
+            active: isActive
+        })
+        .where(and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.endpoint, endpoint)));
 };
 
 export const unsubscribe = async (userId: string, endpoint: string): Promise<void> => {
@@ -141,7 +150,7 @@ export const sendPushToSubscriptions = async (subscriptions: PushSubscriptionRow
 };
 
 export const sendPushToUser = async (userId: string, payload: PushPayload): Promise<PushSendResult> => {
-    const subscriptions = await getPushSubscriptionsForUser(userId);
+    const subscriptions = await getActivePushSubscriptionsForUser(userId);
 
     return sendPushToSubscriptions(subscriptions, payload);
 };

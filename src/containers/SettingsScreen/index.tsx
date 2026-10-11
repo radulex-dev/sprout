@@ -5,18 +5,20 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 // Constants
-import { TEST_PUSH_COOLDOWN_SECONDS, VERIFY_COOLDOWN_SECONDS } from './constants';
+import { NOTIFICATIONS_LABEL, TEST_PUSH_COOLDOWN_SECONDS, VERIFY_COOLDOWN_SECONDS } from './constants';
 import { CONFIRM_LABEL, INSTALL_GUIDE_CONTENT } from './InstallGuide/constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
 import { ToastVariant } from '@/design-system/Toast/constants';
 
 // Components
 import AboutCard from './AboutCard';
-import AccountCard from './AccountCard';
 import CreditsCard from './CreditsCard';
 import InstallGuide from './InstallGuide';
-import RemindersCard from './RemindersCard';
+import SettingsCard from './SettingsCard';
+import TestPushButton from './TestPushButton';
 import AlertDialog from '@/design-system/AlertDialog';
+import Button from '@/design-system/Button';
+import Switch from '@/design-system/Switch';
 
 // Hooks
 import { useInstall } from '@/hooks';
@@ -47,7 +49,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
 
     const router = useRouter();
     const showToast = useToast();
-    const { isSupported, permission, requestPermission } = useNotifications();
+    const { isSupported, permission, isSubscribed, isOptedOut, setRemindersEnabled } = useNotifications();
     const { isStandalone, platform, canPrompt, promptInstall } = useInstall();
     const [isGuideOpen, setIsGuideOpen] = useState(false);
     const [testCooldown, setTestCooldown] = useState(0);
@@ -55,6 +57,9 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
 
     const guidePlatform = platform ?? InstallPlatform.Other;
     const guideContent = INSTALL_GUIDE_CONTENT[guidePlatform];
+    const isInstallRequired = isSupported === false && isStandalone === false;
+    const isOn = permission === 'granted' && isSubscribed && !isOptedOut;
+    const noticeClasses = classNames(styles.notice, styles.noticeWarn);
 
     useEffect(() => {
         if (testCooldown <= 0) {
@@ -95,13 +100,13 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
         router.refresh();
     }, [router]);
 
-    const handleEnableNotifications = useCallback(async () => {
-        const granted = await requestPermission();
+    const handleToggleReminders = useCallback(async (isEnabled: boolean) => {
+        await setRemindersEnabled(isEnabled);
 
-        if (granted === 'granted') {
+        if (isEnabled) {
             await checkAndNotify();
         }
-    }, [requestPermission]);
+    }, [setRemindersEnabled]);
 
     const handleTestNotification = useCallback(async () => {
         setTestCooldown(TEST_PUSH_COOLDOWN_SECONDS);
@@ -213,16 +218,53 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
         setIsGuideOpen(false);
     }, []);
 
-    const renderAccountCard = () => {
+    const renderSettingsCard = () => {
         return (
-            <AccountCard user={user} verifyCooldown={verifyCooldown} onVerify={handleVerify} onSignOut={handleSignOut} />
+            <SettingsCard user={user} verifyCooldown={verifyCooldown} notificationsControl={renderNotificationsControl()} notificationsFooter={renderNotificationsFooter()} onVerify={handleVerify} onSignOut={handleSignOut} className={styles.wide} />
         );
     };
 
-    const renderRemindersCard = () => {
+    const renderNotificationsControl = () => {
+        if (isSupported !== true || permission === 'denied') {
+            return;
+        }
+
         return (
-            <RemindersCard isSupported={isSupported} perm={permission} isStandalone={isStandalone} testCooldown={testCooldown} onEnable={handleEnableNotifications} onInstall={handleInstall} onTest={handleTestNotification} />
+            <React.Fragment>
+                {isOn ? (
+                    <TestPushButton cooldown={testCooldown} total={TEST_PUSH_COOLDOWN_SECONDS} onSend={handleTestNotification} />
+                ) : undefined}
+                <Switch isChecked={isOn} onCheckedChange={handleToggleReminders} aria-label={NOTIFICATIONS_LABEL} />
+            </React.Fragment>
         );
+    };
+
+    const renderNotificationsFooter = () => {
+        if (isInstallRequired) {
+            return (
+                <Button block onClick={handleInstall}>
+                    Install the app to enable reminders
+                </Button>
+            );
+        }
+
+        if (isSupported === false) {
+            return (
+                <div className={noticeClasses}>
+                    Notifications aren't supported in this browser.
+                </div>
+            );
+        }
+
+        if (permission === 'denied') {
+            return (
+                <div className={noticeClasses}>
+                    Notifications are blocked. Enable them for this site in your browser settings.
+                </div>
+            );
+        }
+
+        return;
     };
 
     const renderAboutCard = () => {
@@ -240,8 +282,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
     const renderContent = () => {
         return (
             <div className={styles.cards}>
-                {renderAccountCard()}
-                {renderRemindersCard()}
+                {renderSettingsCard()}
                 {renderAboutCard()}
                 {renderCreditsCard()}
             </div>

@@ -16,14 +16,15 @@ import styles from './styles.module.css';
 export interface Props extends Omit<React.ComponentPropsWithoutRef<'button'>, 'children'> {
     trigger: React.ReactNode;
     children: React.ReactNode;
+    openOnHover?: boolean;
 }
 
-const Popover: React.FunctionComponent<Props> = ({ trigger, children, ...props }) => {
+const Popover: React.FunctionComponent<Props> = ({ trigger, children, openOnHover = false, ...props }) => {
     const triggerId = useId();
 
     return (
         <BasePopover.Root>
-            <BasePopover.Trigger id={triggerId} render={<Button variant={ButtonVariant.Unstyled} {...props} />}>
+            <BasePopover.Trigger id={triggerId} openOnHover={openOnHover} render={<Button variant={ButtonVariant.Unstyled} {...props} />}>
                 {trigger}
             </BasePopover.Trigger>
             <BasePopover.Portal>

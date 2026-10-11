@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { DAY_MS, DAYS_PER_MONTH, FALLBACK_CARE } from './constants';
 
 // Helpers
-import { allTasks, dueTasks, formatDue, isNotifiedToday, nextDue, resolveLastCare, startOfToday, toDateValue } from './index';
+import { allTasks, buildCareNotification, dueTasks, formatDue, isNotifiedToday, nextDue, resolveLastCare, startOfToday, toDateValue } from './index';
 import { resolveCare } from './resolve';
 
 // Mocks
@@ -434,6 +434,161 @@ describe('alias resolution', () => {
             waterEveryDays: 10,
             fertilizeEveryDays: 30,
             repotEveryMonths: 30
+        });
+    });
+});
+
+describe('buildCareNotification', () => {
+    it('keeps the personal copy for a single task', () => {
+        const plant = makePlant({
+            id: 'plant-fern',
+            nickname: 'Fern'
+        });
+
+        const notification = buildCareNotification([{
+            plant,
+            kind: CareKind.Water,
+            dueAt: NOW,
+            daysUntil: 0
+        }]);
+
+        expect(notification).toEqual({
+            title: 'Time to water Fern',
+            body: 'Fern is due for watering today.',
+            tag: 'sprout-care-today'
+        });
+    });
+
+    it('uses the fertilising gerund rather than a naive label suffix', () => {
+        const plant = makePlant({
+            id: 'plant-fern',
+            nickname: 'Fern'
+        });
+
+        const notification = buildCareNotification([{
+            plant,
+            kind: CareKind.Fertilize,
+            dueAt: NOW,
+            daysUntil: 0
+        }]);
+
+        expect(notification.body).toBe('Fern is due for fertilising today.');
+    });
+
+    it('reports an overdue single task', () => {
+        const plant = makePlant({
+            id: 'plant-fern',
+            nickname: 'Fern'
+        });
+
+        const notification = buildCareNotification([{
+            plant,
+            kind: CareKind.Repot,
+            dueAt: NOW,
+            daysUntil: -2
+        }]);
+
+        expect(notification.body).toBe('Fern is 2 days overdue for repotting.');
+    });
+
+    it('combines several tasks on one plant into a single notification', () => {
+        const plant = makePlant({
+            id: 'plant-fern',
+            nickname: 'Fern'
+        });
+
+        const notification = buildCareNotification([{
+            plant,
+            kind: CareKind.Water,
+            dueAt: NOW,
+            daysUntil: 0
+        }, {
+            plant,
+            kind: CareKind.Fertilize,
+            dueAt: NOW,
+            daysUntil: 0
+        }]);
+
+        expect(notification).toEqual({
+            title: 'Fern needs care today',
+            body: 'Fern: water, fertilise',
+            tag: 'sprout-care-today'
+        });
+    });
+
+    it('combines tasks across plants into a single notification', () => {
+        const fern = makePlant({
+            id: 'plant-fern',
+            nickname: 'Fern'
+        });
+        const monstera = makePlant({
+            id: 'plant-monstera',
+            nickname: 'Monstera'
+        });
+
+        const notification = buildCareNotification([{
+            plant: fern,
+            kind: CareKind.Water,
+            dueAt: NOW,
+            daysUntil: 0
+        }, {
+            plant: monstera,
+            kind: CareKind.Water,
+            dueAt: NOW,
+            daysUntil: 0
+        }]);
+
+        expect(notification).toEqual({
+            title: '2 plants need care today',
+            body: 'Fern: water · Monstera: water',
+            tag: 'sprout-care-today'
+        });
+    });
+
+    it('collapses to per-kind counts once more than three plants are due', () => {
+        const fern = makePlant({
+            id: 'plant-fern',
+            nickname: 'Fern'
+        });
+        const monstera = makePlant({
+            id: 'plant-monstera',
+            nickname: 'Monstera'
+        });
+        const aloe = makePlant({
+            id: 'plant-aloe',
+            nickname: 'Aloe'
+        });
+        const ficus = makePlant({
+            id: 'plant-ficus',
+            nickname: 'Ficus'
+        });
+
+        const notification = buildCareNotification([{
+            plant: fern,
+            kind: CareKind.Water,
+            dueAt: NOW,
+            daysUntil: 0
+        }, {
+            plant: monstera,
+            kind: CareKind.Water,
+            dueAt: NOW,
+            daysUntil: 0
+        }, {
+            plant: aloe,
+            kind: CareKind.Water,
+            dueAt: NOW,
+            daysUntil: 0
+        }, {
+            plant: ficus,
+            kind: CareKind.Fertilize,
+            dueAt: NOW,
+            daysUntil: 0
+        }]);
+
+        expect(notification).toEqual({
+            title: '4 plants need care today',
+            body: 'Water: 3 · Fertilise: 1',
+            tag: 'sprout-care-today'
         });
     });
 });

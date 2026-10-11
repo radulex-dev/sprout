@@ -51,7 +51,10 @@ vi.mock('@/hooks/useNotifications', () => {
             return {
                 isSupported: true,
                 permission: 'granted',
-                requestPermission: vi.fn()
+                isSubscribed: true,
+                isOptedOut: false,
+                requestPermission: vi.fn(),
+                setRemindersEnabled: vi.fn()
             };
         }
     };
@@ -106,7 +109,7 @@ const advanceCooldown = async (seconds: number): Promise<void> => {
     }
 };
 
-describe('SettingsScreen', () => {
+describe('<SettingsScreen />', () => {
     beforeEach(() => {
         vi.useFakeTimers();
         vi.stubGlobal('fetch', fetchMock);

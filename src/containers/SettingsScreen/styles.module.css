@@ -16,6 +16,18 @@
     @apply md:grid md:grid-cols-2 md:gap-3.5;
 }
 
+.wide {
+    @apply md:col-span-2;
+}
+
 .about {
     @apply md:col-span-2;
+}
+
+.notice {
+    @apply ui-notice flex items-center gap-1.5;
+}
+
+.noticeWarn {
+    @apply ui-notice-warn;
 }

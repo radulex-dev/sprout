@@ -4,8 +4,8 @@ import { NextResponse } from 'next/server';
 import { HttpStatus } from '@/lib/http/constants';
 
 // Services
-import { subscribe, unsubscribe } from '@/services/server/push';
-import { PushSubscriptionInputSchema } from '@/services/server/push/schema';
+import { setSubscriptionActive, subscribe, unsubscribe } from '@/services/server/push';
+import { PushPreferenceSchema, PushSubscriptionInputSchema } from '@/services/server/push/schema';
 
 // Auth
 import { requireUser } from '@/lib/auth/session';
@@ -28,6 +28,26 @@ export const POST = async (request: Request) => {
     }
 
     await subscribe(session.user.id, parsed.data);
+
+    return NextResponse.json({
+        ok: true
+    });
+};
+
+export const PATCH = async (request: Request) => {
+    const session = await requireUser();
+    const body = await request.json() as unknown;
+    const parsed = PushPreferenceSchema.safeParse(body);
+
+    if (!parsed.success) {
+        return NextResponse.json({
+            error: 'Invalid push preference.'
+        }, {
+            status: HttpStatus.BadRequest
+        });
+    }
+
+    await setSubscriptionActive(session.user.id, parsed.data.endpoint, parsed.data.active);
 
     return NextResponse.json({
         ok: true

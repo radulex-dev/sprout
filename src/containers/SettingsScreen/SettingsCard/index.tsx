@@ -1,13 +1,14 @@
 import classNames from 'classnames';
 import React from 'react';
-import { BadgeCheck, User } from 'lucide-react';
+import { BadgeCheck, Info, SlidersHorizontal, User } from 'lucide-react';
 
 // Constants
-import { VERIFIED_LABEL, VERIFY_HINT, VERIFY_LABEL } from './constants';
+import { NOTIFICATIONS_DESCRIPTION, NOTIFICATIONS_LABEL, PREFERENCES_LABEL, VERIFIED_LABEL, VERIFY_HINT, VERIFY_LABEL } from '../constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
 
 // Components
 import Button from '@/design-system/Button';
+import Popover from '@/design-system/Popover';
 
 // Styles
 import styles from './styles.module.css';
@@ -18,11 +19,13 @@ import type { SettingsUser } from '../types';
 export interface Props extends React.ComponentProps<'div'> {
     user: SettingsUser;
     verifyCooldown: number;
+    notificationsControl?: React.ReactNode;
+    notificationsFooter?: React.ReactNode;
     onVerify: () => void;
     onSignOut: () => void;
 }
 
-const AccountCard: React.FunctionComponent<Props> = ({ user, verifyCooldown, onVerify, onSignOut, className, ...props }) => {
+const SettingsCard: React.FunctionComponent<Props> = ({ user, verifyCooldown, notificationsControl, notificationsFooter, onVerify, onSignOut, className, ...props }) => {
     const classes = classNames(styles.root, className);
 
     const renderVerification = () => {
@@ -65,6 +68,30 @@ const AccountCard: React.FunctionComponent<Props> = ({ user, verifyCooldown, onV
                 </span>
             </p>
             {renderVerification()}
+            <div className={styles.settings}>
+                <h3 className={styles.heading}>
+                    <SlidersHorizontal size="1.125rem" aria-hidden />
+                    {PREFERENCES_LABEL}
+                </h3>
+                <div className={styles.row}>
+                    <span className={styles.rowLabel}>
+                        {NOTIFICATIONS_LABEL}
+                    </span>
+                    <div className={styles.controls}>
+                        {notificationsControl}
+                        <Popover trigger={<Info size="1rem" aria-hidden />} aria-label={`About ${NOTIFICATIONS_LABEL}`} openOnHover className={styles.info}>
+                            <p className={styles.description}>
+                                {NOTIFICATIONS_DESCRIPTION}
+                            </p>
+                        </Popover>
+                    </div>
+                </div>
+                {notificationsFooter ? (
+                    <div className={styles.footer}>
+                        {notificationsFooter}
+                    </div>
+                ) : undefined}
+            </div>
             <div className={styles.actions}>
                 <Button variant={ButtonVariant.Secondary} block onClick={onSignOut}>
                     Log out
@@ -74,4 +101,4 @@ const AccountCard: React.FunctionComponent<Props> = ({ user, verifyCooldown, onV
     );
 };
 
-export default AccountCard;
+export default SettingsCard;

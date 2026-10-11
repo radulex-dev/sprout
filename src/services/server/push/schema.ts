@@ -7,3 +7,8 @@ export const PushSubscriptionInputSchema = z.object({
         auth: z.string().min(1)
     })
 });
+
+export const PushPreferenceSchema = z.object({
+    endpoint: z.url(),
+    active: z.boolean()
+});
