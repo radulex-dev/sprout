@@ -3,8 +3,7 @@
 import classNames from 'classnames';
 import React, { useCallback, useMemo } from 'react';
 import { getLocalTimeZone, today } from '@internationalized/date';
-import { capitalize } from 'lodash-es';
-import { Check } from 'lucide-react';
+import { CheckCheck } from 'lucide-react';
 
 // Constants
 import { ButtonSize, ButtonVariant } from '@/design-system/Button/constants';
@@ -64,7 +63,7 @@ const CareLogRow: React.FunctionComponent<Props> = ({ plant, label, now, onDone,
                     {toDateValue(last)}
                 </Popover>
             </div>
-            <Button variant={ButtonVariant.Soft} size={ButtonSize.Sm} icon={Check} onClick={handleDone} className={styles.done}>{`${capitalize(meta.verb)} today`}</Button>
+            <Button round variant={ButtonVariant.Soft} size={ButtonSize.Sm} icon={CheckCheck} onClick={handleDone} className={styles.done} aria-label={`Mark ${meta.verb} as done`} />
             <DateSelect label={`Last ${meta.verb}`} value={toDateValue(last)} max={maxDate} onSelect={handleSelectDate} className={styles.date} />
         </div>
     );

@@ -47,7 +47,7 @@ describe('PlantDetail', () => {
             </ToastProvider>
         );
         await user.click(screen.getByRole('button', {
-            name: 'Watered today'
+            name: 'Mark watered as done'
         }));
 
         expect(await screen.findByText('Couldn\'t log that care. Please try again.')).toBeInTheDocument();

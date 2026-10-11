@@ -26,7 +26,7 @@ const props: React.ComponentProps<typeof CareLogRow> = {
 };
 
 describe('CareLogRow', () => {
-    it('renders the care label, the relative line and the select-date button', () => {
+    it('renders the care button, the relative line and the select-date button', () => {
         render(<CareLogRow {...props} />);
 
         expect(screen.getByText('Water')).toBeInTheDocument();
@@ -35,20 +35,8 @@ describe('CareLogRow', () => {
             name: SELECT_DATE_NAME
         })).toBeInTheDocument();
         expect(screen.getByRole('button', {
-            name: 'Watered today'
-        })).toHaveTextContent('Watered today');
-    });
-
-    it('calls onDone with the care kind when the button is clicked', async () => {
-        const handleDone = vi.fn();
-        const user = userEvent.setup();
-
-        render(<CareLogRow {...props} onDone={handleDone} />);
-        await user.click(screen.getByRole('button', {
-            name: 'Watered today'
-        }));
-
-        expect(handleDone).toHaveBeenCalledWith(CareKind.Water);
+            name: 'Mark watered as done'
+        })).toBeInTheDocument();
     });
 
     it('reveals the stored care date when the relative-time line is clicked', async () => {

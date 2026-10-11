@@ -53,6 +53,10 @@ const config = configure([{
         'react/react-in-jsx-scope': 'off',
         'react/no-unescaped-entities': 'off',
         'react/jsx-fragments': ['error', 'element'],
+        'react/self-closing-comp': ['error', {
+            component: true,
+            html: true
+        }],
         '@stylistic/object-curly-spacing': ['error', 'always', {
             emptyObjects: 'never'
         }],
