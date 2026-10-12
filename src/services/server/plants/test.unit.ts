@@ -34,6 +34,24 @@ describe('CareScheduleSchema', () => {
         });
     });
 
+    it('accepts an omitted interval for the kinds that can be never', () => {
+        expect(CareScheduleSchema.parse({
+            waterEveryDays: 7
+        })).toEqual({
+            waterEveryDays: 7
+        });
+    });
+
+    it('rejects a zero interval', () => {
+        expect(() => {
+            return CareScheduleSchema.parse({
+                waterEveryDays: 7,
+                fertilizeEveryDays: 0,
+                repotEveryMonths: 0
+            });
+        }).toThrow();
+    });
+
     it('rejects a negative interval', () => {
         expect(() => {
             return CareScheduleSchema.parse({

@@ -24,8 +24,8 @@ export enum CareUnit {
 
 export interface CareSchedule {
     waterEveryDays: number;
-    fertilizeEveryDays: number;
-    repotEveryMonths: number;
+    fertilizeEveryDays?: number;
+    repotEveryMonths?: number;
 }
 
 export interface Plant {

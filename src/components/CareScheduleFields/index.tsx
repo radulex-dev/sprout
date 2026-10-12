@@ -25,21 +25,25 @@ export interface Props extends Omit<React.ComponentProps<'div'>, 'onChange'> {
 const CareScheduleFields: React.FunctionComponent<Props> = ({ value, onChange, hint, className, ...props }) => {
     const classes = classNames(styles.root, className);
 
-    const handleWaterChange = useCallback((newValue: number) => {
+    const handleWaterChange = useCallback((newValue?: number) => {
+        if (newValue === undefined) {
+            return;
+        }
+
         onChange({
             ...value,
             waterEveryDays: newValue
         });
     }, [value, onChange]);
 
-    const handleFertilizeChange = useCallback((newValue: number) => {
+    const handleFertilizeChange = useCallback((newValue?: number) => {
         onChange({
             ...value,
             fertilizeEveryDays: newValue
         });
     }, [value, onChange]);
 
-    const handleRepotChange = useCallback((newValue: number) => {
+    const handleRepotChange = useCallback((newValue?: number) => {
         onChange({
             ...value,
             repotEveryMonths: newValue

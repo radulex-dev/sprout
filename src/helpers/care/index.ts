@@ -15,10 +15,10 @@ const intervalMs = (plant: Plant, kind: CareKind): number => {
     }
 
     if (kind === CareKind.Fertilize) {
-        return care.fertilizeEveryDays * DAY_MS;
+        return (care.fertilizeEveryDays ?? 0) * DAY_MS;
     }
 
-    return care.repotEveryMonths * DAYS_PER_MONTH * DAY_MS;
+    return (care.repotEveryMonths ?? 0) * DAYS_PER_MONTH * DAY_MS;
 };
 
 export const nextDue = (plant: Plant, kind: CareKind): number | undefined => {

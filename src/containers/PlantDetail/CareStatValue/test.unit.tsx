@@ -22,8 +22,8 @@ const props: React.ComponentProps<typeof CareStatValue> = {
     plant: makePlant({
         care: {
             waterEveryDays: 7,
-            fertilizeEveryDays: 0,
-            repotEveryMonths: 0
+            fertilizeEveryDays: undefined,
+            repotEveryMonths: undefined
         },
         lastCare: {
             [CareKind.Water]: NOW - 2 * DAY_MS,
@@ -36,30 +36,30 @@ const props: React.ComponentProps<typeof CareStatValue> = {
 };
 
 describe('CareStatValue', () => {
-    it('renders an em dash when the interval is zero', () => {
+    it('renders "not set" when the kind is never scheduled', () => {
         const plant = makePlant({
             care: {
-                waterEveryDays: 0,
-                fertilizeEveryDays: 0,
-                repotEveryMonths: 0
+                waterEveryDays: 7,
+                fertilizeEveryDays: undefined,
+                repotEveryMonths: undefined
             }
         });
 
-        render(<CareStatValue {...props} plant={plant} />);
+        render(<CareStatValue {...props} kind={CareKind.Fertilize} plant={plant} />);
 
-        expect(screen.getByText('—')).toBeInTheDocument();
+        expect(screen.getByText('not set')).toBeInTheDocument();
     });
 
-    it('renders no popup trigger when the interval is zero', () => {
+    it('renders no popup trigger when the kind is never scheduled', () => {
         const plant = makePlant({
             care: {
-                waterEveryDays: 0,
-                fertilizeEveryDays: 0,
-                repotEveryMonths: 0
+                waterEveryDays: 7,
+                fertilizeEveryDays: undefined,
+                repotEveryMonths: undefined
             }
         });
 
-        render(<CareStatValue {...props} plant={plant} />);
+        render(<CareStatValue {...props} kind={CareKind.Fertilize} plant={plant} />);
 
         expect(screen.queryByRole('button')).toBeNull();
     });
@@ -68,8 +68,8 @@ describe('CareStatValue', () => {
         const plant = makePlant({
             care: {
                 waterEveryDays: 7,
-                fertilizeEveryDays: 0,
-                repotEveryMonths: 0
+                fertilizeEveryDays: undefined,
+                repotEveryMonths: undefined
             },
             lastCare: {
                 [CareKind.Water]: NOW - 10 * DAY_MS,

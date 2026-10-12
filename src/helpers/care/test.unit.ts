@@ -26,12 +26,12 @@ const utcDate = (timestamp: number): string => {
 };
 
 describe('nextDue', () => {
-    it('returns undefined when the interval is zero', () => {
+    it('returns undefined when a kind is never scheduled', () => {
         const plant = makePlant({
             care: {
-                waterEveryDays: 0,
-                fertilizeEveryDays: 0,
-                repotEveryMonths: 0
+                waterEveryDays: 7,
+                fertilizeEveryDays: undefined,
+                repotEveryMonths: undefined
             },
             lastCare: {
                 [CareKind.Water]: NOW,
@@ -40,7 +40,6 @@ describe('nextDue', () => {
             }
         });
 
-        expect(nextDue(plant, CareKind.Water)).toBeUndefined();
         expect(nextDue(plant, CareKind.Fertilize)).toBeUndefined();
         expect(nextDue(plant, CareKind.Repot)).toBeUndefined();
     });
@@ -50,8 +49,8 @@ describe('nextDue', () => {
         const plant = makePlant({
             care: {
                 waterEveryDays: 7,
-                fertilizeEveryDays: 0,
-                repotEveryMonths: 0
+                fertilizeEveryDays: undefined,
+                repotEveryMonths: undefined
             },
             lastCare: {
                 [CareKind.Water]: last,
@@ -67,8 +66,8 @@ describe('nextDue', () => {
         const last = NOW - 40 * DAY_MS;
         const plant = makePlant({
             care: {
-                waterEveryDays: 0,
-                fertilizeEveryDays: 0,
+                waterEveryDays: 7,
+                fertilizeEveryDays: undefined,
                 repotEveryMonths: 3
             },
             lastCare: {
@@ -102,8 +101,8 @@ describe('dueTasks', () => {
             id: 'plant-overdue',
             care: {
                 waterEveryDays: 7,
-                fertilizeEveryDays: 0,
-                repotEveryMonths: 0
+                fertilizeEveryDays: undefined,
+                repotEveryMonths: undefined
             },
             lastCare: {
                 [CareKind.Water]: NOW - 10 * DAY_MS,
@@ -115,8 +114,8 @@ describe('dueTasks', () => {
             id: 'plant-future',
             care: {
                 waterEveryDays: 7,
-                fertilizeEveryDays: 0,
-                repotEveryMonths: 0
+                fertilizeEveryDays: undefined,
+                repotEveryMonths: undefined
             },
             lastCare: {
                 [CareKind.Water]: NOW - DAY_MS,
@@ -205,8 +204,8 @@ describe('allTasks', () => {
             id: 'plant-soon',
             care: {
                 waterEveryDays: 7,
-                fertilizeEveryDays: 0,
-                repotEveryMonths: 0
+                fertilizeEveryDays: undefined,
+                repotEveryMonths: undefined
             },
             lastCare: {
                 [CareKind.Water]: NOW - 6 * DAY_MS,
@@ -218,8 +217,8 @@ describe('allTasks', () => {
             id: 'plant-later',
             care: {
                 waterEveryDays: 7,
-                fertilizeEveryDays: 0,
-                repotEveryMonths: 0
+                fertilizeEveryDays: undefined,
+                repotEveryMonths: undefined
             },
             lastCare: {
                 [CareKind.Water]: NOW - DAY_MS,

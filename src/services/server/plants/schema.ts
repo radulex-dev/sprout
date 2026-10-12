@@ -11,8 +11,8 @@ export const CareKindSchema = z.enum(CareKind);
 
 export const CareScheduleSchema = z.object({
     waterEveryDays: z.int().min(0).max(MAX_DAYS),
-    fertilizeEveryDays: z.int().min(0).max(MAX_DAYS),
-    repotEveryMonths: z.int().min(0).max(MAX_MONTHS)
+    fertilizeEveryDays: z.int().min(1).max(MAX_DAYS).optional(),
+    repotEveryMonths: z.int().min(1).max(MAX_MONTHS).optional()
 });
 
 // Realm-agnostic: survives React Flight/Next serialization (File is a Blob).
