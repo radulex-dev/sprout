@@ -39,6 +39,26 @@ describe('CareLogRow', () => {
         })).toBeInTheDocument();
     });
 
+    it('reads never when the kind holds no stored care', () => {
+        const plant = {
+            ...makePlant(),
+            lastCare: {}
+        };
+
+        render(<CareLogRow {...props} plant={plant} />);
+
+        expect(screen.getByText('Last: never')).toBeInTheDocument();
+        expect(screen.queryByRole('button', {
+            name: /^Last: /
+        })).not.toBeInTheDocument();
+        expect(screen.getByRole('button', {
+            name: SELECT_DATE_NAME
+        })).toBeInTheDocument();
+        expect(screen.getByRole('button', {
+            name: 'Mark watered as done'
+        })).toBeInTheDocument();
+    });
+
     it('reveals the stored care date when the relative-time line is clicked', async () => {
         const plant = makePlant({
             lastCare: {

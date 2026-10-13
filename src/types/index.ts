@@ -36,7 +36,7 @@ export interface Plant {
     photo?: string;
     acquiredAt: number;
     care: CareSchedule;
-    lastCare: Record<CareKind, number>;
+    lastCare: Partial<Record<CareKind, number>>;
     lastNotified: Partial<Record<CareKind, number>>;
     notes: string;
 }

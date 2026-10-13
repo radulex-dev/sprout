@@ -20,6 +20,10 @@
     @apply relative ui-when flex self-start border-none bg-transparent p-0 text-left;
 }
 
+.never {
+    @apply ui-when flex self-start;
+}
+
 .when::after {
     @apply absolute inset-x-0 -inset-y-3.5;
 

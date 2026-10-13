@@ -37,7 +37,6 @@ const CareLogRow: React.FunctionComponent<Props> = ({ plant, label, now, onDone,
 
     const meta = CARE_META[label];
     const last = plant.lastCare[label];
-    const daysAgo = Math.floor((now - last) / DAY_MS);
     const maxDate = useMemo(() => {
         return today(getLocalTimeZone()).toString();
     }, []);
@@ -50,6 +49,26 @@ const CareLogRow: React.FunctionComponent<Props> = ({ plant, label, now, onDone,
         onSetDate(label, date);
     }, [onSetDate, label]);
 
+    const renderNeverCare = () => {
+        return (
+            <div className={styles.never}>
+                Last: never
+            </div>
+        );
+    };
+
+    const renderLast = () => {
+        if (last === undefined) {
+            return renderNeverCare();
+        }
+
+        return (
+            <Popover trigger={`Last: ${formatDaysAgo(Math.floor((now - last) / DAY_MS))}`} className={styles.when}>
+                {toDateValue(last)}
+            </Popover>
+        );
+    };
+
     return (
         <div className={classes} {...props}>
             <div className={styles.thumb}>
@@ -59,9 +78,7 @@ const CareLogRow: React.FunctionComponent<Props> = ({ plant, label, now, onDone,
                 <div className={styles.title}>
                     {meta.label}
                 </div>
-                <Popover trigger={`Last: ${formatDaysAgo(daysAgo)}`} className={styles.when}>
-                    {toDateValue(last)}
-                </Popover>
+                {renderLast()}
             </div>
             <Button round variant={ButtonVariant.Soft} size={ButtonSize.Sm} icon={CheckCheck} onClick={handleDone} className={styles.done} aria-label={`Mark ${meta.verb} as done`} />
             <DateSelect label={`Last ${meta.verb}`} value={toDateValue(last)} max={maxDate} onSelect={handleSelectDate} className={styles.date} />

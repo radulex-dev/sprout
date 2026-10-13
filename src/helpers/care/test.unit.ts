@@ -79,6 +79,21 @@ describe('nextDue', () => {
 
         expect(nextDue(plant, CareKind.Repot)).toBe(last + 3 * DAYS_PER_MONTH * DAY_MS);
     });
+
+    it('bases a never-cared kind on the acquisition date', () => {
+        const plant = {
+            ...makePlant({
+                care: {
+                    waterEveryDays: 7,
+                    fertilizeEveryDays: undefined,
+                    repotEveryMonths: undefined
+                }
+            }),
+            lastCare: {}
+        };
+
+        expect(nextDue(plant, CareKind.Water)).toBe(plant.acquiredAt + 7 * DAY_MS);
+    });
 });
 
 describe('formatDue', () => {
@@ -238,38 +253,26 @@ describe('allTasks', () => {
 });
 
 describe('resolveLastCare', () => {
-    it('defaults every kind to the start of today when all dates are blank', () => {
-        const resolved = resolveLastCare({}, NOW);
-
-        expect(resolved).toEqual({
-            [CareKind.Water]: startOfLocalDay(NOW),
-            [CareKind.Fertilize]: startOfLocalDay(NOW),
-            [CareKind.Repot]: startOfLocalDay(NOW)
-        });
+    it('resolves no kinds when every date is missing', () => {
+        expect(resolveLastCare({})).toEqual({});
     });
 
-    it('treats an empty string like a missing date', () => {
-        const resolved = resolveLastCare({
+    it('resolves no kinds when every date is an empty string', () => {
+        expect(resolveLastCare({
             [CareKind.Water]: '',
             [CareKind.Fertilize]: '',
             [CareKind.Repot]: ''
-        }, NOW);
-
-        expect(resolved).toEqual({
-            [CareKind.Water]: startOfLocalDay(NOW),
-            [CareKind.Fertilize]: startOfLocalDay(NOW),
-            [CareKind.Repot]: startOfLocalDay(NOW)
-        });
+        })).toEqual({});
     });
 
-    it('honours a supplied date for its own kind without affecting the others', () => {
+    it('resolves a supplied date to local midnight and leaves the other kinds absent', () => {
         const resolved = resolveLastCare({
             [CareKind.Water]: '2023-08-15'
-        }, NOW);
+        });
 
         expect(resolved[CareKind.Water]).toBe(new Date(2023, 7, 15).getTime());
-        expect(resolved[CareKind.Fertilize]).toBe(startOfLocalDay(NOW));
-        expect(resolved[CareKind.Repot]).toBe(startOfLocalDay(NOW));
+        expect(resolved).not.toHaveProperty(CareKind.Fertilize);
+        expect(resolved).not.toHaveProperty(CareKind.Repot);
     });
 });
 
@@ -285,9 +288,14 @@ describe('toDateValue', () => {
     it('round-trips a resolved last-care date', () => {
         const resolved = resolveLastCare({
             [CareKind.Water]: '2026-09-06'
-        }, NOW);
+        });
+        const water = resolved[CareKind.Water];
 
-        expect(toDateValue(resolved[CareKind.Water])).toBe('2026-09-06');
+        expect(water).toBeDefined();
+
+        if (water !== undefined) {
+            expect(toDateValue(water)).toBe('2026-09-06');
+        }
     });
 });
 

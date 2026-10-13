@@ -66,7 +66,7 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
             photo,
             care,
             acquiredAt: Date.now(),
-            lastCare: resolveLastCare(lastCareDates, Date.now())
+            lastCare: resolveLastCare(lastCareDates)
         });
     }, [nickname, result, photo, care, lastCareDates, onSave]);
 

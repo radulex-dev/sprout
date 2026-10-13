@@ -1,0 +1,10 @@
+{
+  "worktree": {
+    "setup": "bun install"
+  },
+  "metadataGeneration": {
+    "commitMessage": {
+      "instructions": "Use conventional commits with a scope"
+    }
+  }
+}

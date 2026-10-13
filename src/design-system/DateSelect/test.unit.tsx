@@ -44,6 +44,23 @@ describe('DateSelect', () => {
         })).toBeInTheDocument();
     });
 
+    it('opens on the current month with no selected day when the value is empty', async () => {
+        vi.useFakeTimers({
+            toFake: ['Date']
+        });
+        vi.setSystemTime(new Date(2026, 8, 12));
+        const user = userEvent.setup();
+
+        const { container } = render(<DateSelect {...props} value={undefined} />);
+
+        await user.click(screen.getByRole('button', {
+            name: TRIGGER_NAME
+        }));
+
+        expect(screen.getByText('September 2026')).toBeInTheDocument();
+        expect(container.querySelectorAll('[class*="selected"]')).toHaveLength(0);
+    });
+
     it('reports the picked day and returns focus to the trigger', async () => {
         const handleSelect = vi.fn();
         const user = userEvent.setup();

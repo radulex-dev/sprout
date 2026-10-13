@@ -1,2 +1,2 @@
 export const LAST_CARE_TITLE = 'Last care';
-export const LAST_CARE_HINT = 'Leave a field blank if you don\'t remember — today is assumed.';
+export const LAST_CARE_HINT = 'Leave a field blank if it has never been done — it will show as "never".';

@@ -105,6 +105,6 @@ describe('CareStatValue', () => {
         expect(trigger).toHaveAttribute('aria-expanded', 'true');
         expect(screen.getByRole('dialog', {
             name: 'in 5 days'
-        })).toHaveTextContent(toDateValue(NOW + 5 * DAY_MS));
+        }).textContent).toBe(toDateValue(NOW + 5 * DAY_MS));
     });
 });

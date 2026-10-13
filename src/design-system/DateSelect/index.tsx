@@ -14,12 +14,15 @@ import { ButtonVariant } from '@/design-system/Button/constants';
 // Components
 import Button from '@/design-system/Button';
 
+// Helpers
+import { monthOf } from './helpers';
+
 // Styles
 import styles from './styles.module.css';
 
 export interface Props extends Omit<React.ComponentPropsWithoutRef<'div'>, 'onSelect'> {
     label: string;
-    value: string;
+    value?: string;
     max?: string;
     onSelect: (value: string) => void;
 }
@@ -29,7 +32,7 @@ const DateSelect: React.FunctionComponent<Props> = ({ label, value, max, onSelec
 
     const [isOpen, setIsOpen] = useState(false);
     const [month, setMonth] = useState(() => {
-        return startOfMonth(parseDate(value));
+        return monthOf(value);
     });
 
     const timeZone = getLocalTimeZone();
@@ -41,7 +44,7 @@ const DateSelect: React.FunctionComponent<Props> = ({ label, value, max, onSelec
         return navigator.language;
     }, []);
     const selectedDate = useMemo(() => {
-        return parseDate(value);
+        return value ? parseDate(value) : undefined;
     }, [value]);
     const maxDate = useMemo(() => {
         return max ? parseDate(max) : undefined;
@@ -75,7 +78,7 @@ const DateSelect: React.FunctionComponent<Props> = ({ label, value, max, onSelec
         setIsOpen(willOpen);
 
         if (willOpen) {
-            setMonth(startOfMonth(parseDate(value)));
+            setMonth(monthOf(value));
         }
     }, [value]);
 
@@ -107,7 +110,7 @@ const DateSelect: React.FunctionComponent<Props> = ({ label, value, max, onSelec
             return <span key={day.toString()} className={styles.blank} aria-hidden />;
         }
 
-        const isSelected = isSameDay(day, selectedDate);
+        const isSelected = selectedDate !== undefined && isSameDay(day, selectedDate);
         const isDayToday = isToday(day, timeZone);
         const dayClasses = classNames(styles.day, {
             [styles.selected]: isSelected,

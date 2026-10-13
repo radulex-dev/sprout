@@ -33,7 +33,7 @@ export const plants = pgTable(
             mode: 'number'
         }).notNull(),
         care: jsonb('care').$type<CareSchedule>().notNull(),
-        lastCare: jsonb('last_care').$type<Record<CareKind, number>>().notNull(),
+        lastCare: jsonb('last_care').$type<Partial<Record<CareKind, number>>>().notNull(),
         lastNotified: jsonb('last_notified')
             .$type<Partial<Record<CareKind, number>>>()
             .notNull()

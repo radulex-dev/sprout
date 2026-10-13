@@ -28,7 +28,7 @@ export const nextDue = (plant: Plant, kind: CareKind): number | undefined => {
         return undefined;
     }
 
-    return plant.lastCare[kind] + interval;
+    return (plant.lastCare[kind] ?? plant.acquiredAt) + interval;
 };
 
 const tasksForPlant = (plant: Plant, now: number): CareTask[] => {
@@ -86,26 +86,28 @@ export const startOfToday = (now = Date.now()): number => {
     return startOfLocalDay(now, getLocalTimeZone());
 };
 
-const localMidnightOf = (value: string | undefined, fallback: number, timeZone: string): number => {
-    if (!value) {
-        return fallback;
+export const resolveLastCare = (dates: LastCareDates): Partial<Record<CareKind, number>> => {
+    const timeZone = getLocalTimeZone();
+
+    return [CareKind.Water, CareKind.Fertilize, CareKind.Repot].reduce<Partial<Record<CareKind, number>>>((resolved, kind) => {
+        const value = dates[kind];
+
+        if (!value) {
+            return resolved;
+        }
+
+        return {
+            ...resolved,
+            [kind]: parseDate(value).toDate(timeZone).getTime()
+        };
+    }, {});
+};
+
+export const toDateValue = (timestamp: number | undefined): string | undefined => {
+    if (timestamp === undefined) {
+        return;
     }
 
-    return parseDate(value).toDate(timeZone).getTime();
-};
-
-export const resolveLastCare = (dates: LastCareDates, now = Date.now()): Record<CareKind, number> => {
-    const timeZone = getLocalTimeZone();
-    const startOfDay = startOfToday(now);
-
-    return {
-        [CareKind.Water]: localMidnightOf(dates[CareKind.Water], startOfDay, timeZone),
-        [CareKind.Fertilize]: localMidnightOf(dates[CareKind.Fertilize], startOfDay, timeZone),
-        [CareKind.Repot]: localMidnightOf(dates[CareKind.Repot], startOfDay, timeZone)
-    };
-};
-
-export const toDateValue = (timestamp: number): string => {
     return toCalendarDate(fromAbsolute(timestamp, getLocalTimeZone())).toString();
 };
 

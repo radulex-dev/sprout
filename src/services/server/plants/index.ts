@@ -9,7 +9,7 @@ import { plants } from '@/lib/db/schema';
 import { getPlantPhoto, getPlantsForUser } from '@/lib/db/queries';
 
 // Types
-import { CareKind, type Plant, type PlantInput } from '@/types';
+import type { CareKind, Plant, PlantInput } from '@/types';
 
 export const listPlants = async (userId: string): Promise<Plant[]> => {
     return getPlantsForUser(userId);
@@ -20,7 +20,6 @@ export const readPlantPhoto = async (userId: string, id: string): Promise<Buffer
 };
 
 export const createPlant = async (userId: string, input: PlantInput): Promise<string> => {
-    const now = Date.now();
     const photo = input.photo ? Buffer.from(await input.photo.arrayBuffer()) : undefined;
     const [row] = await database
         .insert(plants)
@@ -31,11 +30,7 @@ export const createPlant = async (userId: string, input: PlantInput): Promise<st
             commonName: input.commonName,
             acquiredAt: input.acquiredAt,
             care: input.care,
-            lastCare: {
-                [CareKind.Water]: input.lastCare?.[CareKind.Water] ?? now,
-                [CareKind.Fertilize]: input.lastCare?.[CareKind.Fertilize] ?? now,
-                [CareKind.Repot]: input.lastCare?.[CareKind.Repot] ?? now
-            },
+            lastCare: input.lastCare ?? {},
             lastNotified: {},
             notes: '',
             photo
