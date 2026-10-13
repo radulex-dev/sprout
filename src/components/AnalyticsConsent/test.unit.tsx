@@ -25,7 +25,7 @@ beforeEach(() => {
     vi.stubEnv('NEXT_PUBLIC_UMAMI_WEBSITE_ID', 'test-website-id');
 });
 
-describe('AnalyticsConsent', () => {
+describe('<AnalyticsConsent />', () => {
     it('shows the banner and loads no analytics when no choice is stored', () => {
         render(<AnalyticsConsent {...props} />);
 

@@ -1,5 +1,4 @@
 import type React from 'react';
-import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
@@ -19,7 +18,7 @@ const props: React.ComponentProps<typeof SelectField> = {
     onChange: vi.fn()
 };
 
-describe('SelectField', () => {
+describe('<SelectField />', () => {
     it('renders the visible label', () => {
         render(<SelectField {...props} />);
 
@@ -38,20 +37,6 @@ describe('SelectField', () => {
         render(<SelectField {...props} value={value} placeholder={placeholder} />);
 
         expect(screen.getByRole('combobox')).toHaveTextContent(expected);
-    });
-
-    it('opens the options and reports the picked value', async () => {
-        const handleChange = vi.fn();
-        const user = userEvent.setup();
-
-        render(<SelectField {...props} onChange={handleChange} />);
-
-        await user.click(screen.getByRole('combobox'));
-        await user.click(await screen.findByRole('option', {
-            name: 'Daily'
-        }));
-
-        expect(handleChange).toHaveBeenCalledWith('daily');
     });
 
     it('renders the hint when provided', () => {

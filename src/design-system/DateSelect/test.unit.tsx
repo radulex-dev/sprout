@@ -16,7 +16,7 @@ const props: React.ComponentProps<typeof DateSelect> = {
     onSelect: vi.fn()
 };
 
-describe('DateSelect', () => {
+describe('<DateSelect />', () => {
     const TRIGGER_NAME = `Last watered: ${SELECT_DATE_TEXT}`;
 
     it('renders an icon-only trigger with the accessible name', () => {

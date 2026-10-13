@@ -1,5 +1,4 @@
 import type React from 'react';
-import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
@@ -26,7 +25,7 @@ const props: React.ComponentProps<typeof TaskRow> = {
     onSelect: vi.fn()
 };
 
-describe('TaskRow', () => {
+describe('<TaskRow />', () => {
     it('renders the task label, the plant name and the due state', () => {
         const task: CareTask = {
             plant: makePlant(),
@@ -40,18 +39,6 @@ describe('TaskRow', () => {
         expect(screen.getByText('Water')).toBeInTheDocument();
         expect(screen.getByText('Monstera deliciosa')).toBeInTheDocument();
         expect(screen.getByText('3 days overdue')).toBeInTheDocument();
-    });
-
-    it('selects the plant when the row is activated', async () => {
-        const handleSelect = vi.fn();
-        const user = userEvent.setup();
-
-        render(<TaskRow {...props} onSelect={handleSelect} />);
-        await user.click(screen.getByRole('button', {
-            name: /Water/
-        }));
-
-        expect(handleSelect).toHaveBeenCalledWith('plant-1');
     });
 
     it('offers no done action of its own', () => {

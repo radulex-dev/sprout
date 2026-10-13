@@ -31,7 +31,7 @@ const props: React.ComponentProps<typeof AddPlantForm> = {
     }
 };
 
-describe('AddPlantForm', () => {
+describe('<AddPlantForm />', () => {
     beforeEach(() => {
         URL.createObjectURL = vi.fn(() => {
             return 'blob:preview';

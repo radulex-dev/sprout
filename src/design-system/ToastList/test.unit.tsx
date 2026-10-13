@@ -26,7 +26,7 @@ const Trigger: React.FunctionComponent = () => {
     );
 };
 
-describe('ToastList', () => {
+describe('<ToastList />', () => {
     it('renders the viewport as a region', () => {
         render(
             <ToastProvider>

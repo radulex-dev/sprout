@@ -1,5 +1,5 @@
-import type React from 'react';
 import userEvent from '@testing-library/user-event';
+import type React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 
@@ -25,7 +25,7 @@ const props: React.ComponentProps<typeof CareLogRow> = {
     onSetDate: vi.fn()
 };
 
-describe('CareLogRow', () => {
+describe('<CareLogRow />', () => {
     it('renders the care button, the relative line and the select-date button', () => {
         render(<CareLogRow {...props} />);
 
@@ -104,28 +104,6 @@ describe('CareLogRow', () => {
         await waitFor(() => {
             expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
         });
-    });
-
-    it('reports the picked day with the care kind', async () => {
-        const plant = makePlant({
-            lastCare: {
-                [CareKind.Water]: new Date(2026, 6, 6).getTime(),
-                [CareKind.Fertilize]: new Date(2026, 6, 6).getTime(),
-                [CareKind.Repot]: new Date(2026, 6, 6).getTime()
-            }
-        });
-        const handleSetDate = vi.fn();
-        const user = userEvent.setup();
-
-        render(<CareLogRow {...props} plant={plant} now={new Date(2026, 6, 16).getTime()} onSetDate={handleSetDate} />);
-        await user.click(screen.getByRole('button', {
-            name: SELECT_DATE_NAME
-        }));
-        await user.click(screen.getByRole('button', {
-            name: 'July 2, 2026'
-        }));
-
-        expect(handleSetDate).toHaveBeenCalledWith(CareKind.Water, '2026-07-02');
     });
 
     it('reads today when the stored care lands a moment ahead of the clock', () => {

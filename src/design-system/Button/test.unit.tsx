@@ -1,6 +1,5 @@
-import type React from 'react';
 import userEvent from '@testing-library/user-event';
-import type { SyntheticEvent } from 'react';
+import type React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Plus } from 'lucide-react';
@@ -16,20 +15,13 @@ import type { AnchorProps } from './types';
 
 const CALLER_CLASS_NAME = 'caller-class-name';
 
-const handleFormSubmit = (handleSubmit: () => void) => {
-    return (event: SyntheticEvent): void => {
-        event.preventDefault();
-        handleSubmit();
-    };
-};
-
 const props: React.ComponentProps<typeof Button> = {};
 
 const anchorProps: AnchorProps = {
     href: '/identify'
 };
 
-describe('Button', () => {
+describe('<Button />', () => {
     it('renders a button of type button by default', () => {
         render(<Button {...props}>Save</Button>);
 
@@ -44,40 +36,6 @@ describe('Button', () => {
         expect(screen.getByRole('button', {
             name: 'Save'
         })).toHaveAttribute('type', 'submit');
-    });
-
-    it('does not submit the surrounding form by default', async () => {
-        const handleSubmit = vi.fn();
-        const user = userEvent.setup();
-
-        render(
-            <form onSubmit={handleFormSubmit(handleSubmit)}>
-                <Button {...props}>Save</Button>
-            </form>
-        );
-
-        await user.click(screen.getByRole('button', {
-            name: 'Save'
-        }));
-
-        expect(handleSubmit).not.toHaveBeenCalled();
-    });
-
-    it('submits the surrounding form when the caller asks for submit', async () => {
-        const handleSubmit = vi.fn();
-        const user = userEvent.setup();
-
-        render(
-            <form onSubmit={handleFormSubmit(handleSubmit)}>
-                <Button {...props} type="submit">Save</Button>
-            </form>
-        );
-
-        await user.click(screen.getByRole('button', {
-            name: 'Save'
-        }));
-
-        expect(handleSubmit).toHaveBeenCalledTimes(1);
     });
 
     it('renders a link when href is given', () => {

@@ -1,13 +1,53 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Constants
 import { PLANT_ID_SCHEMA } from '@/lib/db/constants';
 
+// Helpers
+import { mockDeleteChain, mockInsertChain, mockSelectChain } from '@test/vitest/helpers/mockDb';
+
+// Mocks
+import { makePlant, NOW } from '@test/vitest/data/plant.mock';
+
 // Services
+import { createPlant, deletePlant, listPlants, markCareDone, readPlantPhoto, recordNotified, updatePlant } from './index';
 import { CareKindSchema, CareScheduleSchema, LastCareSchema, NotifiedAtSchema, PlantInputSchema, UpdatePlantSchema } from './schema';
+
+// Database
+import { getPlantPhoto, getPlantsForUser } from '@/lib/db/queries';
 
 // Types
 import { CareKind } from '@/types';
+
+const { mockDelete, mockInsert, mockSelect, mockUpdate } = vi.hoisted(() => {
+    return {
+        mockDelete: vi.fn(),
+        mockInsert: vi.fn(),
+        mockSelect: vi.fn(),
+        mockUpdate: vi.fn()
+    };
+});
+
+vi.mock('@/lib/db', () => {
+    return {
+        database: {
+            delete: mockDelete,
+            insert: mockInsert,
+            select: mockSelect,
+            update: mockUpdate
+        }
+    };
+});
+
+vi.mock('@/lib/db/queries', () => {
+    return {
+        getPlantPhoto: vi.fn(),
+        getPlantsForUser: vi.fn()
+    };
+});
+
+const mockGetPlantPhoto = vi.mocked(getPlantPhoto);
+const mockGetPlantsForUser = vi.mocked(getPlantsForUser);
 
 describe('CareKindSchema', () => {
     it.each([CareKind.Water, CareKind.Fertilize, CareKind.Repot])('accepts %s', (kind) => {
@@ -426,5 +466,222 @@ describe('NotifiedAtSchema', () => {
         expect(() => {
             return NotifiedAtSchema.parse(-1);
         }).toThrow();
+    });
+});
+
+describe('plant mutations', () => {
+    beforeEach(() => {
+        mockDelete.mockReset();
+        mockInsert.mockReset();
+        mockSelect.mockReset();
+        mockUpdate.mockReset();
+        mockGetPlantPhoto.mockReset();
+        mockGetPlantsForUser.mockReset();
+    });
+
+    it('listPlants returns the plants loaded for the user', async () => {
+        const plant = makePlant({
+            nickname: 'Fern'
+        });
+
+        mockGetPlantsForUser.mockResolvedValue([plant]);
+
+        await expect(listPlants('user-1')).resolves.toEqual([plant]);
+        expect(mockGetPlantsForUser).toHaveBeenCalledWith('user-1');
+    });
+
+    it('readPlantPhoto returns the stored photo bytes', async () => {
+        mockGetPlantPhoto.mockResolvedValue(Buffer.from('leaf'));
+
+        await expect(readPlantPhoto('user-1', 'plant-1')).resolves.toEqual(Buffer.from('leaf'));
+        expect(mockGetPlantPhoto).toHaveBeenCalledWith('user-1', 'plant-1');
+    });
+
+    it('createPlant stores the uploaded photo bytes and the given lastCare', async () => {
+        const insertChain = mockInsertChain();
+
+        mockInsert.mockReturnValueOnce(insertChain);
+
+        const id = await createPlant('user-1', {
+            nickname: 'Fern',
+            species: 'Nephrolepis exaltata',
+            commonName: '',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: NOW,
+            lastCare: {
+                [CareKind.Water]: NOW
+            },
+            photo: new Blob(['leaf'])
+        });
+
+        expect(id).toBe('generated-id');
+        expect(insertChain.values).toHaveBeenCalledWith({
+            userId: 'user-1',
+            nickname: 'Fern',
+            species: 'Nephrolepis exaltata',
+            commonName: '',
+            acquiredAt: NOW,
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            lastCare: {
+                [CareKind.Water]: NOW
+            },
+            lastNotified: {},
+            notes: '',
+            photo: Buffer.from('leaf')
+        });
+    });
+
+    it('createPlant stores an empty lastCare and no photo when both are omitted', async () => {
+        const insertChain = mockInsertChain();
+
+        mockInsert.mockReturnValueOnce(insertChain);
+
+        await createPlant('user-1', {
+            nickname: 'Fern',
+            species: 'Nephrolepis exaltata',
+            commonName: '',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: NOW
+        });
+
+        expect(insertChain.values).toHaveBeenCalledWith({
+            userId: 'user-1',
+            nickname: 'Fern',
+            species: 'Nephrolepis exaltata',
+            commonName: '',
+            acquiredAt: NOW,
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            lastCare: {},
+            lastNotified: {},
+            notes: '',
+            photo: undefined
+        });
+    });
+
+    it('updatePlant writes the nickname and care scoped to the user', async () => {
+        const where = vi.fn();
+        const set = vi.fn(() => {
+            return {
+                where
+            };
+        });
+
+        mockUpdate.mockReturnValueOnce({
+            set
+        });
+
+        await updatePlant('user-1', 'plant-1', {
+            nickname: 'Fern',
+            care: {
+                waterEveryDays: 5,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            }
+        });
+
+        expect(set).toHaveBeenCalledWith({
+            nickname: 'Fern',
+            care: {
+                waterEveryDays: 5,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            }
+        });
+        expect(where).toHaveBeenCalledTimes(1);
+    });
+
+    it('markCareDone merges the kind into the stored lastCare', async () => {
+        const where = vi.fn();
+        const set = vi.fn(() => {
+            return {
+                where
+            };
+        });
+
+        mockSelect.mockReturnValueOnce(mockSelectChain([{
+            lastCare: {
+                [CareKind.Water]: NOW - 1_000_000
+            }
+        }]));
+        mockUpdate.mockReturnValueOnce({
+            set
+        });
+
+        await markCareDone('user-1', 'plant-1', CareKind.Water);
+
+        expect(set).toHaveBeenCalledWith({
+            lastCare: {
+                [CareKind.Water]: expect.any(Number)
+            }
+        });
+        expect(where).toHaveBeenCalledTimes(1);
+    });
+
+    it('markCareDone skips the write when the plant row is missing', async () => {
+        mockSelect.mockReturnValueOnce(mockSelectChain([]));
+
+        await markCareDone('user-1', 'plant-1', CareKind.Water);
+
+        expect(mockUpdate).not.toHaveBeenCalled();
+    });
+
+    it('recordNotified merges the kind into the stored lastNotified', async () => {
+        const where = vi.fn();
+        const set = vi.fn(() => {
+            return {
+                where
+            };
+        });
+
+        mockSelect.mockReturnValueOnce(mockSelectChain([{
+            lastNotified: {}
+        }]));
+        mockUpdate.mockReturnValueOnce({
+            set
+        });
+
+        await recordNotified('user-1', 'plant-1', CareKind.Fertilize, NOW);
+
+        expect(set).toHaveBeenCalledWith({
+            lastNotified: {
+                [CareKind.Fertilize]: NOW
+            }
+        });
+        expect(where).toHaveBeenCalledTimes(1);
+    });
+
+    it('recordNotified skips the write when the plant row is missing', async () => {
+        mockSelect.mockReturnValueOnce(mockSelectChain([]));
+
+        await recordNotified('user-1', 'plant-1', CareKind.Fertilize, NOW);
+
+        expect(mockUpdate).not.toHaveBeenCalled();
+    });
+
+    it('deletePlant deletes the plant row', async () => {
+        const removalChain = mockDeleteChain();
+
+        mockDelete.mockReturnValueOnce(removalChain);
+
+        await deletePlant('user-1', 'plant-1');
+
+        expect(mockDelete).toHaveBeenCalledTimes(1);
+        expect(removalChain.where).toHaveBeenCalledTimes(1);
     });
 });

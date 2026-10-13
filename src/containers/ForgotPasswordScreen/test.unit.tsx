@@ -25,7 +25,7 @@ vi.mock('@/lib/auth/auth-client', () => {
 
 const props: React.ComponentProps<typeof ForgotPasswordScreen> = {};
 
-describe('ForgotPasswordScreen', () => {
+describe('<ForgotPasswordScreen />', () => {
     beforeEach(() => {
         requestPasswordResetMock.mockResolvedValue({
             data: {

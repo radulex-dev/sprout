@@ -10,7 +10,7 @@ const props: Omit<React.ComponentProps<typeof Popover>, 'children'> = {
     trigger: 'Open'
 };
 
-describe('Popover', () => {
+describe('<Popover />', () => {
     it('renders the trigger button', () => {
         render(<Popover {...props}>Popover body</Popover>);
 

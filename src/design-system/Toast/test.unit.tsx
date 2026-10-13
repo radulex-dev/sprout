@@ -38,7 +38,7 @@ const Trigger: React.FunctionComponent<{ variant: ToastVariant; timeout?: number
     );
 };
 
-describe('Toast', () => {
+describe('<Toast />', () => {
     it.each([{
         variant: ToastVariant.Info,
         icon: Info

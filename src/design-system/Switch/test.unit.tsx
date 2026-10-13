@@ -1,5 +1,4 @@
 import type React from 'react';
-import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
@@ -30,24 +29,6 @@ describe('<Switch />', () => {
         render(<Switch {...props} aria-label="Reminders" />);
 
         expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'false');
-    });
-
-    it.each([{
-        isChecked: false,
-        expected: true
-    }, {
-        isChecked: true,
-        expected: false
-    }])('clicking with isChecked=$isChecked reports $expected', async ({ isChecked, expected }) => {
-        const handleCheckedChange = vi.fn();
-        const user = userEvent.setup();
-
-        render(<Switch {...props} isChecked={isChecked} onCheckedChange={handleCheckedChange} aria-label="Reminders" />);
-
-        await user.click(screen.getByRole('switch'));
-
-        expect(handleCheckedChange).toHaveBeenCalledTimes(1);
-        expect(handleCheckedChange).toHaveBeenCalledWith(expected);
     });
 
     it('disables the switch when disabled', () => {

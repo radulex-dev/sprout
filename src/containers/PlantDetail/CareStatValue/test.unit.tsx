@@ -35,7 +35,7 @@ const props: React.ComponentProps<typeof CareStatValue> = {
     now: NOW
 };
 
-describe('CareStatValue', () => {
+describe('<CareStatValue />', () => {
     it('renders "not set" when the kind is never scheduled', () => {
         const plant = makePlant({
             care: {

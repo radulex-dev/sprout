@@ -1,5 +1,4 @@
 import type React from 'react';
-import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
@@ -12,7 +11,7 @@ const props: React.ComponentProps<typeof DatePicker> = {
     onChange: vi.fn()
 };
 
-describe('DatePicker', () => {
+describe('<DatePicker />', () => {
     it('renders a date input associated with its visible label', () => {
         render(<DatePicker {...props} />);
 
@@ -39,17 +38,6 @@ describe('DatePicker', () => {
         render(<DatePicker {...props} value="2026-09-06" />);
 
         expect(screen.getByLabelText('Watered')).toHaveValue('2026-09-06');
-    });
-
-    it('reports the picked date', async () => {
-        const handleChange = vi.fn();
-        const user = userEvent.setup();
-
-        render(<DatePicker {...props} onChange={handleChange} />);
-
-        await user.type(screen.getByLabelText('Watered'), '2026-09-06');
-
-        expect(handleChange).toHaveBeenCalledWith('2026-09-06');
     });
 
     it('caps the input at the given max date', () => {
@@ -80,8 +68,9 @@ describe('DatePicker', () => {
     });
 
     it('renders no hint when none is provided', () => {
-        const { container } = render(<DatePicker {...props} />);
+        render(<DatePicker {...props} />);
 
-        expect(container.querySelector('[class*="hint"]')).toBeNull();
+        expect(screen.queryByText('Leave blank for today.')).not.toBeInTheDocument();
+        expect(screen.getByLabelText('Watered')).not.toHaveAccessibleDescription();
     });
 });

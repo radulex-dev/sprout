@@ -30,7 +30,7 @@ const props: React.ComponentProps<typeof CareScreen> = {
     plants: [makePlant()]
 };
 
-describe('CareScreen', () => {
+describe('<CareScreen />', () => {
     it('opens the plant page when a task row is activated', async () => {
         const user = userEvent.setup();
 

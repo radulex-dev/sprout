@@ -11,16 +11,20 @@ const props: React.ComponentProps<typeof InstallButton> = {
     onInstall: vi.fn()
 };
 
-describe('InstallButton', () => {
+describe('<InstallButton />', () => {
     it('renders the install label and calls onInstall from the button', async () => {
         const handleInstall = vi.fn();
         const user = userEvent.setup();
 
         render(<InstallButton {...props} onInstall={handleInstall} />);
 
-        await user.click(screen.getByRole('button', {
+        const installButton = screen.getByRole('button', {
             name: 'Install app'
-        }));
+        });
+
+        expect(installButton).toBeInTheDocument();
+
+        await user.click(installButton);
 
         expect(handleInstall).toHaveBeenCalledTimes(1);
     });

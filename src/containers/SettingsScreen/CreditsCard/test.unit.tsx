@@ -10,7 +10,7 @@ import CreditsCard from './index';
 
 const props: React.ComponentProps<typeof CreditsCard> = {};
 
-describe('CreditsCard', () => {
+describe('<CreditsCard />', () => {
     it('names both data sources and states the CC BY 4.0 licence', () => {
         render(<CreditsCard {...props} />);
 

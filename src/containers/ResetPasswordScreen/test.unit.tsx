@@ -45,7 +45,7 @@ const props: React.ComponentProps<typeof ResetPasswordScreen> = {
     token: 'reset-token-abc'
 };
 
-describe('ResetPasswordScreen', () => {
+describe('<ResetPasswordScreen />', () => {
     beforeEach(() => {
         rememberResetEmailMock.mockResolvedValue(undefined);
     });

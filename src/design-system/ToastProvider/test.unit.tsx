@@ -30,7 +30,7 @@ const Trigger: React.FunctionComponent = () => {
     );
 };
 
-describe('ToastProvider', () => {
+describe('<ToastProvider />', () => {
     it('shows a toast with the title and description passed to useToast', async () => {
         const user = userEvent.setup();
 

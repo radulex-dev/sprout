@@ -20,16 +20,18 @@ export default defineConfig({
                 '**/*.d.ts',
                 '**/test.unit.{ts,tsx}',
                 '**/*.mock.{ts,tsx}',
+                '**/*.stories.{ts,tsx}',
+                '**/.storybook/**',
                 'test/**',
                 'src/app/**',
                 'src/proxy.ts',
                 'src/lib/db/auth-schema.ts'
             ],
             thresholds: {
-                statements: 11,
-                branches: 16,
-                functions: 10,
-                lines: 11
+                statements: 80,
+                branches: 80,
+                functions: 80,
+                lines: 80
             }
         }
     }

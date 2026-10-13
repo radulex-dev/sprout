@@ -12,7 +12,7 @@ const props: React.ComponentProps<typeof InstallGuide> = {
     platform: InstallPlatform.Ios
 };
 
-describe('InstallGuide', () => {
+describe('<InstallGuide />', () => {
     it('shows the iOS home screen steps', () => {
         render(<InstallGuide {...props} />);
 
