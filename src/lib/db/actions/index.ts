@@ -11,6 +11,8 @@ import { ALL_PATH, PLANT_ID_SCHEMA } from '@/lib/db/constants';
 // Services
 import { createPlant as serviceCreatePlant, deletePlant as serviceDeletePlant, markCareDone as serviceMarkCareDone, recordNotified as serviceRecordNotified, updatePlant as serviceUpdatePlant } from '@/services/server/plants';
 import { CareKindSchema, LastCareDateSchema, NotifiedAtSchema, parsePlantInput, UpdatePlantSchema, type UpdatePlantInput } from '@/services/server/plants/schema';
+import { captureEvent } from '@/services/server/posthog';
+import { PostHogEvent } from '@/services/server/posthog/types';
 
 // Auth
 import { requireUser, requireVerifiedUser } from '@/lib/auth/session';
@@ -22,6 +24,8 @@ export const createPlant = async (input: PlantInput): Promise<string> => {
     const session = await requireVerifiedUser();
     const parsed = parsePlantInput(input);
     const id = await serviceCreatePlant(session.user.id, parsed);
+
+    captureEvent(session.user.id, PostHogEvent.PlantCreated);
 
     revalidatePath(ALL_PATH, 'layout');
 

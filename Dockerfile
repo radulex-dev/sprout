@@ -27,6 +27,8 @@ ARG NEXT_PUBLIC_BUILD_ID
 ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY
 ARG NEXT_PUBLIC_UMAMI_SCRIPT_URL
 ARG NEXT_PUBLIC_UMAMI_WEBSITE_ID
+ARG NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN
+ARG NEXT_PUBLIC_POSTHOG_HOST
 # SOURCE_COMMIT is Coolify's per-build commit argument, so the build id follows the commit
 # instead of the static build variable - but Coolify only sends it when Configuration →
 # Advanced → "Include Source Commit in Build" is enabled. The build id is inlined by
