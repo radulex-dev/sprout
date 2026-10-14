@@ -1,12 +1,15 @@
 'use client';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 // Constants
 import { ButtonVariant } from '@/design-system/Button/constants';
 
 // Components
 import Button from '@/design-system/Button';
+
+// Helpers
+import { captureClientException } from '@/components/PostHog/helpers';
 
 // Auth
 import { authClient } from '@/lib/auth/auth-client';
@@ -19,7 +22,7 @@ export interface Props {
     reset: () => void;
 }
 
-const RootError: React.FunctionComponent<Pick<Props, 'reset'>> = ({ reset }) => {
+const RootError: React.FunctionComponent<Props> = ({ error, reset }) => {
     const handleReset = useCallback(() => {
         reset();
     }, [reset]);
@@ -29,6 +32,10 @@ const RootError: React.FunctionComponent<Pick<Props, 'reset'>> = ({ reset }) => 
 
         location.assign('/login');
     }, []);
+
+    useEffect(() => {
+        captureClientException(error);
+    }, [error]);
 
     return (
         <main className={styles.root}>

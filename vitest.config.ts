@@ -24,7 +24,6 @@ export default defineConfig({
                 '**/.storybook/**',
                 'test/**',
                 'src/app/**',
-                'src/proxy.ts',
                 'src/lib/db/auth-schema.ts'
             ],
             thresholds: {

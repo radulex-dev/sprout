@@ -120,6 +120,10 @@ const config = configure([{
         }],
         'unicorn/catch-error-name': 'off',
         'unicorn/prefer-minimal-ternary': 'off',
+        'no-restricted-syntax': ['error', {
+            selector: 'ReturnStatement > Identifier[name="undefined"]',
+            message: 'Use `return;` instead of `return undefined;`.'
+        }],
         'unicorn/filename-case': ['error', {
             cases: {
                 camelCase: true,

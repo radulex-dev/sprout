@@ -1,8 +1,11 @@
 import 'server-only';
 import { PostHog } from 'posthog-node';
 
+// Constants
+import { POSTHOG_COOKIE_PATTERN } from './constants';
+
 // Types
-import type { PostHogEvent } from './types';
+import type { PostHogCookieState, PostHogEvent } from './types';
 
 const clients = new Map<string, PostHog>();
 
@@ -22,7 +25,7 @@ const isPostHogConfigured = (): boolean => {
 
 const getClient = (): PostHog | undefined => {
     if (!isPostHogConfigured()) {
-        return undefined;
+        return;
     }
 
     const environment = readPostHogEnvironment();
@@ -58,4 +61,38 @@ export const captureEvent = (distinctId: string, event: PostHogEvent, properties
             environment: readPostHogEnvironment().environment
         }
     });
+};
+
+export const captureException = (error: unknown, distinctId?: string): void => {
+    const posthog = getClient();
+
+    if (!posthog) {
+        return;
+    }
+
+    posthog.captureException(error, distinctId, {
+        environment: readPostHogEnvironment().environment
+    });
+};
+
+export const readPostHogDistinctId = (cookieHeader: string | string[] | undefined): string | undefined => {
+    const cookie = Array.isArray(cookieHeader) ? cookieHeader.join('; ') : cookieHeader;
+
+    if (!cookie) {
+        return;
+    }
+
+    const encoded = POSTHOG_COOKIE_PATTERN.exec(cookie)?.at(1);
+
+    if (!encoded) {
+        return;
+    }
+
+    try {
+        const data = JSON.parse(decodeURIComponent(encoded)) as PostHogCookieState;
+
+        return data.distinct_id;
+    } catch {
+        return;
+    }
 };

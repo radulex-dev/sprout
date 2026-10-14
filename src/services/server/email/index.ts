@@ -27,7 +27,7 @@ export const isEmailConfigured = (): boolean => {
 
 const getTransporter = (): ReturnType<typeof nodemailer.createTransport> | undefined => {
     if (!isEmailConfigured()) {
-        return undefined;
+        return;
     }
 
     const environment = readSmtpEnvironment();

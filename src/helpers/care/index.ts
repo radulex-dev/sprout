@@ -25,7 +25,7 @@ export const nextDue = (plant: Plant, kind: CareKind): number | undefined => {
     const interval = intervalMs(plant, kind);
 
     if (interval <= 0) {
-        return undefined;
+        return;
     }
 
     return (plant.lastCare[kind] ?? plant.acquiredAt) + interval;

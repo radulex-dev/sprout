@@ -73,7 +73,7 @@ const readPlantNetMessage = async (response: Response): Promise<string | undefin
 
         return body.message ?? undefined;
     } catch {
-        return undefined;
+        return;
     }
 };
 

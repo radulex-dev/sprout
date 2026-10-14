@@ -5,8 +5,9 @@ import { render } from '@testing-library/react';
 // Components
 import type PostHogComponent from './index';
 
-const { identifyMock, initMock, registerMock, resetMock, useSessionMock } = vi.hoisted(() => {
+const { captureExceptionMock, identifyMock, initMock, registerMock, resetMock, useSessionMock } = vi.hoisted(() => {
     return {
+        captureExceptionMock: vi.fn(),
         identifyMock: vi.fn(),
         initMock: vi.fn(),
         registerMock: vi.fn(),
@@ -18,6 +19,7 @@ const { identifyMock, initMock, registerMock, resetMock, useSessionMock } = vi.h
 vi.mock('posthog-js', () => {
     return {
         default: {
+            captureException: captureExceptionMock,
             identify: identifyMock,
             init: initMock,
             register: registerMock,
@@ -160,5 +162,32 @@ describe('<PostHog />', () => {
         rerender(<PostHog {...props} />);
 
         expect(resetMock).toHaveBeenCalledTimes(1);
+    });
+
+    describe('Helpers', () => {
+        describe('captureClientException()', () => {
+            beforeEach(() => {
+                vi.resetModules();
+            });
+
+            it('captures the exception when configured', async () => {
+                vi.stubEnv('NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN', 'phc_test');
+                const { captureClientException } = await import('./helpers');
+                const error = new Error('boom');
+
+                captureClientException(error);
+
+                expect(captureExceptionMock).toHaveBeenCalledWith(error);
+            });
+
+            it('does nothing when unconfigured', async () => {
+                vi.stubEnv('NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN', '');
+                const { captureClientException } = await import('./helpers');
+
+                captureClientException(new Error('boom'));
+
+                expect(captureExceptionMock).not.toHaveBeenCalled();
+            });
+        });
     });
 });

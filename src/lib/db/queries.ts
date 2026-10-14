@@ -55,7 +55,7 @@ export const getPlantsForUser = cache(async (userId: string): Promise<Plant[]> =
 
 export const getPlantForUser = cache(async (userId: string, id: string): Promise<Plant | undefined> => {
     if (!PLANT_ID_SCHEMA.safeParse(id).success) {
-        return undefined;
+        return;
     }
 
     const rows = await database
@@ -69,7 +69,7 @@ export const getPlantForUser = cache(async (userId: string, id: string): Promise
 
 export const getPlantPhoto = async (userId: string, id: string): Promise<Buffer | undefined> => {
     if (!PLANT_ID_SCHEMA.safeParse(id).success) {
-        return undefined;
+        return;
     }
 
     const rows = await database
