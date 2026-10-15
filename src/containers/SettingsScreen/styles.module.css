@@ -24,10 +24,22 @@
     @apply md:col-span-2;
 }
 
+.install {
+    @apply md:col-span-2;
+}
+
 .notice {
     @apply ui-notice flex items-center gap-1.5;
 }
 
+.notice svg {
+    @apply shrink-0;
+}
+
 .noticeWarn {
     @apply ui-notice-warn;
+}
+
+.gateHint {
+    @apply flex items-center gap-1.5 text-note text-amber-ink;
 }

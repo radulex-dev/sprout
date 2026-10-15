@@ -1,0 +1,52 @@
+@reference "../../app/globals.css";
+
+.root {
+    @apply fixed inset-0 z-30 flex;
+
+    background-color: var(--color-bg);
+    overflow-y: auto;
+    animation: fade-in var(--dur-base) var(--ease-out);
+}
+
+.content {
+    @apply m-auto flex w-full max-w-sm flex-col items-center gap-3 text-center;
+
+    padding-block: calc(1rem + env(safe-area-inset-top)) calc(1rem + env(safe-area-inset-bottom));
+    padding-inline: calc(1.5rem + env(safe-area-inset-left)) calc(1.5rem + env(safe-area-inset-right));
+}
+
+.icon {
+    @apply flex size-20 items-center justify-center rounded-3xl bg-surface text-green-700 shadow-card;
+}
+
+.title {
+    @apply m-0 text-[1.3125rem] leading-tight font-extrabold text-green-900;
+}
+
+.body {
+    @apply m-0 text-note leading-[1.6] text-ink-soft;
+}
+
+.steps {
+    @apply m-0 flex w-full flex-col gap-3 rounded-card bg-surface px-4.5 py-4 text-left shadow-card;
+
+    list-style: none;
+}
+
+.step {
+    @apply flex items-start gap-3 text-note leading-[1.4] font-semibold text-ink;
+}
+
+.stepNumber {
+    @apply size-5.5 shrink-0 rounded-full bg-green-100 text-center text-xs font-bold text-green-900;
+
+    line-height: 1.375rem;
+}
+
+.actions {
+    @apply ui-task-list w-full;
+
+    button {
+        @apply min-h-11;
+    }
+}

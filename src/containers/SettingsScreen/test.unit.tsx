@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
 
 // Constants
-import { NOTIFICATIONS_LABEL } from './constants';
+import { NOTIFICATIONS_LABEL, REMINDERS_INSTALL_HINT_ID } from './constants';
 import { TEST_PUSH_LABEL } from './TestPushButton/constants';
 
 // Components
@@ -14,13 +14,17 @@ import ToastProvider from '@/design-system/ToastProvider';
 // Mocks
 import { makePlant } from '@test/vitest/data/plant.mock';
 
+// Services
+import { InstallPlatform } from '@/services/install';
+
 const { checkNotifyMock, fetchMock, installMock, notificationsMock, permissionMock, promptInstallMock, pushMock, setRemindersEnabledMock, signOutMock } = vi.hoisted(() => {
     return {
         checkNotifyMock: vi.fn(),
         fetchMock: vi.fn(),
         installMock: {
             canPrompt: false,
-            isStandalone: true
+            isStandalone: true,
+            platform: undefined as InstallPlatform | undefined
         },
         notificationsMock: {
             isOptedOut: false,
@@ -56,7 +60,7 @@ vi.mock('@/hooks', () => {
             return {
                 isStandalone: installMock.isStandalone,
                 isPhone: false,
-                platform: undefined,
+                platform: installMock.platform,
                 canPrompt: installMock.canPrompt,
                 promptInstall: promptInstallMock
             };
@@ -123,6 +127,7 @@ describe('<SettingsScreen />', () => {
 
         installMock.canPrompt = false;
         installMock.isStandalone = true;
+        installMock.platform = undefined;
         notificationsMock.isOptedOut = false;
         notificationsMock.isSubscribed = true;
         notificationsMock.isSupported = true;
@@ -484,7 +489,7 @@ describe('<SettingsScreen />', () => {
         });
 
         await user.click(screen.getByRole('button', {
-            name: 'Install the app to enable reminders'
+            name: 'Install'
         }));
 
         expect(promptInstallMock).toHaveBeenCalledTimes(1);
@@ -508,7 +513,7 @@ describe('<SettingsScreen />', () => {
         });
 
         await user.click(screen.getByRole('button', {
-            name: 'Install the app to enable reminders'
+            name: 'Show steps'
         }));
 
         expect(screen.getByRole('alertdialog')).toBeInTheDocument();
@@ -519,6 +524,54 @@ describe('<SettingsScreen />', () => {
         }));
 
         expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    });
+
+    it('shows the installed status instead of install actions when the app is already installed', () => {
+        render(
+            <ToastProvider>
+                <SettingsScreen {...props} />
+            </ToastProvider>
+        );
+
+        expect(screen.getByText('Installed on this device')).toBeInTheDocument();
+        expect(screen.queryByRole('button', {
+            name: 'Show steps'
+        })).not.toBeInTheDocument();
+    });
+
+    it('locks the reminders toggle and offers the install guide on iPhone until the app is installed', () => {
+        installMock.platform = InstallPlatform.Ios;
+        installMock.isStandalone = false;
+
+        render(
+            <ToastProvider>
+                <SettingsScreen {...props} />
+            </ToastProvider>
+        );
+
+        expect(screen.getByText('Reminders need Sprout on your Home Screen')).toBeInTheDocument();
+        expect(screen.getByRole('switch', {
+            name: NOTIFICATIONS_LABEL
+        })).toHaveAttribute('aria-disabled', 'true');
+        expect(screen.getByRole('switch', {
+            name: NOTIFICATIONS_LABEL
+        })).toHaveAttribute('aria-describedby', REMINDERS_INSTALL_HINT_ID);
+    });
+
+    it('enables the reminders toggle and confirms reminders are on once installed on iPhone', () => {
+        installMock.platform = InstallPlatform.Ios;
+
+        render(
+            <ToastProvider>
+                <SettingsScreen {...props} />
+            </ToastProvider>
+        );
+
+        expect(screen.getByRole('switch', {
+            name: NOTIFICATIONS_LABEL
+        })).not.toHaveAttribute('aria-disabled', 'true');
+        expect(screen.getByText('Reminders are on')).toBeInTheDocument();
+        expect(screen.queryByText('Reminders need Sprout on your Home Screen')).not.toBeInTheDocument();
     });
 
     it('explains that notifications are unsupported when installed but the browser lacks support', () => {

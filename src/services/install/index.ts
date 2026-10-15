@@ -1,13 +1,13 @@
 import { UAParser } from 'ua-parser-js';
-import { EngineName, OSName } from 'ua-parser-js/enums';
+import { BrowserType, EngineName, OSName } from 'ua-parser-js/enums';
 
 // Constants
-import { IPADOS_MIN_TOUCH_POINTS, IPADOS_TOUCH_PLATFORM, STANDALONE_DISPLAY_MODE, TOUCH_ONLY_QUERY } from './constants';
+import { IN_APP_BROWSER_NAMES, INSTALL_BROWSERS, IPADOS_MIN_TOUCH_POINTS, IPADOS_TOUCH_PLATFORM, STANDALONE_DISPLAY_MODE, TOUCH_ONLY_QUERY } from './constants';
 
 // Types
-import { InstallPlatform, type InstallNavigator } from './types';
+import { InstallBrowser, InstallPlatform, type InstallNavigator } from './types';
 
-export { InstallPlatform } from './types';
+export { InstallBrowser, InstallPlatform } from './types';
 
 const isIosStandalone = (): boolean => {
     const navigatorWithStandalone = globalThis.navigator as InstallNavigator;
@@ -50,4 +50,28 @@ export const getInstallPlatform = (): InstallPlatform => {
     }
 
     return InstallPlatform.Other;
+};
+
+export const getInstallBrowser = (): InstallBrowser => {
+    if (!('navigator' in globalThis)) {
+        return InstallBrowser.Other;
+    }
+
+    const { browser } = new UAParser(globalThis.navigator.userAgent).getResult();
+
+    return INSTALL_BROWSERS[browser.name ?? ''] ?? InstallBrowser.Other;
+};
+
+export const isInAppBrowser = (): boolean => {
+    if (!('navigator' in globalThis)) {
+        return false;
+    }
+
+    const { browser } = new UAParser(globalThis.navigator.userAgent).getResult();
+
+    if (browser.type === BrowserType.INAPP) {
+        return true;
+    }
+
+    return IN_APP_BROWSER_NAMES.includes(browser.name ?? '');
 };

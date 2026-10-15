@@ -5,8 +5,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { useInstall } from './index';
 
 // Services
-import { getInstallPlatform, isPhoneBrowser, isStandalone } from '@/services/install';
-import { InstallPlatform } from '@/services/install/types';
+import { getInstallBrowser, getInstallPlatform, isInAppBrowser, isPhoneBrowser, isStandalone } from '@/services/install';
+import { InstallBrowser, InstallPlatform } from '@/services/install/types';
 
 const installHandler = vi.hoisted(() => {
     return {
@@ -18,7 +18,9 @@ const installHandler = vi.hoisted(() => {
 
 vi.mock('@/services/install', () => {
     return {
+        getInstallBrowser: vi.fn(),
         getInstallPlatform: vi.fn(),
+        isInAppBrowser: vi.fn(),
         isPhoneBrowser: vi.fn(),
         isStandalone: vi.fn()
     };
@@ -31,10 +33,12 @@ vi.mock('pwa-install-handler', () => {
 });
 
 describe('useInstall', () => {
-    it('reports the standalone, phone and platform state on mount', () => {
+    it('reports the standalone, phone, platform, browser and in-app state on mount', () => {
         vi.mocked(isStandalone).mockReturnValue(true);
         vi.mocked(isPhoneBrowser).mockReturnValue(true);
         vi.mocked(getInstallPlatform).mockReturnValue(InstallPlatform.Ios);
+        vi.mocked(getInstallBrowser).mockReturnValue(InstallBrowser.Safari);
+        vi.mocked(isInAppBrowser).mockReturnValue(true);
 
         const { result } = renderHook(() => {
             return useInstall();
@@ -43,6 +47,8 @@ describe('useInstall', () => {
         expect(result.current.isStandalone).toBe(true);
         expect(result.current.isPhone).toBe(true);
         expect(result.current.platform).toBe(InstallPlatform.Ios);
+        expect(result.current.browser).toBe(InstallBrowser.Safari);
+        expect(result.current.isInApp).toBe(true);
         expect(result.current.canPrompt).toBe(false);
     });
 

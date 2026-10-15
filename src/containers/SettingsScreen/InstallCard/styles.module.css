@@ -1,0 +1,32 @@
+@reference "../../../app/globals.css";
+
+.root {
+    @apply
+        mb-3.5 rounded-card bg-surface p-4 shadow-card
+        md:mb-0
+    ;
+
+    h2 {
+        @apply m-0 mb-1.5 flex items-center gap-1.5 text-base;
+    }
+
+    p {
+        @apply m-0 mb-3 text-note/normal text-ink-soft;
+    }
+}
+
+.actions {
+    @apply flex flex-wrap gap-2;
+}
+
+.installed {
+    @apply flex items-center gap-3;
+}
+
+.check {
+    @apply flex size-9 shrink-0 items-center justify-center rounded-full bg-green-100 text-green-700;
+}
+
+.installedLabel {
+    @apply text-[0.9375rem] font-[650] text-ink;
+}

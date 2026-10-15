@@ -1,0 +1,56 @@
+@reference "../../app/globals.css";
+
+.root {
+    @apply
+        fixed inset-x-0 z-20 mx-auto flex max-w-120 flex-col gap-3.5 rounded-card bg-surface py-4
+        shadow-card
+    ;
+
+    bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 0.625rem);
+    padding-inline: calc(1rem + env(safe-area-inset-left)) calc(1rem + env(safe-area-inset-right));
+    animation: fade-in 300ms var(--ease-out);
+
+    @variant tablet {
+        @apply max-w-2xl;
+    }
+
+    @variant desktop {
+        @apply max-w-4xl;
+
+        bottom: 1rem;
+    }
+}
+
+.intro {
+    @apply flex flex-col gap-1;
+}
+
+.header {
+    @apply ui-field-row items-center;
+}
+
+.icon {
+    @apply size-9 shrink-0 rounded-[0.5625rem] object-cover;
+}
+
+.title {
+    @apply m-0 text-[0.9375rem] font-extrabold text-green-900;
+}
+
+.body {
+    @apply m-0 text-note leading-[1.45] text-ink-soft;
+}
+
+.actions {
+    @apply flex items-center gap-2;
+}
+
+.dismiss {
+    @apply font-semibold text-green-700;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .dismiss:hover {
+        @apply bg-green-100;
+    }
+}

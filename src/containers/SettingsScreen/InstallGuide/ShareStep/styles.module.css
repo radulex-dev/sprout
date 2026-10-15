@@ -1,0 +1,5 @@
+@reference "../../../../app/globals.css";
+
+.root {
+    @apply inline-flex w-fit items-center gap-1.5 rounded-lg bg-surface-2 px-2.5 py-1.5 text-green-900;
+}

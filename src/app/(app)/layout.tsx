@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 
 // Components
 import BottomNav from '@/components/BottomNav';
+import InstallNudge from '@/components/InstallNudge';
 
 // Helpers
 import { dueTasks } from '@/helpers/care';
@@ -49,6 +50,7 @@ const AppLayout = async ({ children, className, ...props }: Props) => {
                 <DueCountNav />
             </Suspense>
             <main id="main">{children}</main>
+            <InstallNudge />
         </div>
     );
 };

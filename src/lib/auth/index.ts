@@ -14,6 +14,13 @@ import { sendEmail } from '@/services/server/email';
 import { database } from '@/lib/db';
 import { account, plants, session, user, verification } from '@/lib/db/schema';
 
+const additionalTrustedOrigins = (process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => {
+        return origin.trim();
+    })
+    .filter(Boolean);
+
 export const auth = betterAuth({
     database: drizzleAdapter(database, {
         provider: 'pg',
@@ -25,6 +32,7 @@ export const auth = betterAuth({
             verification
         }
     }),
+    trustedOrigins: additionalTrustedOrigins,
     disabledPaths: [SEND_VERIFICATION_PATH],
     emailAndPassword: {
         enabled: true,

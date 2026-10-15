@@ -24,6 +24,7 @@ import { useToast } from '@/design-system/hooks/useToast';
 
 // Services
 import { identifyPlant } from '@/services/identify';
+import { markInstallNudgeHandoff } from '@/services/install-nudge/helpers';
 import type { IdentifyResult } from '@/services/identify/types';
 
 // Database
@@ -127,6 +128,7 @@ const IdentifyScreen: React.FunctionComponent<Props> = ({ emailVerified, classNa
                 title: 'Plant added.'
             });
 
+            markInstallNudgeHandoff();
             router.push(`/plants/${id}`);
             router.refresh();
         } catch (reason) {

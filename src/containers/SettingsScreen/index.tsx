@@ -3,9 +3,10 @@
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { BadgeCheck, CircleAlert } from 'lucide-react';
 
 // Constants
-import { NOTIFICATIONS_LABEL, TEST_PUSH_COOLDOWN_SECONDS, VERIFY_COOLDOWN_SECONDS } from './constants';
+import { NOTIFICATIONS_LABEL, REMINDERS_INSTALL_HINT, REMINDERS_INSTALL_HINT_ID, REMINDERS_ON_LABEL, TEST_PUSH_COOLDOWN_SECONDS, VERIFY_COOLDOWN_SECONDS } from './constants';
 import { CONFIRM_LABEL, INSTALL_GUIDE_CONTENT } from './InstallGuide/constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
 import { ToastVariant } from '@/design-system/Toast/constants';
@@ -13,11 +14,11 @@ import { ToastVariant } from '@/design-system/Toast/constants';
 // Components
 import AboutCard from './AboutCard';
 import CreditsCard from './CreditsCard';
+import InstallCard from './InstallCard';
 import InstallGuide from './InstallGuide';
 import SettingsCard from './SettingsCard';
 import TestPushButton from './TestPushButton';
 import AlertDialog from '@/design-system/AlertDialog';
-import Button from '@/design-system/Button';
 import Switch from '@/design-system/Switch';
 
 // Hooks
@@ -50,14 +51,14 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
     const router = useRouter();
     const showToast = useToast();
     const { isSupported, permission, isSubscribed, isOptedOut, setRemindersEnabled } = useNotifications();
-    const { isStandalone, platform, canPrompt, promptInstall } = useInstall();
+    const { isStandalone, platform, browser, canPrompt, promptInstall } = useInstall();
     const [isGuideOpen, setIsGuideOpen] = useState(false);
     const [testCooldown, setTestCooldown] = useState(0);
     const [verifyCooldown, setVerifyCooldown] = useState(0);
 
     const guidePlatform = platform ?? InstallPlatform.Other;
     const guideContent = INSTALL_GUIDE_CONTENT[guidePlatform];
-    const isInstallRequired = isSupported === false && isStandalone === false;
+    const isRemindersGated = platform === InstallPlatform.Ios && isStandalone === false;
     const isOn = permission === 'granted' && isSubscribed && !isOptedOut;
     const noticeClasses = classNames(styles.notice, styles.noticeWarn);
 
@@ -204,6 +205,10 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
         }
     }, [showToast]);
 
+    const handleShowSteps = useCallback(() => {
+        setIsGuideOpen(true);
+    }, []);
+
     const handleInstall = useCallback(async () => {
         if (canPrompt) {
             await promptInstall();
@@ -211,8 +216,8 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
             return;
         }
 
-        setIsGuideOpen(true);
-    }, [canPrompt, promptInstall]);
+        handleShowSteps();
+    }, [canPrompt, promptInstall, handleShowSteps]);
 
     const handleCloseInstallGuide = useCallback(() => {
         setIsGuideOpen(false);
@@ -225,6 +230,12 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
     };
 
     const renderNotificationsControl = () => {
+        if (isRemindersGated) {
+            return (
+                <Switch isChecked={isOn} disabled onCheckedChange={handleToggleReminders} aria-label={NOTIFICATIONS_LABEL} aria-describedby={REMINDERS_INSTALL_HINT_ID} />
+            );
+        }
+
         if (isSupported !== true || permission === 'denied') {
             return;
         }
@@ -240,11 +251,12 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
     };
 
     const renderNotificationsFooter = () => {
-        if (isInstallRequired) {
+        if (isRemindersGated) {
             return (
-                <Button block onClick={handleInstall}>
-                    Install the app to enable reminders
-                </Button>
+                <div className={styles.gateHint} id={REMINDERS_INSTALL_HINT_ID}>
+                    <CircleAlert size="0.8125rem" aria-hidden />
+                    {REMINDERS_INSTALL_HINT}
+                </div>
             );
         }
 
@@ -264,7 +276,22 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
             );
         }
 
+        if (isOn) {
+            return (
+                <div className={styles.notice}>
+                    <BadgeCheck size="1rem" aria-hidden />
+                    {REMINDERS_ON_LABEL}
+                </div>
+            );
+        }
+
         return;
+    };
+
+    const renderInstallCard = () => {
+        return (
+            <InstallCard isInstalled={isStandalone === true} canPrompt={canPrompt} onInstall={handleInstall} onShowSteps={handleShowSteps} className={styles.install} />
+        );
     };
 
     const renderAboutCard = () => {
@@ -283,6 +310,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
         return (
             <div className={styles.cards}>
                 {renderSettingsCard()}
+                {renderInstallCard()}
                 {renderAboutCard()}
                 {renderCreditsCard()}
             </div>
@@ -292,7 +320,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ plants, user, classNam
     const renderInstallGuide = () => {
         return (
             <AlertDialog isOpen={isGuideOpen} title={guideContent.title} description={guideContent.description} confirmLabel={CONFIRM_LABEL} confirmVariant={ButtonVariant.Primary} hideCancel onConfirm={handleCloseInstallGuide} onCancel={handleCloseInstallGuide}>
-                <InstallGuide platform={guidePlatform} />
+                <InstallGuide platform={guidePlatform} browser={browser} />
             </AlertDialog>
         );
     };

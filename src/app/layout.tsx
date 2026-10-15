@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from 'next';
 
 // Components
 import AnalyticsConsent from '@/components/AnalyticsConsent';
+import InAppBrowserNotice from '@/components/InAppBrowserNotice';
 import PostHog from '@/components/PostHog';
 import SiteCore from '@/components/SiteCore';
 import ToastProvider from '@/design-system/ToastProvider';
@@ -67,6 +68,7 @@ const RootLayout = ({ children, className, ...props }: Props) => {
                     </SiteCore>
                     <PostHog />
                     <AnalyticsConsent />
+                    <InAppBrowserNotice />
                 </ToastProvider>
             </body>
         </html>

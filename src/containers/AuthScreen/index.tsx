@@ -40,7 +40,7 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, resetSucce
     const classes = classNames(styles.root, className);
 
     const router = useRouter();
-    const { isStandalone, isPhone, platform, canPrompt, promptInstall } = useInstall();
+    const { isStandalone, isPhone, platform, browser, canPrompt, promptInstall } = useInstall();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -200,7 +200,7 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, resetSucce
     const renderInstallGuide = () => {
         return (
             <AlertDialog isOpen={isInstallGuideOpen} title={guideContent.title} description={guideContent.description} confirmLabel={CONFIRM_LABEL} confirmVariant={ButtonVariant.Primary} hideCancel onConfirm={handleCloseInstallGuide} onCancel={handleCloseInstallGuide}>
-                <InstallGuide platform={guidePlatform} />
+                <InstallGuide platform={guidePlatform} browser={browser} />
             </AlertDialog>
         );
     };

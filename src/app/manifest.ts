@@ -6,7 +6,7 @@ const manifest = (): MetadataRoute.Manifest => {
         short_name: 'Sprout',
         description: 'Track your houseplants, identify species with your camera, and never miss a watering.',
         id: '/',
-        start_url: '/',
+        start_url: '/?source=homescreen',
         display: 'standalone',
         background_color: '#f4f1e8',
         theme_color: '#0F6B45',

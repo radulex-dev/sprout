@@ -1,29 +1,73 @@
 import classNames from 'classnames';
 import React from 'react';
-import { Download } from 'lucide-react';
+import { Download, Info } from 'lucide-react';
 
 // Constants
-import { INSTALL_GUIDE_CONTENT, STEPS_HEADING } from './constants';
+import { STEPS_HEADING } from './constants';
+
+// Components
+import AddToHomeScreenStep from './AddToHomeScreenStep';
+import HomeIconStep from './HomeIconStep';
+import ShareStep from './ShareStep';
+import WebAppSheetStep from './WebAppSheetStep';
+
+// Helpers
+import { getInstallGuideContent } from './helpers';
 
 // Services
-import type { InstallPlatform } from '@/services/install';
+import type { InstallBrowser, InstallPlatform } from '@/services/install';
 
 // Styles
 import styles from './styles.module.css';
 
+// Types
+import { StepIllustration, type InstallGuideStep } from './types';
+
 export interface Props extends React.ComponentProps<'div'> {
     platform: InstallPlatform;
+    browser?: InstallBrowser;
 }
 
-const InstallGuide: React.FunctionComponent<Props> = ({ platform, className, ...props }) => {
-    const classes = classNames(styles.root, className);
-    const content = INSTALL_GUIDE_CONTENT[platform];
+const renderIllustration = (illustration: StepIllustration) => {
+    if (illustration === StepIllustration.Share) {
+        return <ShareStep />;
+    }
 
-    const renderStep = (step: string) => {
-        return (
-            <li key={step} className={styles.step}>{step}</li>
-        );
-    };
+    if (illustration === StepIllustration.AddToHomeScreen) {
+        return <AddToHomeScreenStep />;
+    }
+
+    if (illustration === StepIllustration.WebAppSheet) {
+        return <WebAppSheetStep />;
+    }
+
+    return <HomeIconStep />;
+};
+
+const renderStep = (step: InstallGuideStep, index: number) => {
+    return (
+        <li key={step.title} className={styles.step}>
+            <span className={styles.stepNum} aria-hidden>
+                {index + 1}
+            </span>
+            <div className={styles.stepContent}>
+                <p className={styles.stepTitle}>
+                    {step.title}
+                </p>
+                {step.hint && (
+                    <p className={styles.stepHint}>
+                        {step.hint}
+                    </p>
+                )}
+                {step.illustration && renderIllustration(step.illustration)}
+            </div>
+        </li>
+    );
+};
+
+const InstallGuide: React.FunctionComponent<Props> = ({ platform, browser, className, ...props }) => {
+    const classes = classNames(styles.root, className);
+    const content = getInstallGuideContent(platform, browser);
 
     return (
         <div className={classes} {...props}>
@@ -31,9 +75,15 @@ const InstallGuide: React.FunctionComponent<Props> = ({ platform, className, ...
                 <Download size="1rem" aria-hidden />
                 {STEPS_HEADING}
             </h3>
+            {content.note && (
+                <p className={styles.note}>
+                    <Info size="0.875rem" aria-hidden />
+                    {content.note}
+                </p>
+            )}
             <ol className={styles.steps}>
-                {content.steps.map((step) => {
-                    return renderStep(step);
+                {content.steps.map((step, index) => {
+                    return renderStep(step, index);
                 })}
             </ol>
         </div>
