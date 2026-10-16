@@ -619,7 +619,7 @@ describe('notifications service', () => {
         });
         expect(showNotification).toHaveBeenCalledTimes(1);
         expect(showNotification).toHaveBeenCalledWith('Monstera deliciosa needs care today', {
-            body: 'Monstera deliciosa: water, fertilise, repot',
+            body: 'Monstera deliciosa: water (set a pot size), fertilise, repot',
             tag: CARE_NOTIFICATION_TAG,
             icon: '/icon-192.png',
             badge: '/icon-192.png'

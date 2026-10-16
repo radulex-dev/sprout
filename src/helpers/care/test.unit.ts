@@ -484,7 +484,7 @@ describe('buildCareNotification', () => {
 
         expect(notification).toEqual({
             title: 'Time to water Fern',
-            body: 'Fern is due for watering today.',
+            body: 'Fern is due for watering today. Set a pot size for the amount.',
             tag: 'sprout-care-today'
         });
     });
@@ -541,7 +541,7 @@ describe('buildCareNotification', () => {
 
         expect(notification).toEqual({
             title: 'Fern needs care today',
-            body: 'Fern: water, fertilise',
+            body: 'Fern: water (set a pot size), fertilise',
             tag: 'sprout-care-today'
         });
     });
@@ -570,7 +570,7 @@ describe('buildCareNotification', () => {
 
         expect(notification).toEqual({
             title: '2 plants need care today',
-            body: 'Fern: water · Monstera: water',
+            body: 'Fern: water (set a pot size) · Monstera: water (set a pot size)',
             tag: 'sprout-care-today'
         });
     });
@@ -620,5 +620,115 @@ describe('buildCareNotification', () => {
             body: 'Water: 3 · Fertilise: 1',
             tag: 'sprout-care-today'
         });
+    });
+
+    it('appends the watering amount to a sized single water task', () => {
+        const plant = makePlant({
+            id: 'plant-fern',
+            nickname: 'Fern',
+            potDiameter: 12
+        });
+
+        const notification = buildCareNotification([{
+            plant,
+            kind: CareKind.Water,
+            dueAt: NOW,
+            daysUntil: 0
+        }]);
+
+        expect(notification).toEqual({
+            title: 'Time to water Fern',
+            body: 'Fern is due for watering today. Give it about 160 ml.',
+            tag: 'sprout-care-today'
+        });
+    });
+
+    it('keeps the overdue sentence and appends the watering amount', () => {
+        const plant = makePlant({
+            id: 'plant-fern',
+            nickname: 'Fern',
+            potDiameter: 12
+        });
+
+        const notification = buildCareNotification([{
+            plant,
+            kind: CareKind.Water,
+            dueAt: NOW,
+            daysUntil: -2
+        }]);
+
+        expect(notification.body).toBe('Fern is 2 days overdue for watering. Give it about 160 ml.');
+    });
+
+    it('adds the watering amount to a sized water row in a plant listing', () => {
+        const plant = makePlant({
+            id: 'plant-fern',
+            nickname: 'Fern',
+            potDiameter: 12
+        });
+
+        const notification = buildCareNotification([{
+            plant,
+            kind: CareKind.Water,
+            dueAt: NOW,
+            daysUntil: 0
+        }, {
+            plant,
+            kind: CareKind.Fertilize,
+            dueAt: NOW,
+            daysUntil: 0
+        }]);
+
+        expect(notification.body).toBe('Fern: water (about 160 ml), fertilise');
+    });
+
+    it('keeps the pot size nudge in an unsized water row of a plant listing', () => {
+        const fern = makePlant({
+            id: 'plant-fern',
+            nickname: 'Fern'
+        });
+        const monstera = makePlant({
+            id: 'plant-monstera',
+            nickname: 'Monstera'
+        });
+
+        const notification = buildCareNotification([{
+            plant: fern,
+            kind: CareKind.Water,
+            dueAt: NOW,
+            daysUntil: 0
+        }, {
+            plant: monstera,
+            kind: CareKind.Fertilize,
+            dueAt: NOW,
+            daysUntil: 0
+        }]);
+
+        expect(notification.body).toBe('Fern: water (set a pot size) · Monstera: fertilise');
+    });
+
+    it('adds no pot size text to a listing whose plants have no water row', () => {
+        const fern = makePlant({
+            id: 'plant-fern',
+            nickname: 'Fern'
+        });
+        const monstera = makePlant({
+            id: 'plant-monstera',
+            nickname: 'Monstera'
+        });
+
+        const notification = buildCareNotification([{
+            plant: fern,
+            kind: CareKind.Fertilize,
+            dueAt: NOW,
+            daysUntil: 0
+        }, {
+            plant: monstera,
+            kind: CareKind.Repot,
+            dueAt: NOW,
+            daysUntil: 0
+        }]);
+
+        expect(notification.body).toBe('Fern: fertilise · Monstera: repot');
     });
 });

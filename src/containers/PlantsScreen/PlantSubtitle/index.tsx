@@ -18,7 +18,11 @@ const PlantSubtitle: React.FunctionComponent<Props> = ({ plants, className, ...p
     const classes = classNames(styles.root, className);
 
     const renderText = () => {
-        return plants.length === 0 ? EMPTY_COLLECTION_TEXT : `${plants.length} plant${plants.length === 1 ? '' : 's'} in your care`;
+        if (plants.length === 0) {
+            return EMPTY_COLLECTION_TEXT;
+        }
+
+        return `${plants.length} plant${plants.length === 1 ? '' : 's'} in your care`;
     };
 
     return (

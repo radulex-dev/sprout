@@ -123,6 +123,9 @@ const config = configure([{
         'no-restricted-syntax': ['error', {
             selector: 'ReturnStatement > Identifier[name="undefined"]',
             message: 'Use `return;` instead of `return undefined;`.'
+        }, {
+            selector: 'ConditionalExpression ConditionalExpression',
+            message: 'Nested ternaries are hard to follow. Extract a function or use if/else.'
         }],
         'unicorn/filename-case': ['error', {
             cases: {

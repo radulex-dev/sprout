@@ -72,6 +72,8 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, resetSucce
     const isSignup = mode === 'signup';
     const guidePlatform = platform ?? InstallPlatform.Other;
     const guideContent = INSTALL_GUIDE_CONTENT[guidePlatform];
+    const actionLabel = isSignup ? 'Create account' : 'Sign in';
+    const submitLabel = isSubmitting ? 'One moment…' : actionLabel;
 
     const handleNameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
@@ -252,7 +254,7 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, resetSucce
                 )}
 
                 <Button variant={ButtonVariant.Primary} block type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'One moment…' : (isSignup ? 'Create account' : 'Sign in')}
+                    {submitLabel}
                 </Button>
             </form>
 

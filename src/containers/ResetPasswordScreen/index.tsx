@@ -40,6 +40,9 @@ const ResetPasswordScreen: React.FunctionComponent<Props> = ({ token, email, ema
 
     const { confirmPassword, fieldError, isSubmitting, newPassword, status } = state;
 
+    const expiredNotice = emailVerified ? RESET_PASSWORD_EXPIRED_NOTICE : RESET_PASSWORD_EXPIRED_NOTICE_UNVERIFIED;
+    const describedBy = fieldError ? fieldErrorId : undefined;
+
     const handleNewPasswordChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         dispatch({
             type: ResetPasswordActionType.ChangeNew,
@@ -144,7 +147,7 @@ const ResetPasswordScreen: React.FunctionComponent<Props> = ({ token, email, ema
                 {tokenExpired ? (
                     <div className={styles.expired}>
                         <p className={styles.notice}>
-                            {emailVerified ? RESET_PASSWORD_EXPIRED_NOTICE : RESET_PASSWORD_EXPIRED_NOTICE_UNVERIFIED}
+                            {expiredNotice}
                         </p>
 
                         <form className={styles.switch} action={rememberResetEmail}>
@@ -159,7 +162,7 @@ const ResetPasswordScreen: React.FunctionComponent<Props> = ({ token, email, ema
                     <form className={styles.form} onSubmit={handleSubmit}>
                         <label className={styles.field}>
                             {RESET_PASSWORD_NEW_LABEL}
-                            <input type="password" value={newPassword} onChange={handleNewPasswordChange} autoComplete="new-password" aria-describedby={fieldError ? fieldErrorId : undefined} required />
+                            <input type="password" value={newPassword} onChange={handleNewPasswordChange} autoComplete="new-password" aria-describedby={describedBy} required />
                         </label>
 
                         {fieldError && (

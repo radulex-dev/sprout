@@ -11,6 +11,9 @@ export const CARE_NOTIFICATION_TAG = 'sprout-care-today';
 
 export const MAX_LISTED_PLANTS = 3;
 
+export const POT_SIZE_NUDGE_SENTENCE = 'Set a pot size for the amount.';
+export const POT_SIZE_NUDGE_SLOT = 'set a pot size';
+
 export const CARE_META: Record<CareKind, CareMeta> = {
     [CareKind.Water]: {
         label: 'Water',

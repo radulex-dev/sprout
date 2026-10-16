@@ -1,7 +1,10 @@
 import { fromAbsolute, fromDate, getLocalTimeZone, parseDate, toCalendarDate } from '@internationalized/date';
 
 // Constants
-import { CARE_META, CARE_NOTIFICATION_TAG, DAY_MS, DAYS_PER_MONTH, MAX_LISTED_PLANTS } from './constants';
+import { CARE_META, CARE_NOTIFICATION_TAG, DAY_MS, DAYS_PER_MONTH, MAX_LISTED_PLANTS, POT_SIZE_NUDGE_SENTENCE, POT_SIZE_NUDGE_SLOT } from './constants';
+
+// Helpers
+import { getWaterAmountMl } from '@/helpers/pot';
 
 // Types
 import { CareKind, type LastCareDates, type Plant } from '@/types';
@@ -141,15 +144,39 @@ export const plantDisplayName = (plant: Plant): string => {
     return plant.nickname || plant.commonName || plant.species;
 };
 
+const formatWaterSlot = (plant: Plant): string => {
+    const amount = getWaterAmountMl(plant.potDiameter);
+
+    if (amount === undefined) {
+        return POT_SIZE_NUDGE_SLOT;
+    }
+
+    return `about ${amount} ml`;
+};
+
+const formatWaterFollowUp = (plant: Plant): string => {
+    const amount = getWaterAmountMl(plant.potDiameter);
+
+    if (amount === undefined) {
+        return POT_SIZE_NUDGE_SENTENCE;
+    }
+
+    return `Give it about ${amount} ml.`;
+};
+
 const buildOneTaskCareNotification = (task: CareTask): CareNotification => {
     const meta = CARE_META[task.kind];
     const name = plantDisplayName(task.plant);
+    const dueSentence = task.daysUntil < 0
+        ? `${name} is ${formatDue(task.daysUntil)} for ${meta.gerund}.`
+        : `${name} is due for ${meta.gerund} today.`;
+    const body = task.kind === CareKind.Water
+        ? `${dueSentence} ${formatWaterFollowUp(task.plant)}`
+        : dueSentence;
 
     return {
         title: `Time to ${meta.label.toLowerCase()} ${name}`,
-        body: task.daysUntil < 0
-            ? `${name} is ${-task.daysUntil} day${task.daysUntil === -1 ? '' : 's'} overdue for ${meta.gerund}.`
-            : `${name} is due for ${meta.gerund} today.`,
+        body,
         tag: CARE_NOTIFICATION_TAG
     };
 };
@@ -157,8 +184,9 @@ const buildOneTaskCareNotification = (task: CareTask): CareNotification => {
 const buildLessThanMaxTasksCareNotification = (tasks: CareTask[], title: string): CareNotification => {
     const kindsByPlantId = tasks.reduce<Map<string, string[]>>((accumulator, task) => {
         const kinds = accumulator.get(task.plant.id) ?? [];
+        const label = CARE_META[task.kind].label.toLowerCase();
 
-        kinds.push(CARE_META[task.kind].label.toLowerCase());
+        kinds.push(task.kind === CareKind.Water ? `${label} (${formatWaterSlot(task.plant)})` : label);
         accumulator.set(task.plant.id, kinds);
 
         return accumulator;

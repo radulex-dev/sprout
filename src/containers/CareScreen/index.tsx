@@ -44,6 +44,7 @@ const CareScreen: React.FunctionComponent<Props> = ({ plants, className, ...prop
             return task.daysUntil > 0 && task.daysUntil <= 14;
         });
     }, [tasks]);
+    const taskSuffix = due.length === 1 ? ' needs' : 's need';
 
     const handleSelect = useCallback((id: string) => {
         router.push(`/plants/${id}`);
@@ -62,7 +63,7 @@ const CareScreen: React.FunctionComponent<Props> = ({ plants, className, ...prop
                                 All plants are happy
                                 <PartyPopper size="0.875rem" aria-hidden />
                             </React.Fragment>
-                        ) : `${due.length} task${due.length === 1 ? ' needs' : 's need'} attention`}
+                        ) : `${due.length} task${taskSuffix} attention`}
                     </div>
                 </div>
             </header>
