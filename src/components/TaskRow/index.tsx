@@ -11,14 +11,19 @@ import { CARE_META } from '@/helpers/care/constants';
 // Components
 import Button from '@/design-system/Button';
 import PlantPhoto from '@/components/PlantPhoto';
+import WaterAmount from '@/components/WaterAmount';
 
 // Helpers
 import { displayName } from '@/helpers/plant';
 import { formatDue } from '@/helpers/care';
+import { getWaterAmountMl } from '@/helpers/pot';
 import type { CareTask } from '@/helpers/care/types';
 
 // Styles
 import styles from './styles.module.css';
+
+// Types
+import { CareKind } from '@/types';
 
 export interface Props extends Omit<React.ComponentProps<'div'>, 'onSelect'> {
     task: CareTask;
@@ -36,6 +41,14 @@ const TaskRow: React.FunctionComponent<Props> = ({ task, onSelect, className, ..
     const handleSelect = useCallback(() => {
         onSelect(task.plant.id);
     }, [onSelect, task]);
+
+    const renderAmount = () => {
+        if (task.kind !== CareKind.Water) {
+            return;
+        }
+
+        return <WaterAmount amount={getWaterAmountMl(task.plant.potDiameter)} />;
+    };
 
     return (
         <div className={classes} {...props}>
@@ -55,6 +68,7 @@ const TaskRow: React.FunctionComponent<Props> = ({ task, onSelect, className, ..
                         <span className={whenClasses}>
                             {capitalize(formatDue(task.daysUntil))}
                         </span>
+                        {renderAmount()}
                     </span>
                 </span>
             </Button>

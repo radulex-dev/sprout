@@ -1,0 +1,12 @@
+@reference "../../app/globals.css";
+
+.root {
+    @apply mt-0.5 inline-flex items-center gap-1 text-xs font-semibold text-ink-soft;
+}
+
+.flag {
+    @apply
+        inline-flex items-center gap-1 rounded-lg ui-notice-warn px-2 py-1 text-xs font-semibold
+        whitespace-nowrap
+    ;
+}

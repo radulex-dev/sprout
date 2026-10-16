@@ -2,16 +2,21 @@ import React from 'react';
 import classNames from 'classnames';
 
 // Constants
+import { WaterAmountVariant } from '@/components/WaterAmount/constants';
 import { CARE_META } from '@/helpers/care/constants';
+
+// Components
+import WaterAmount from '@/components/WaterAmount';
 
 // Helpers
 import { allTasks, formatDue } from '@/helpers/care';
+import { getWaterAmountMl } from '@/helpers/pot';
 
 // Styles
 import styles from './styles.module.css';
 
 // Types
-import type { Plant } from '@/types';
+import { CareKind, type Plant } from '@/types';
 
 export interface Props extends React.ComponentProps<'div'> {
     plant: Plant;
@@ -71,9 +76,22 @@ const PlantChips: React.FunctionComponent<Props> = ({ plant, className, ...props
         return NextMeta && next ? renderNextChip() : undefined;
     };
 
+    const renderAmountFlag = () => {
+        const isWaterDue = tasks.some((task) => {
+            return task.kind === CareKind.Water && task.daysUntil <= 0;
+        });
+
+        if (!isWaterDue) {
+            return;
+        }
+
+        return <WaterAmount amount={getWaterAmountMl(plant.potDiameter)} variant={WaterAmountVariant.Flag} />;
+    };
+
     return (
         <div className={classes} {...props}>
             {renderContent()}
+            {renderAmountFlag()}
         </div>
     );
 };

@@ -1,6 +1,5 @@
 import React from 'react';
 import classNames from 'classnames';
-import { Droplet } from 'lucide-react';
 
 // Constants
 import { NO_DUE_DATE_TEXT } from './constants';
@@ -8,6 +7,7 @@ import { SET_POT_SIZE_LABEL } from '@/components/PotSizePicker/constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
 
 // Components
+import WaterAmount from '@/components/WaterAmount';
 import Button from '@/design-system/Button';
 import Popover from '@/design-system/Popover';
 
@@ -68,12 +68,7 @@ const CareStatValue: React.FunctionComponent<Props> = ({ plant, kind, now, onReq
             );
         }
 
-        return (
-            <span className={styles.amount}>
-                <Droplet aria-hidden size="0.75rem" />
-                {`${amount} ml`}
-            </span>
-        );
+        return <WaterAmount amount={amount} />;
     };
 
     return (

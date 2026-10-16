@@ -49,4 +49,47 @@ describe('<TaskRow />', () => {
         })).not.toBeInTheDocument();
         expect(screen.getAllByRole('button')).toHaveLength(1);
     });
+
+    it('renders the watering amount on a water row for a sized plant', () => {
+        const task: CareTask = {
+            plant: makePlant({
+                potDiameter: 12
+            }),
+            kind: CareKind.Water,
+            dueAt: NOW,
+            daysUntil: 0
+        };
+
+        render(<TaskRow {...props} task={task} />);
+
+        expect(screen.getByText('160 ml')).toBeInTheDocument();
+    });
+
+    it('renders no amount on a fertilise row even when the plant has a pot size', () => {
+        const task: CareTask = {
+            plant: makePlant({
+                potDiameter: 12
+            }),
+            kind: CareKind.Fertilize,
+            dueAt: NOW,
+            daysUntil: 0
+        };
+
+        render(<TaskRow {...props} task={task} />);
+
+        expect(screen.queryByText('160 ml')).not.toBeInTheDocument();
+    });
+
+    it('renders no amount on a water row for a plant with no pot size', () => {
+        const task: CareTask = {
+            plant: makePlant(),
+            kind: CareKind.Water,
+            dueAt: NOW,
+            daysUntil: 0
+        };
+
+        render(<TaskRow {...props} task={task} />);
+
+        expect(screen.queryByText(/ml/)).not.toBeInTheDocument();
+    });
 });

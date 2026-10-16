@@ -93,6 +93,59 @@ describe('<PlantChips />', () => {
         expect(screen.getByText('in 7 days')).toBeInTheDocument();
     });
 
+    it('renders the water amount flag when watering is due', () => {
+        const now = Date.now();
+        const plant = makePlant({
+            care: {
+                waterEveryDays: 2
+            },
+            lastCare: {
+                [CareKind.Water]: now - 5 * DAY_MS,
+                [CareKind.Fertilize]: now,
+                [CareKind.Repot]: now
+            },
+            potDiameter: 12
+        });
+
+        render(<PlantChips {...props} plant={plant} />);
+
+        expect(screen.getByText('160 ml')).toBeInTheDocument();
+    });
+
+    it('renders no water amount flag when watering is not due', () => {
+        const now = Date.now();
+        const plant = makePlant({
+            lastCare: {
+                [CareKind.Water]: now,
+                [CareKind.Fertilize]: now,
+                [CareKind.Repot]: now
+            },
+            potDiameter: 12
+        });
+
+        render(<PlantChips {...props} plant={plant} />);
+
+        expect(screen.queryByText('160 ml')).not.toBeInTheDocument();
+    });
+
+    it('renders no water amount flag when the plant has no pot size', () => {
+        const now = Date.now();
+        const plant = makePlant({
+            care: {
+                waterEveryDays: 2
+            },
+            lastCare: {
+                [CareKind.Water]: now - 5 * DAY_MS,
+                [CareKind.Fertilize]: now,
+                [CareKind.Repot]: now
+            }
+        });
+
+        render(<PlantChips {...props} plant={plant} />);
+
+        expect(screen.queryByText('160 ml')).not.toBeInTheDocument();
+    });
+
     it('renders no chips when the plant has no care intervals', () => {
         const plant = makePlant({
             care: {
