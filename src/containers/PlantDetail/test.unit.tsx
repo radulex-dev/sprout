@@ -161,12 +161,44 @@ describe('<PlantDetail />', () => {
                 waterEveryDays: 7,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 12
-            }
+            },
+            potDiameter: undefined
         });
         expect(await screen.findByText('Schedule saved.')).toBeInTheDocument();
         expect(screen.getByRole('button', {
             name: 'Edit'
         })).toBeInTheDocument();
+    });
+
+    it('saves the chosen pot size without logging care', async () => {
+        const user = userEvent.setup();
+
+        render(
+            <ToastProvider>
+                <PlantDetail {...props} />
+            </ToastProvider>
+        );
+
+        await user.click(screen.getByRole('button', {
+            name: 'Set pot size'
+        }));
+        await user.click(screen.getByRole('radio', {
+            name: '12 cm pot'
+        }));
+        await user.click(screen.getByRole('button', {
+            name: 'Save changes'
+        }));
+
+        expect(vi.mocked(updatePlant)).toHaveBeenCalledWith('plant-1', {
+            nickname: '',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
+            },
+            potDiameter: 12
+        });
+        expect(vi.mocked(markCareDone)).not.toHaveBeenCalled();
     });
 
     it('shows a notice when the schedule cannot be saved', async () => {

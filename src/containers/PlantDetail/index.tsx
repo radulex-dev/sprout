@@ -86,7 +86,8 @@ const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...prop
         try {
             await updatePlant(edited.id, {
                 nickname: edited.nickname,
-                care: edited.care
+                care: edited.care,
+                potDiameter: edited.potDiameter
             });
 
             showToast({
@@ -188,7 +189,7 @@ const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...prop
                                         {meta.label}
                                     </dt>
                                     <dd>
-                                        <CareStatValue plant={plant} kind={kind} now={now} />
+                                        <CareStatValue plant={plant} kind={kind} now={now} onRequestPotSize={handleStartEdit} />
                                     </dd>
                                 </div>
                             );

@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 
 // Services
 import type { UpdatePlantInput } from './schema';
@@ -48,7 +48,8 @@ export const updatePlant = async (userId: string, id: string, input: UpdatePlant
         .update(plants)
         .set({
             nickname: input.nickname,
-            care: input.care
+            care: input.care,
+            potDiameter: input.potDiameter ?? sql`null`
         })
         .where(and(eq(plants.id, id), eq(plants.userId, userId)));
 };

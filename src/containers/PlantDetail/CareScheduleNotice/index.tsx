@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 import React from 'react';
+import { Ruler } from 'lucide-react';
 
 // Constants
 import { ButtonVariant } from '@/design-system/Button/constants';
@@ -44,6 +45,12 @@ const CareScheduleNotice: React.FunctionComponent<Props> = ({ plant, onEdit, cla
                     <RepotIcon size="0.875rem" aria-hidden />
                     <span>
                         {plant.care.repotEveryMonths ? `${plant.care.repotEveryMonths} months` : 'never'}
+                    </span>
+                </div>
+                <div className={styles.row}>
+                    <Ruler size="0.875rem" aria-hidden />
+                    <span>
+                        {plant.potDiameter === undefined ? 'Not set' : `${plant.potDiameter} cm`}
                     </span>
                 </div>
             </div>

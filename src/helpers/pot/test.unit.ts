@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { ML_PER_LITRE, POT_SIZES, WATER_AMOUNT_RATIO } from './constants';
 
 // Helpers
-import { waterAmountMl } from './index';
+import { getWaterAmountMl } from './index';
 
 // Types
 import { PotDiameterUnit, PotVolumeUnit } from './types';
@@ -24,21 +24,21 @@ describe('waterAmountMl', () => {
         [27, 1500],
         [30, 2000]
     ])('maps a %s cm pot to %s ml', (diameter, ml) => {
-        expect(waterAmountMl(diameter)).toBe(ml);
+        expect(getWaterAmountMl(diameter)).toBe(ml);
     });
 
     it('derives no amount when the diameter is unset', () => {
-        expect(waterAmountMl(undefined)).toBeUndefined();
+        expect(getWaterAmountMl(undefined)).toBeUndefined();
     });
 
     it('derives no amount for an unrecognised diameter', () => {
-        expect(waterAmountMl(11)).toBeUndefined();
+        expect(getWaterAmountMl(11)).toBeUndefined();
     });
 });
 
 describe('POT_SIZES', () => {
     it.each(POT_SIZES)('rounds the amount for a $diameter cm pot to ten millilitres', ({ diameter, volume }) => {
-        const amount = waterAmountMl(diameter);
+        const amount = getWaterAmountMl(diameter);
 
         expect(amount).toBe(Math.round(volume * ML_PER_LITRE * WATER_AMOUNT_RATIO));
         expect(Number(amount) % 10).toBe(0);

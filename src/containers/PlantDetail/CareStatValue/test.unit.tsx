@@ -1,6 +1,6 @@
 import type React from 'react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
 // Constants
@@ -32,7 +32,8 @@ const props: React.ComponentProps<typeof CareStatValue> = {
         }
     }),
     kind: CareKind.Water,
-    now: NOW
+    now: NOW,
+    onRequestPotSize: vi.fn()
 };
 
 describe('<CareStatValue />', () => {
@@ -106,5 +107,40 @@ describe('<CareStatValue />', () => {
         expect(screen.getByRole('dialog', {
             name: 'in 5 days'
         }).textContent).toBe(toDateValue(NOW + 5 * DAY_MS));
+    });
+
+    it('renders the watering amount when a pot size is set', () => {
+        const plant = makePlant({
+            potDiameter: 12
+        });
+
+        render(<CareStatValue {...props} plant={plant} />);
+
+        expect(screen.getByText('160 ml')).toBeInTheDocument();
+    });
+
+    it('starts the pot size edit when the prompt is clicked', async () => {
+        const user = userEvent.setup();
+
+        render(<CareStatValue {...props} />);
+
+        await user.click(screen.getByRole('button', {
+            name: 'Set pot size'
+        }));
+
+        expect(props.onRequestPotSize).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([CareKind.Fertilize, CareKind.Repot])('renders no pot size slot for %s', (kind) => {
+        const plant = makePlant({
+            potDiameter: 12
+        });
+
+        render(<CareStatValue {...props} kind={kind} plant={plant} />);
+
+        expect(screen.queryByText('160 ml')).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', {
+            name: 'Set pot size'
+        })).not.toBeInTheDocument();
     });
 });

@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Constants
@@ -495,6 +496,32 @@ describe('UpdatePlantSchema', () => {
             });
         }).toThrow();
     });
+
+    it('accepts a standard pot diameter', () => {
+        expect(UpdatePlantSchema.parse({
+            nickname: 'Fern',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            potDiameter: 10.5
+        }).potDiameter).toBe(10.5);
+    });
+
+    it('rejects a pot diameter that is not a standard size', () => {
+        expect(() => {
+            return UpdatePlantSchema.parse({
+                nickname: 'Fern',
+                care: {
+                    waterEveryDays: 7,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 18
+                },
+                potDiameter: 11
+            });
+        }).toThrow();
+    });
 });
 
 describe('NotifiedAtSchema', () => {
@@ -623,7 +650,7 @@ describe('plant mutations', () => {
         });
     });
 
-    it('updatePlant writes the nickname and care scoped to the user', async () => {
+    it('updatePlant writes the nickname and care and clears an omitted pot diameter', async () => {
         const where = vi.fn();
         const set = vi.fn(() => {
             return {
@@ -650,7 +677,42 @@ describe('plant mutations', () => {
                 waterEveryDays: 5,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
-            }
+            },
+            potDiameter: sql`null`
+        });
+        expect(where).toHaveBeenCalledTimes(1);
+    });
+
+    it('updatePlant writes a chosen pot diameter and never writes lastCare', async () => {
+        const where = vi.fn();
+        const set = vi.fn(() => {
+            return {
+                where
+            };
+        });
+
+        mockUpdate.mockReturnValueOnce({
+            set
+        });
+
+        await updatePlant('user-1', 'plant-1', {
+            nickname: 'Fern',
+            care: {
+                waterEveryDays: 5,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            potDiameter: 10.5
+        });
+
+        expect(set).toHaveBeenCalledWith({
+            nickname: 'Fern',
+            care: {
+                waterEveryDays: 5,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            potDiameter: 10.5
         });
         expect(where).toHaveBeenCalledTimes(1);
     });

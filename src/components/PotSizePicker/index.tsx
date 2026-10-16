@@ -15,7 +15,7 @@ import PotGlyph from './PotGlyph';
 
 // Helpers
 import { formatPotOptionName, formatWaterAmount } from './helpers';
-import { waterAmountMl } from '@/helpers/pot';
+import { getWaterAmountMl } from '@/helpers/pot';
 
 // Styles
 import styles from './styles.module.css';
@@ -31,7 +31,7 @@ const PotSizePicker: React.FunctionComponent<Props> = ({ value, onChange, hint, 
     const labelId = useId();
     const hintId = useId();
     const radioGroupId = useId();
-    const amount = waterAmountMl(value);
+    const amount = getWaterAmountMl(value);
     const describedBy = hint ? hintId : undefined;
 
     const handleOptionChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {

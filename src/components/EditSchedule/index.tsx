@@ -5,11 +5,13 @@ import React, { useCallback, useId, useState } from 'react';
 
 // Constants
 import { FREQUENCY_TITLE } from '@/components/CareScheduleFields/constants';
+import { POT_SIZE_HINT } from '@/components/PotSizePicker/constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
 
 // Components
 import Button from '@/design-system/Button';
 import CareScheduleFields from '@/components/CareScheduleFields';
+import PotSizePicker from '@/components/PotSizePicker';
 
 // Styles
 import styles from './styles.module.css';
@@ -28,6 +30,7 @@ const EditSchedule: React.FunctionComponent<Props> = ({ plant, onSave, onCancel,
 
     const [nickname, setNickname] = useState(plant.nickname);
     const [care, setCare] = useState(plant.care);
+    const [potDiameter, setPotDiameter] = useState<number | undefined>(plant.potDiameter);
     const nicknameId = useId();
 
     const handleNicknameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,9 +41,10 @@ const EditSchedule: React.FunctionComponent<Props> = ({ plant, onSave, onCancel,
         onSave({
             ...plant,
             nickname: nickname.trim() || plant.nickname,
-            care
+            care,
+            potDiameter
         });
-    }, [plant, onSave, nickname, care]);
+    }, [plant, onSave, nickname, care, potDiameter]);
 
     return (
         <div className={classes} {...props}>
@@ -54,6 +58,7 @@ const EditSchedule: React.FunctionComponent<Props> = ({ plant, onSave, onCancel,
                 {FREQUENCY_TITLE}
             </h2>
             <CareScheduleFields value={care} onChange={setCare} />
+            <PotSizePicker value={potDiameter} onChange={setPotDiameter} hint={POT_SIZE_HINT} />
             <div className={styles.shutterRow}>
                 <Button variant={ButtonVariant.Secondary} grow onClick={onCancel}>
                     Cancel

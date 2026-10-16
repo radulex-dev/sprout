@@ -61,7 +61,8 @@ export const parsePlantInput = (value: unknown): PlantInput => {
 
 export const UpdatePlantSchema = z.object({
     nickname: z.string().trim().min(1).max(MAX_TEXT_LENGTH),
-    care: CareScheduleSchema
+    care: CareScheduleSchema,
+    potDiameter: potDiameterSchema.optional()
 });
 export type UpdatePlantInput = z.infer<typeof UpdatePlantSchema>;
 
