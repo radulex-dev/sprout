@@ -303,4 +303,24 @@ describe('<PlantDetail />', () => {
 
         expect(screen.getByText('Boston fern')).toBeInTheDocument();
     });
+
+    it('scrolls back to the size form when the prompt is tapped again', async () => {
+        const user = userEvent.setup();
+        const scrollIntoView = vi.spyOn(Element.prototype, 'scrollIntoView');
+
+        render(
+            <ToastProvider>
+                <PlantDetail {...props} />
+            </ToastProvider>
+        );
+
+        await user.click(screen.getByRole('button', {
+            name: 'Set pot size'
+        }));
+        await user.click(screen.getByRole('button', {
+            name: 'Set pot size'
+        }));
+
+        expect(scrollIntoView).toHaveBeenCalledTimes(2);
+    });
 });

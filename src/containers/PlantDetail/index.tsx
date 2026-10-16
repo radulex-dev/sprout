@@ -2,7 +2,7 @@
 
 import classNames from 'classnames';
 import Link from 'next/link';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { getLocalTimeZone, parseDate } from '@internationalized/date';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
@@ -51,6 +51,7 @@ const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...prop
     const showToast = useToast();
     const [isEditing, setIsEditing] = useState(false);
     const [isConfirmDelete, setIsConfirmDelete] = useState(false);
+    const formRef = useRef<HTMLDivElement>(null);
 
     const handleMarkDone = useCallback(async (kind: CareKind) => {
         try {
@@ -130,9 +131,30 @@ const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...prop
         }
     }, [plant, router, showToast]);
 
-    const handleStartEdit = useCallback(() => {
-        setIsEditing(true);
+    const scrollToForm = useCallback(() => {
+        formRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
     }, []);
+
+    useEffect(() => {
+        if (!isEditing) {
+            return;
+        }
+
+        scrollToForm();
+    }, [isEditing, scrollToForm]);
+
+    const handleStartEdit = useCallback(() => {
+        if (isEditing) {
+            scrollToForm();
+
+            return;
+        }
+
+        setIsEditing(true);
+    }, [isEditing, scrollToForm]);
 
     const handleCancelEdit = useCallback(() => {
         setIsEditing(false);
@@ -147,7 +169,7 @@ const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...prop
     }, []);
 
     const renderSchedule = () => {
-        return isEditing ? <EditSchedule key={plant.id} plant={plant} onSave={handleSaveEdited} onCancel={handleCancelEdit} /> : <CareScheduleNotice plant={plant} onEdit={handleStartEdit} />;
+        return isEditing ? <EditSchedule key={plant.id} ref={formRef} plant={plant} onSave={handleSaveEdited} onCancel={handleCancelEdit} /> : <CareScheduleNotice plant={plant} onEdit={handleStartEdit} />;
     };
 
     return (

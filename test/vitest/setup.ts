@@ -6,6 +6,8 @@ vi.mock('server-only', () => {
     return {};
 });
 
+Element.prototype.scrollIntoView = vi.fn();
+
 beforeEach(() => {
     localStorage.clear();
     sessionStorage.clear();
