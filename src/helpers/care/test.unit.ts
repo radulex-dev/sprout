@@ -146,6 +146,29 @@ describe('dueTasks', () => {
         expect(overdueTask.plant.id).toBe('plant-overdue');
         expect(overdueTask.kind).toBe(CareKind.Water);
     });
+
+    it('is unaffected by the pot size', () => {
+        const unsized = makePlant({
+            care: {
+                waterEveryDays: 7
+            },
+            lastCare: {
+                [CareKind.Water]: NOW - 10 * DAY_MS
+            }
+        });
+        const sized = makePlant({
+            potDiameter: 10.5,
+            care: {
+                waterEveryDays: 7
+            },
+            lastCare: {
+                [CareKind.Water]: NOW - 10 * DAY_MS
+            }
+        });
+
+        expect(dueTasks([unsized], NOW)).toHaveLength(1);
+        expect(dueTasks([sized], NOW)).toHaveLength(1);
+    });
 });
 
 describe('isNotifiedToday', () => {

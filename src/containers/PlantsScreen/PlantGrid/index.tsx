@@ -1,6 +1,10 @@
 import React from 'react';
 import classNames from 'classnames';
 import Link from 'next/link';
+import { Ruler } from 'lucide-react';
+
+// Constants
+import { SET_POT_SIZE_LABEL } from '@/components/PotSizePicker/constants';
 
 // Components
 import PlantPhoto from '@/components/PlantPhoto';
@@ -40,6 +44,12 @@ const PlantGrid: React.FunctionComponent<Props> = ({ plants, className, ...props
                                 </div>
                                 <div className={styles.chips}>
                                     <PlantChips plant={plant} />
+                                    {plant.potDiameter === undefined && (
+                                        <span className={styles.potSizeFlag}>
+                                            <Ruler aria-hidden size="0.875rem" />
+                                            {SET_POT_SIZE_LABEL}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         </Link>

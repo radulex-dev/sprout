@@ -1,6 +1,7 @@
 export const POT_SIZE_LABEL = 'Pot size';
 export const POT_SIZE_HINT = 'Optional · Measure across the top of the pot, in cm.';
 export const POT_CLEAR_LABEL = 'Clear pot size';
+export const SET_POT_SIZE_LABEL = 'Set pot size';
 
 export const POT_WIDTH_REM_PER_CM = 0.09167;
 

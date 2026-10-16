@@ -77,4 +77,57 @@ describe('<PlantGrid />', () => {
 
         expect(screen.getByText('3 days overdue')).toBeInTheDocument();
     });
+
+    it('renders the pot size flag for a plant with no pot size', () => {
+        render(<PlantGrid {...props} />);
+
+        expect(screen.getByText('Set pot size')).toBeInTheDocument();
+        expect(screen.getAllByRole('link')).toHaveLength(1);
+    });
+
+    it('does not render the pot size flag for a plant with a pot size', () => {
+        const plants = [
+            makePlant({
+                potDiameter: 10.5
+            })
+        ];
+
+        render(<PlantGrid {...props} plants={plants} />);
+
+        expect(screen.queryByText('Set pot size')).not.toBeInTheDocument();
+    });
+
+    it('renders the pot size flag on every unsized card', () => {
+        const plants = [
+            makePlant(),
+            makePlant({
+                id: 'plant-2'
+            })
+        ];
+
+        render(<PlantGrid {...props} plants={plants} />);
+
+        expect(screen.getAllByText('Set pot size')).toHaveLength(2);
+    });
+
+    it('renders the pot size flag alongside a care chip', () => {
+        const now = Date.now();
+        const plants = [
+            makePlant({
+                care: {
+                    waterEveryDays: 2
+                },
+                lastCare: {
+                    [CareKind.Water]: now - 5 * DAY_MS,
+                    [CareKind.Fertilize]: now,
+                    [CareKind.Repot]: now
+                }
+            })
+        ];
+
+        render(<PlantGrid {...props} plants={plants} />);
+
+        expect(screen.getByText('3 days overdue')).toBeInTheDocument();
+        expect(screen.getByText('Set pot size')).toBeInTheDocument();
+    });
 });

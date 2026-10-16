@@ -55,6 +55,13 @@
     @apply mt-2 flex flex-wrap gap-1;
 }
 
+.potSizeFlag {
+    @apply
+        inline-flex items-center gap-1 rounded-lg ui-notice-warn px-2 py-1 text-xs font-semibold
+        whitespace-nowrap
+    ;
+}
+
 @variant tablet {
     @media (hover: hover) {
         .plantCard:hover {

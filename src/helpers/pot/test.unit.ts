@@ -9,7 +9,7 @@ import { getWaterAmountMl } from './index';
 // Types
 import { PotDiameterUnit, PotVolumeUnit } from './types';
 
-describe('waterAmountMl', () => {
+describe('getWaterAmountMl', () => {
     it.each([
         [9, 70],
         [10.5, 90],

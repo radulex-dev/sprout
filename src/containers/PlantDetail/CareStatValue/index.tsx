@@ -3,7 +3,8 @@ import classNames from 'classnames';
 import { Droplet } from 'lucide-react';
 
 // Constants
-import { NO_DUE_DATE_TEXT, SET_POT_SIZE_LABEL } from './constants';
+import { NO_DUE_DATE_TEXT } from './constants';
+import { SET_POT_SIZE_LABEL } from '@/components/PotSizePicker/constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
 
 // Components
