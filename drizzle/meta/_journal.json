@@ -43,6 +43,13 @@
       "when": 1791763200000,
       "tag": "0005_removed_zero_care_intervals",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792175152548,
+      "tag": "0006_added_pot_diameter",
+      "breakpoints": true
     }
   ]
 }

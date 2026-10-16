@@ -3,6 +3,7 @@ import * as z from 'zod';
 // Constants
 import { MAX_DAYS, MAX_MONTHS, MAX_TEXT_LENGTH } from './constants';
 import { MAX_PHOTO_BYTES } from '@/helpers/image/constants';
+import { POT_SIZES } from '@/helpers/pot/constants';
 
 // Types
 import { CareKind, type PlantInput } from '@/types';
@@ -26,6 +27,14 @@ const photoSchema = z.custom<Blob>((value) => {
     message: `Photo must be a Blob no larger than ${MAX_PHOTO_BYTES / 1024 / 1024} MB.`
 });
 
+const potDiameterSchema = z.number().refine((value) => {
+    return POT_SIZES.some((size) => {
+        return size.diameter === value;
+    });
+}, {
+    message: 'Pot diameter must be one of the standard pot sizes.'
+});
+
 export const LastCareDateSchema = z.int().nonnegative().refine((value) => {
     return value <= Date.now();
 }, {
@@ -40,6 +49,7 @@ export const PlantInputSchema = z.object({
     commonName: z.string().trim().max(MAX_TEXT_LENGTH),
     care: CareScheduleSchema,
     photo: photoSchema.optional(),
+    potDiameter: potDiameterSchema.optional(),
     acquiredAt: z.int().nonnegative(),
     lastCare: LastCareSchema.optional()
 });

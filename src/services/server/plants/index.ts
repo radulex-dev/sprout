@@ -33,7 +33,8 @@ export const createPlant = async (userId: string, input: PlantInput): Promise<st
             lastCare: input.lastCare ?? {},
             lastNotified: {},
             notes: '',
-            photo
+            photo,
+            potDiameter: input.potDiameter
         })
         .returning({
             id: plants.id

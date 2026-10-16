@@ -34,6 +34,7 @@ export interface Plant {
     species: string;
     commonName: string;
     photo?: string;
+    potDiameter?: number;
     acquiredAt: number;
     care: CareSchedule;
     lastCare: Partial<Record<CareKind, number>>;
@@ -46,6 +47,7 @@ export interface PlantInput {
     commonName: string;
     care: CareSchedule;
     photo?: Blob;
+    potDiameter?: number;
     acquiredAt: number;
     lastCare?: Partial<Record<CareKind, number>>;
 }

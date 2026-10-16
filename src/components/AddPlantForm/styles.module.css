@@ -13,6 +13,10 @@
     @apply ui-field;
 }
 
+.potField {
+    @apply mb-3.5;
+}
+
 .previewPane,
 .formPane {
     @apply min-w-0;

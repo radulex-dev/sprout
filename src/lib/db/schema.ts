@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { bigint, boolean, check, customType, index, integer, jsonb, pgTable, text, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+import { bigint, boolean, check, customType, index, integer, jsonb, pgTable, real, text, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 
 // Schema
 export { account, session, user, verification } from './auth-schema';
@@ -29,6 +29,7 @@ export const plants = pgTable(
         species: text('species').notNull(),
         commonName: text('common_name').notNull().default(''),
         photo: bytea('photo'),
+        potDiameter: real('pot_diameter'),
         acquiredAt: bigint('acquired_at', {
             mode: 'number'
         }).notNull(),

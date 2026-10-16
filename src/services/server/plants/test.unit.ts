@@ -364,6 +364,52 @@ describe('PlantInputSchema', () => {
             lastCare
         }).lastCare).toEqual(lastCare);
     });
+
+    it.each([9, 10.5, 30])('accepts the pot diameter %s', (potDiameter) => {
+        expect(PlantInputSchema.parse({
+            nickname: 'Kitchen monstera',
+            species: 'Monstera deliciosa',
+            commonName: 'Swiss cheese plant',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1_700_000_000_000,
+            potDiameter
+        }).potDiameter).toBe(potDiameter);
+    });
+
+    it('accepts an omitted potDiameter', () => {
+        expect(PlantInputSchema.parse({
+            nickname: 'Kitchen monstera',
+            species: 'Monstera deliciosa',
+            commonName: 'Swiss cheese plant',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1_700_000_000_000
+        })).not.toHaveProperty('potDiameter');
+    });
+
+    it.each([0, 11, -9, NaN])('rejects the pot diameter %s', (potDiameter) => {
+        expect(() => {
+            return PlantInputSchema.parse({
+                nickname: 'Kitchen monstera',
+                species: 'Monstera deliciosa',
+                commonName: 'Swiss cheese plant',
+                care: {
+                    waterEveryDays: 7,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 18
+                },
+                acquiredAt: 1_700_000_000_000,
+                potDiameter
+            });
+        }).toThrow();
+    });
 });
 
 describe('LastCareSchema', () => {
@@ -497,7 +543,7 @@ describe('plant mutations', () => {
         expect(mockGetPlantPhoto).toHaveBeenCalledWith('user-1', 'plant-1');
     });
 
-    it('createPlant stores the uploaded photo bytes and the given lastCare', async () => {
+    it('createPlant stores the uploaded photo bytes, the given lastCare and the pot diameter', async () => {
         const insertChain = mockInsertChain();
 
         mockInsert.mockReturnValueOnce(insertChain);
@@ -515,7 +561,8 @@ describe('plant mutations', () => {
             lastCare: {
                 [CareKind.Water]: NOW
             },
-            photo: new Blob(['leaf'])
+            photo: new Blob(['leaf']),
+            potDiameter: 10.5
         });
 
         expect(id).toBe('generated-id');
@@ -535,7 +582,8 @@ describe('plant mutations', () => {
             },
             lastNotified: {},
             notes: '',
-            photo: Buffer.from('leaf')
+            photo: Buffer.from('leaf'),
+            potDiameter: 10.5
         });
     });
 
@@ -570,7 +618,8 @@ describe('plant mutations', () => {
             lastCare: {},
             lastNotified: {},
             notes: '',
-            photo: undefined
+            photo: undefined,
+            potDiameter: undefined
         });
     });
 

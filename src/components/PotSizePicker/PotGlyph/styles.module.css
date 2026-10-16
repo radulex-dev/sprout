@@ -1,0 +1,24 @@
+@reference "../../../app/globals.css";
+
+.root {
+    @apply block h-auto;
+}
+
+.body {
+    @apply fill-green-100 stroke-green-500;
+
+    stroke-linejoin: round;
+    stroke-width: 3;
+}
+
+.rim {
+    @apply fill-green-500;
+}
+
+.selected .body {
+    @apply fill-[#c8dfc3] stroke-green-700;
+}
+
+.selected .rim {
+    @apply fill-green-700;
+}

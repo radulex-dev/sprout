@@ -1,0 +1,85 @@
+@reference "../../app/globals.css";
+
+.root {
+    @apply flex min-w-0 flex-col gap-1.5;
+
+    container-type: inline-size;
+}
+
+.label {
+    @apply text-note font-[650] text-ink;
+}
+
+.hint {
+    @apply text-xs text-ink-soft;
+}
+
+.grid {
+    @apply grid gap-1.5;
+
+    grid-template-columns: repeat(auto-fill, minmax(2.75rem, 1fr));
+}
+
+@container (min-width: 18.375rem) {
+    .grid {
+        grid-template-columns: repeat(6, minmax(2.75rem, 1fr));
+    }
+}
+
+.option {
+    @apply
+        relative flex min-h-17 min-w-11 cursor-pointer flex-col items-center justify-end gap-1
+        rounded-xl px-0.5 pt-1 pb-1.5
+    ;
+
+    transition: background-color var(--dur-base) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .option:not(.optionSelected):hover {
+        @apply bg-surface-2;
+    }
+}
+
+.optionSelected {
+    @apply bg-green-100;
+}
+
+.optionInput {
+    @apply absolute inset-0 m-0 cursor-pointer rounded-xl border-0 bg-transparent;
+
+    appearance: none;
+}
+
+.optionLabel {
+    @apply text-xs font-semibold text-ink-soft;
+
+    line-height: 1.2;
+}
+
+.optionSelected .optionLabel {
+    @apply font-extrabold text-green-900;
+}
+
+.result {
+    @apply m-0 flex items-center gap-1.5 text-[0.8125rem] font-bold text-green-900;
+}
+
+.resultIcon {
+    @apply text-green-700;
+}
+
+.clear {
+    @apply
+        flex min-h-11 items-center self-start rounded-xl px-3 py-2 text-[0.9375rem] font-bold
+        text-green-700
+    ;
+
+    transition: background-color var(--dur-base) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .clear:hover {
+        @apply bg-green-100;
+    }
+}

@@ -8,12 +8,14 @@ import { Sprout } from 'lucide-react';
 import { CARE_HINT_BY_SOURCE, NICKNAME_LABEL, NICKNAME_PLACEHOLDER } from './constants';
 import { FREQUENCY_TITLE } from '@/components/CareScheduleFields/constants';
 import { LAST_CARE_HINT, LAST_CARE_TITLE } from '@/components/LastCareFields/constants';
+import { POT_SIZE_HINT } from '@/components/PotSizePicker/constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
 
 // Components
 import Button from '@/design-system/Button';
 import CareScheduleFields from '@/components/CareScheduleFields';
 import LastCareFields from '@/components/LastCareFields';
+import PotSizePicker from '@/components/PotSizePicker';
 
 // Helpers
 import { resolveLastCare } from '@/helpers/care';
@@ -47,6 +49,7 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
         return result.defaultCare;
     });
     const [lastCareDates, setLastCareDates] = useState<LastCareDates>({});
+    const [potDiameter, setPotDiameter] = useState<number | undefined>(undefined);
     const photoUrl = useObjectUrl(photo);
     const nicknameId = useId();
 
@@ -58,6 +61,10 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
         setLastCareDates(dates);
     }, []);
 
+    const handlePotDiameterChange = useCallback((value: number | undefined) => {
+        setPotDiameter(value);
+    }, []);
+
     const handleSave = useCallback(() => {
         onSave({
             nickname: nickname.trim() || result.commonName || result.species,
@@ -65,10 +72,11 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
             commonName: result.commonName,
             photo,
             care,
+            potDiameter,
             acquiredAt: Date.now(),
             lastCare: resolveLastCare(lastCareDates)
         });
-    }, [nickname, result, photo, care, lastCareDates, onSave]);
+    }, [nickname, result, photo, care, potDiameter, lastCareDates, onSave]);
 
     return (
         <div className={classes} {...props}>
@@ -93,6 +101,8 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
                     </label>
                     <input id={nicknameId} value={nickname} onChange={handleNicknameChange} placeholder={NICKNAME_PLACEHOLDER} />
                 </div>
+
+                <PotSizePicker className={styles.potField} value={potDiameter} onChange={handlePotDiameterChange} hint={POT_SIZE_HINT} />
 
                 <h2 className={styles.sectionTitle}>
                     {LAST_CARE_TITLE}
