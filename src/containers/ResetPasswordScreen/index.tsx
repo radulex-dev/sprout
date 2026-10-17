@@ -3,7 +3,7 @@
 import classNames from 'classnames';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCallback, useId, useReducer } from 'react';
+import { useCallback, useReducer } from 'react';
 
 // Constants
 import { RESET_PASSWORD_CONFIRM_LABEL, RESET_PASSWORD_EXPIRED_NOTICE, RESET_PASSWORD_EXPIRED_NOTICE_UNVERIFIED, RESET_PASSWORD_FRESH_LINK_LABEL, RESET_PASSWORD_GENERIC_ERROR, RESET_PASSWORD_MAX_LENGTH, RESET_PASSWORD_MIN_LENGTH, RESET_PASSWORD_MISMATCH, RESET_PASSWORD_NEW_LABEL, RESET_PASSWORD_SUBMIT_LABEL, RESET_PASSWORD_TITLE, RESET_PASSWORD_TOKEN_ERROR, RESET_PASSWORD_TOO_LONG, RESET_PASSWORD_TOO_SHORT, ResetPasswordActionType, ResetPasswordErrorCode, ResetPasswordStatus } from './constants';
@@ -11,6 +11,7 @@ import { ButtonVariant } from '@/design-system/Button/constants';
 
 // Components
 import Button from '@/design-system/Button';
+import Field from '@/design-system/Field';
 
 // Helpers
 import { initialState, resetPasswordReducer } from './helpers';
@@ -36,24 +37,22 @@ const ResetPasswordScreen: React.FunctionComponent<Props> = ({ token, email, ema
 
     const router = useRouter();
     const [state, dispatch] = useReducer(resetPasswordReducer, initialState);
-    const fieldErrorId = useId();
 
     const { confirmPassword, fieldError, isSubmitting, newPassword, status } = state;
 
     const expiredNotice = emailVerified ? RESET_PASSWORD_EXPIRED_NOTICE : RESET_PASSWORD_EXPIRED_NOTICE_UNVERIFIED;
-    const describedBy = fieldError ? fieldErrorId : undefined;
 
-    const handleNewPasswordChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleNewPasswordChange = useCallback((value: string) => {
         dispatch({
             type: ResetPasswordActionType.ChangeNew,
-            value: event.target.value
+            value
         });
     }, []);
 
-    const handleConfirmPasswordChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleConfirmPasswordChange = useCallback((value: string) => {
         dispatch({
             type: ResetPasswordActionType.ChangeConfirm,
-            value: event.target.value
+            value
         });
     }, []);
 
@@ -160,21 +159,9 @@ const ResetPasswordScreen: React.FunctionComponent<Props> = ({ token, email, ema
                     </div>
                 ) : (
                     <form className={styles.form} onSubmit={handleSubmit}>
-                        <label className={styles.field}>
-                            {RESET_PASSWORD_NEW_LABEL}
-                            <input type="password" value={newPassword} onChange={handleNewPasswordChange} autoComplete="new-password" aria-describedby={describedBy} required />
-                        </label>
+                        <Field label={RESET_PASSWORD_NEW_LABEL} type="password" value={newPassword} onValueChange={handleNewPasswordChange} autoComplete="new-password" error={fieldError} required />
 
-                        {fieldError && (
-                            <p className={styles.error} role="alert" id={fieldErrorId}>
-                                {fieldError}
-                            </p>
-                        )}
-
-                        <label className={styles.field}>
-                            {RESET_PASSWORD_CONFIRM_LABEL}
-                            <input type="password" value={confirmPassword} onChange={handleConfirmPasswordChange} autoComplete="new-password" required />
-                        </label>
+                        <Field label={RESET_PASSWORD_CONFIRM_LABEL} type="password" value={confirmPassword} onValueChange={handleConfirmPasswordChange} autoComplete="new-password" required />
 
                         {status === ResetPasswordStatus.TokenError && (
                             <p className={styles.error} role="alert">

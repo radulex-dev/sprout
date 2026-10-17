@@ -20,22 +20,6 @@
     @apply flex flex-col gap-3.5;
 }
 
-.field {
-    @apply flex flex-col gap-1.5 text-note font-semibold text-ink;
-
-    input {
-        @apply w-full rounded-card bg-surface px-3.5 py-3 text-base font-normal text-ink;
-
-        border: 1px solid rgb(28 37 32 / 12%);
-        outline: none;
-
-        &:focus {
-            border-color: var(--color-green-500);
-            box-shadow: 0 0 0 3px rgb(76 143 95 / 15%);
-        }
-    }
-}
-
 .confirmation {
     @apply m-0 rounded-btn-sm px-3 py-2.5 text-note text-green-700;
 

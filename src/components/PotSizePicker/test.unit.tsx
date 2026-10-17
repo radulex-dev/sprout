@@ -258,7 +258,7 @@ describe('<PotSizePicker />', () => {
         expect(screen.getByText(sentence)).toBeInTheDocument();
     });
 
-    it.each(['0', '10.5', '-1', '1001', 'abc'])('rejects the litres entry %s without storing it', async (entered) => {
+    it.each(['0', '10.5', '12,5', '1001'])('rejects the litres entry %s without storing it', async (entered) => {
         const user = userEvent.setup();
 
         render(<PotSizePicker {...props} />);
@@ -270,6 +270,23 @@ describe('<PotSizePicker />', () => {
         await user.paste(entered);
 
         expect(props.onChange).not.toHaveBeenCalled();
+    });
+
+    it.each([['1a2', '12'], ['-1', '1'], ['60 L', '60']])('keeps only the digits of the litres entry %s', async (entered, expected) => {
+        const user = userEvent.setup();
+
+        render(<PotSizePicker {...props} />);
+
+        await user.click(screen.getByRole('radio', {
+            name: 'Litres'
+        }));
+        await user.click(screen.getByLabelText('Soil volume in litres'));
+        await user.paste(entered);
+
+        expect(screen.getByLabelText('Soil volume in litres')).toHaveValue(expected);
+        expect(props.onChange).toHaveBeenCalledWith({
+            soilVolumeLitres: Number(expected)
+        });
     });
 
     it('unsets the size when the litres entry is emptied', async () => {

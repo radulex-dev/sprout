@@ -5,7 +5,7 @@
 }
 
 .field {
-    @apply ui-field;
+    @apply mb-3.5;
 }
 
 .sectionTitle {

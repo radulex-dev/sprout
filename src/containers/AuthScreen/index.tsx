@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import Link from 'next/link';
 import { GoogleLogin, GoogleOAuthProvider, type CredentialResponse } from '@react-oauth/google';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Sprout } from 'lucide-react';
 
 // Constants
@@ -17,6 +17,10 @@ import InstallButton from './InstallButton';
 import InstallGuide from '@/containers/SettingsScreen/InstallGuide';
 import AlertDialog from '@/design-system/AlertDialog';
 import Button from '@/design-system/Button';
+import Field from '@/design-system/Field';
+
+// Helpers
+import { getPasswordPolicyErrors } from './helpers';
 
 // Hooks
 import { useInstall } from '@/hooks';
@@ -49,7 +53,6 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, resetSucce
     const [isGoogleUnavailable, setIsGoogleUnavailable] = useState(!clientId);
     const [isInstallGuideOpen, setIsInstallGuideOpen] = useState(false);
     const googleSlotRef = useRef<HTMLDivElement>(null);
-    const errorId = useId();
 
     useEffect(() => {
         if (isGoogleUnavailable) {
@@ -75,16 +78,24 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, resetSucce
     const actionLabel = isSignup ? 'Create account' : 'Sign in';
     const submitLabel = isSubmitting ? 'One moment…' : actionLabel;
 
-    const handleNameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        setName(event.target.value);
+    const handleNameChange = useCallback((value: string) => {
+        setName(value);
     }, []);
 
-    const handleEmailChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        setEmail(event.target.value);
+    const handleEmailChange = useCallback((value: string) => {
+        setEmail(value);
     }, []);
 
-    const handlePasswordChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        setPassword(event.target.value);
+    const handlePasswordChange = useCallback((value: string) => {
+        setPassword(value);
+    }, []);
+
+    const handlePasswordValidate = useCallback((value: unknown): string[] => {
+        if (typeof value !== 'string') {
+            return [];
+        }
+
+        return getPasswordPolicyErrors(value);
     }, []);
 
     const handleSubmit = useCallback(async (event: React.SyntheticEvent) => {
@@ -92,6 +103,12 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, resetSucce
 
         setError('');
         setIsSubmitting(true);
+
+        if (isSignup && getPasswordPolicyErrors(password).length > 0) {
+            setIsSubmitting(false);
+
+            return;
+        }
 
         const callbackURL = '/';
 
@@ -231,24 +248,15 @@ const AuthScreen: React.FunctionComponent<Props> = ({ mode, clientId, resetSucce
                 )}
 
                 {isSignup && (
-                    <label className={styles.field}>
-                        Name
-                        <input value={name} onChange={handleNameChange} placeholder="Ada Lovelace" autoComplete="name" required />
-                    </label>
+                    <Field label="Name" value={name} onValueChange={handleNameChange} placeholder="Ada Lovelace" autoComplete="name" required />
                 )}
 
-                <label className={styles.field}>
-                    Email
-                    <input type="email" value={email} onChange={handleEmailChange} placeholder="you@example.com" autoComplete="email" aria-describedby={error ? errorId : undefined} required />
-                </label>
+                <Field label="Email" type="email" value={email} onValueChange={handleEmailChange} placeholder="you@example.com" autoComplete="email" required />
 
-                <label className={styles.field}>
-                    Password
-                    <input type="password" value={password} onChange={handlePasswordChange} placeholder="••••••••" autoComplete={isSignup ? 'new-password' : 'current-password'} aria-describedby={error ? errorId : undefined} required />
-                </label>
+                <Field label="Password" type="password" value={password} onValueChange={handlePasswordChange} placeholder="••••••••" autoComplete={isSignup ? 'new-password' : 'current-password'} validate={isSignup ? handlePasswordValidate : undefined} required />
 
                 {error && (
-                    <p className={styles.error} role="alert" id={errorId}>
+                    <p className={styles.error} role="alert">
                         {error}
                     </p>
                 )}

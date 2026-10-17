@@ -131,14 +131,12 @@
     @apply flex items-center gap-2;
 }
 
-.entryInput {
-    @apply ui-info rounded-lg bg-surface px-3 py-2 text-base text-ink;
-
-    border: 1.5px solid rgb(28 37 32 / 14%);
+.entryLabel {
+    @apply ui-visually-hidden;
 }
 
-.entryInput:focus {
-    @apply border-green-500 outline-none;
+.entryInput {
+    @apply ui-info;
 }
 
 .entryUnit {
@@ -159,12 +157,6 @@
         outline: 0.125rem solid var(--color-green-500);
         outline-offset: 0.125rem;
     }
-}
-
-.error {
-    @apply m-0 rounded-btn-sm px-3 py-2.5 text-note text-red-ink;
-
-    background: rgb(192 69 47 / 10%);
 }
 
 .grid {

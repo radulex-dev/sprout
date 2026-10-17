@@ -1,0 +1,9 @@
+@reference "../../../app/globals.css";
+
+.root {
+    @apply mt-1 text-note text-red-ink;
+
+    ul {
+        @apply m-0 list-none p-0;
+    }
+}

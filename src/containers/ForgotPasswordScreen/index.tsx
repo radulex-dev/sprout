@@ -9,6 +9,7 @@ import { ButtonVariant } from '@/design-system/Button/constants';
 
 // Components
 import Button from '@/design-system/Button';
+import Field from '@/design-system/Field';
 
 // Auth
 import { authClient } from '@/lib/auth/auth-client';
@@ -43,8 +44,8 @@ const ForgotPasswordScreen: React.FunctionComponent<Props> = ({ initialEmail = '
         };
     }, [cooldown]);
 
-    const handleEmailChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        setEmail(event.target.value);
+    const handleEmailChange = useCallback((value: string) => {
+        setEmail(value);
     }, []);
 
     const handleSubmit = useCallback(async (event: React.SyntheticEvent) => {
@@ -78,10 +79,7 @@ const ForgotPasswordScreen: React.FunctionComponent<Props> = ({ initialEmail = '
                 </p>
 
                 <form className={styles.form} onSubmit={handleSubmit}>
-                    <label className={styles.field}>
-                        {FORGOT_PASSWORD_EMAIL_LABEL}
-                        <input type="email" value={email} onChange={handleEmailChange} placeholder="you@example.com" autoComplete="email" required />
-                    </label>
+                    <Field label={FORGOT_PASSWORD_EMAIL_LABEL} type="email" value={email} onValueChange={handleEmailChange} placeholder="you@example.com" autoComplete="email" required />
 
                     {status === ForgotPasswordStatus.Confirmation && (
                         <p className={styles.confirmation} role="status">

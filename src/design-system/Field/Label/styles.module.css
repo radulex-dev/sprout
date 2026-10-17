@@ -1,0 +1,5 @@
+@reference "../../../app/globals.css";
+
+.root {
+    @apply mb-1.5 flex items-center gap-1.5 text-note font-[650] text-ink;
+}

@@ -1,0 +1,34 @@
+@reference "../../../app/globals.css";
+
+.root {
+    @apply w-full rounded-xl bg-surface px-3 py-2.75 text-base text-ink;
+
+    border: 1.5px solid rgb(28 37 32 / 14%);
+
+    &:focus {
+        @apply border-green-500 outline-none;
+    }
+
+    &:focus-visible {
+        outline: 0.125rem solid var(--color-green-500);
+        outline-offset: 0.125rem;
+    }
+
+    &[data-invalid] {
+        border-color: var(--color-red);
+
+        &:focus {
+            border-color: var(--color-red);
+            outline: none;
+            box-shadow: 0 0 0 0.25rem rgb(192 69 47 / 25%);
+        }
+    }
+
+    &[data-valid] {
+        @apply border-green-500;
+    }
+
+    &[type="date"] {
+        width: -webkit-fill-available;
+    }
+}

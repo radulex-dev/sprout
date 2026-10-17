@@ -11,6 +11,7 @@ import { POT_SIZES } from '@/helpers/pot/constants';
 
 // Components
 import Button from '@/design-system/Button';
+import Field from '@/design-system/Field';
 import Popover from '@/design-system/Popover';
 import DiameterDiagram from './DiameterDiagram';
 import LitresDiagram from './LitresDiagram';
@@ -39,7 +40,6 @@ const PotSizePicker: React.FunctionComponent<Props> = ({ value, onChange, hint, 
     const hintId = useId();
     const roundGroupId = useId();
     const shapeGroupId = useId();
-    const litresErrorId = useId();
     const [shape, setShape] = useState<ContainerShape>(value?.soilVolumeLitres === undefined ? ContainerShape.Round : ContainerShape.Long);
     const [litresText, setLitresText] = useState(() => {
         return value?.soilVolumeLitres === undefined ? '' : String(value.soilVolumeLitres);
@@ -60,8 +60,8 @@ const PotSizePicker: React.FunctionComponent<Props> = ({ value, onChange, hint, 
         });
     }, [onChange]);
 
-    const handleLitresChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        const nextText = event.currentTarget.value;
+    const handleLitresChange = useCallback((nextValue: string) => {
+        const nextText = nextValue.replaceAll(/[^\d.,]/g, '');
         const litres = parseSoilVolumeLitres(nextText);
 
         setLitresText(nextText);
@@ -207,19 +207,20 @@ const PotSizePicker: React.FunctionComponent<Props> = ({ value, onChange, hint, 
                         <div className={styles.fill} style={litreFillStyle(value?.soilVolumeLitres)} />
                     </div>
                     <div className={styles.longSide}>
-                        <div className={styles.entry}>
-                            <input aria-describedby={isLitresInvalid ? litresErrorId : undefined} aria-label={LITRES_FIELD_LABEL} className={styles.entryInput} inputMode="numeric" onChange={handleLitresChange} type="text" value={litresText} />
-                            <span className={styles.entryUnit}>{LITRES_UNIT}</span>
-                            <Popover aria-label={LITRES_INFO_LABEL} className={styles.info} openOnHover trigger={<Info aria-hidden size="1rem" />}>
-                                <LitresDiagram />
-                            </Popover>
-                        </div>
+                        <Field.Root invalid={isLitresInvalid}>
+                            <Field.Label className={styles.entryLabel}>{LITRES_FIELD_LABEL}</Field.Label>
+                            <div className={styles.entry}>
+                                <Field.Control className={styles.entryInput} inputMode="numeric" onValueChange={handleLitresChange} type="text" value={litresText} />
+                                <span className={styles.entryUnit}>{LITRES_UNIT}</span>
+                                <Popover aria-label={LITRES_INFO_LABEL} className={styles.info} openOnHover trigger={<Info aria-hidden size="1rem" />}>
+                                    <LitresDiagram />
+                                </Popover>
+                            </div>
+                            {isLitresInvalid && (
+                                <Field.Error match={true}>{LITRES_ERROR}</Field.Error>
+                            )}
+                        </Field.Root>
                         {renderResult(sentence)}
-                        {isLitresInvalid && (
-                            <p className={styles.error} id={litresErrorId} role="alert">
-                                {LITRES_ERROR}
-                            </p>
-                        )}
                     </div>
                 </div>
             </div>

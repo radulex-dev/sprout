@@ -1,0 +1,7 @@
+@reference "../../../app/globals.css";
+
+.root {
+    label {
+        @apply mb-0 flex items-center gap-2 text-note font-normal text-ink;
+    }
+}

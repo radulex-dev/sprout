@@ -26,12 +26,10 @@ describe('<DatePicker />', () => {
         expect(screen.getByLabelText('Watered')).toHaveAccessibleName('Watered');
     });
 
-    it('lets an explicit aria-label override the default', () => {
+    it('names the control from the visible label even when an aria-label is passed', () => {
         render(<DatePicker {...props} aria-label="Date last watered" />);
 
-        const input = screen.getByLabelText('Date last watered');
-
-        expect(input).toHaveAccessibleName('Date last watered');
+        expect(screen.getByLabelText('Watered')).toHaveAccessibleName('Watered');
     });
 
     it('renders the value it is given', () => {

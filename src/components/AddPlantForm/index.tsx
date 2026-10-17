@@ -1,7 +1,7 @@
 'use client';
 
 import classNames from 'classnames';
-import React, { useCallback, useId, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Sprout } from 'lucide-react';
 
 // Constants
@@ -14,6 +14,7 @@ import { ButtonVariant } from '@/design-system/Button/constants';
 // Components
 import Button from '@/design-system/Button';
 import CareScheduleFields from '@/components/CareScheduleFields';
+import Field from '@/design-system/Field';
 import LastCareFields from '@/components/LastCareFields';
 import PotSizePicker from '@/components/PotSizePicker';
 
@@ -52,10 +53,9 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
     const [lastCareDates, setLastCareDates] = useState<LastCareDates>({});
     const [size, setSize] = useState<ContainerSize | undefined>();
     const photoUrl = useObjectUrl(photo);
-    const nicknameId = useId();
 
-    const handleNicknameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        setNickname(event.target.value);
+    const handleNicknameChange = useCallback((nextNickname: string) => {
+        setNickname(nextNickname);
     }, []);
 
     const handleLastCareChange = useCallback((dates: LastCareDates) => {
@@ -96,12 +96,7 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
             </div>
 
             <div className={styles.formPane}>
-                <div className={styles.field}>
-                    <label htmlFor={nicknameId}>
-                        {NICKNAME_LABEL}
-                    </label>
-                    <input id={nicknameId} value={nickname} onChange={handleNicknameChange} placeholder={NICKNAME_PLACEHOLDER} />
-                </div>
+                <Field className={styles.field} label={NICKNAME_LABEL} value={nickname} onValueChange={handleNicknameChange} placeholder={NICKNAME_PLACEHOLDER} />
 
                 <PotSizePicker className={styles.potField} value={size} onChange={handleSizeChange} hint={POT_SIZE_HINT} />
 

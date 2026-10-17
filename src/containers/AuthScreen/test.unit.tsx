@@ -5,7 +5,7 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import type { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
 
 // Constants
-import { ERROR_GOOGLE_SIGN_IN, FORGOT_PASSWORD_LABEL, GIS_RENDER_TIMEOUT_MS, RESET_SUCCESS_TEXT } from './constants';
+import { ERROR_GOOGLE_SIGN_IN, FORGOT_PASSWORD_LABEL, GIS_RENDER_TIMEOUT_MS, PASSWORD_LETTER_NUMBER_ERROR, PASSWORD_MIN_LENGTH_ERROR, PASSWORD_SPECIAL_CHARACTER_ERROR, RESET_SUCCESS_TEXT } from './constants';
 import { CONFIRM_LABEL, STEPS_HEADING } from '@/containers/SettingsScreen/InstallGuide/constants';
 
 // Components
@@ -213,6 +213,30 @@ describe('<AuthScreen />', () => {
         expect(await screen.findByRole('alert')).toHaveTextContent('Sign-in failed.');
     });
 
+    it('signs in with a password that the sign-up policy would reject', async () => {
+        const user = userEvent.setup();
+        signInEmailMock.mockResolvedValue({
+            error: undefined
+        });
+
+        render(<AuthScreen {...props} />);
+        await user.type(screen.getByLabelText('Email'), 'ada@example.com');
+        await user.type(screen.getByLabelText('Password'), 'wrong-pass');
+
+        expect(screen.queryByText(PASSWORD_LETTER_NUMBER_ERROR)).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole('button', {
+            name: 'Sign in'
+        }));
+
+        await waitFor(() => {
+            expect(signInEmailMock).toHaveBeenCalledWith({
+                email: 'ada@example.com',
+                password: 'wrong-pass'
+            });
+        });
+    });
+
     it('signs up with a name, email and password', async () => {
         const user = userEvent.setup();
         signUpEmailMock.mockResolvedValue({
@@ -222,7 +246,7 @@ describe('<AuthScreen />', () => {
         render(<AuthScreen {...props} mode="signup" />);
         await user.type(screen.getByLabelText('Name'), 'Ada Lovelace');
         await user.type(screen.getByLabelText('Email'), 'ada@example.com');
-        await user.type(screen.getByLabelText('Password'), 'secret-pass');
+        await user.type(screen.getByLabelText('Password'), 'fakepass1!');
         await user.click(screen.getByRole('button', {
             name: 'Create account'
         }));
@@ -231,7 +255,7 @@ describe('<AuthScreen />', () => {
             expect(signUpEmailMock).toHaveBeenCalledWith({
                 name: 'Ada Lovelace',
                 email: 'ada@example.com',
-                password: 'secret-pass',
+                password: 'fakepass1!',
                 callbackURL: '/'
             });
         });
@@ -249,7 +273,7 @@ describe('<AuthScreen />', () => {
         render(<AuthScreen {...props} mode="signup" />);
         await user.type(screen.getByLabelText('Name'), 'Ada Lovelace');
         await user.type(screen.getByLabelText('Email'), 'ada@example.com');
-        await user.type(screen.getByLabelText('Password'), 'secret-pass');
+        await user.type(screen.getByLabelText('Password'), 'fakepass1!');
         await user.click(screen.getByRole('button', {
             name: 'Create account'
         }));
@@ -267,12 +291,34 @@ describe('<AuthScreen />', () => {
         render(<AuthScreen {...props} mode="signup" />);
         await user.type(screen.getByLabelText('Name'), 'Ada Lovelace');
         await user.type(screen.getByLabelText('Email'), 'ada@example.com');
-        await user.type(screen.getByLabelText('Password'), 'secret-pass');
+        await user.type(screen.getByLabelText('Password'), 'fakepass1!');
         await user.click(screen.getByRole('button', {
             name: 'Create account'
         }));
 
         expect(await screen.findByRole('alert')).toHaveTextContent('Sign-up failed.');
+    });
+
+    it('blocks sign-up with a weak password and shows the unmet requirements', async () => {
+        const user = userEvent.setup();
+
+        render(<AuthScreen {...props} mode="signup" />);
+        await user.type(screen.getByLabelText('Name'), 'Ada Lovelace');
+        await user.type(screen.getByLabelText('Email'), 'ada@example.com');
+        await user.type(screen.getByLabelText('Password'), 'abc');
+
+        expect(await screen.findByText(PASSWORD_MIN_LENGTH_ERROR)).toBeInTheDocument();
+        expect(screen.getByText(PASSWORD_LETTER_NUMBER_ERROR)).toBeInTheDocument();
+        expect(screen.getByText(PASSWORD_SPECIAL_CHARACTER_ERROR)).toBeInTheDocument();
+
+        await user.click(screen.getByRole('button', {
+            name: 'Create account'
+        }));
+
+        expect(signUpEmailMock).not.toHaveBeenCalled();
+        expect(screen.getByRole('button', {
+            name: 'Create account'
+        })).toBeEnabled();
     });
 
     it('signs in with a Google credential', async () => {

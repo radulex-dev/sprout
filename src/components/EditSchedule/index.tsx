@@ -1,7 +1,7 @@
 'use client';
 
 import classNames from 'classnames';
-import React, { useCallback, useId, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 // Constants
 import { FREQUENCY_TITLE } from '@/components/CareScheduleFields/constants';
@@ -11,6 +11,7 @@ import { ButtonVariant } from '@/design-system/Button/constants';
 // Components
 import Button from '@/design-system/Button';
 import CareScheduleFields from '@/components/CareScheduleFields';
+import Field from '@/design-system/Field';
 import PotSizePicker from '@/components/PotSizePicker';
 
 // Styles
@@ -37,10 +38,9 @@ const EditSchedule: React.FunctionComponent<Props> = ({ plant, onSave, onCancel,
             soilVolumeLitres: plant.soilVolumeLitres
         };
     });
-    const nicknameId = useId();
 
-    const handleNicknameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        setNickname(event.target.value);
+    const handleNicknameChange = useCallback((nextNickname: string) => {
+        setNickname(nextNickname);
     }, []);
 
     const handleSave = useCallback(() => {
@@ -55,12 +55,7 @@ const EditSchedule: React.FunctionComponent<Props> = ({ plant, onSave, onCancel,
 
     return (
         <div className={classes} {...props}>
-            <div className={styles.field}>
-                <label htmlFor={nicknameId}>
-                    Nickname
-                </label>
-                <input id={nicknameId} value={nickname} onChange={handleNicknameChange} />
-            </div>
+            <Field className={styles.field} label="Nickname" value={nickname} onValueChange={handleNicknameChange} />
             <h2 className={styles.sectionTitle}>
                 {FREQUENCY_TITLE}
             </h2>

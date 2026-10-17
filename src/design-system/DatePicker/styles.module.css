@@ -1,16 +1,5 @@
 @reference "../../app/globals.css";
 
 .root {
-    @apply ui-field;
-
-    input {
-        /* iOS ignores box-sizing on the native date control, so `w-full` overflows by the
-           padding (1.5rem) plus the border (3px). Engines that don't know this value drop it
-           and fall back to `w-full`, which is correct for them. */
-        width: -webkit-fill-available;
-    }
-}
-
-.hint {
-    @apply ui-field-hint mb-0;
+    @apply mb-3.5;
 }
