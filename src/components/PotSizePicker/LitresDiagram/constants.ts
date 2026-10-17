@@ -1,0 +1,44 @@
+export const DIAGRAM_VIEW_BOX = '0 0 288 372';
+
+export const DIAGRAM_TITLE = 'Finding the litres';
+export const DIAGRAM_HEADING = 'Finding the litres';
+export const DIAGRAM_LEAD_CAPACITY = 'Use the stated capacity first.';
+export const DIAGRAM_LEAD_MEASURE = 'Measure only when it is not given.';
+export const DIAGRAM_DESC = 'Use the stated capacity when the box gives one. Otherwise measure length, width and height in centimetres, multiply them and divide by 1000 to get litres. Tapered and oblong planters hold about 60% of that outer box; straight-sided ones up to 90%, so start at about two-thirds. Water in two or three passes: pour, let it soak in, repeat until water leaves the holes. The watering amount is 10% of the soil volume, in millilitres.';
+export const DIAGRAM_TEXT = 'Finding the litres. Use the stated capacity when the box gives one. Otherwise measure length, width and height in centimetres, multiply them and divide by 1000 to get litres. Tapered and oblong planters hold about 60% of that outer box; straight-sided ones up to 90%, so start at about two-thirds. Water in two or three passes: pour, let it soak in, repeat until water leaves the holes. The watering amount is 10% of the soil volume, in millilitres.';
+
+export const PLANTER_TOP_PATH = 'M70 72 L190 72 L152 96 L32 96 Z';
+export const PLANTER_FRONT_PATH = 'M32 96 H152 V168 H32 Z';
+export const PLANTER_SIDE_PATH = 'M152 96 L190 72 V144 L152 168 Z';
+export const LENGTH_EXTENSION_LEFT = 'M70 72 V64';
+export const LENGTH_EXTENSION_RIGHT = 'M190 72 V64';
+export const LENGTH_ARROW = 'M70 68 H190';
+export const WIDTH_EXTENSION_LEFT = 'M32 168 V188';
+export const WIDTH_EXTENSION_RIGHT = 'M152 168 V188';
+export const WIDTH_ARROW = 'M32 184 H152';
+export const HEIGHT_EXTENSION_TOP = 'M190 72 H208';
+export const HEIGHT_EXTENSION_BOTTOM = 'M190 144 H208';
+export const HEIGHT_ARROW = 'M204 72 V144';
+export const LENGTH_LABEL = 'L cm';
+export const WIDTH_LABEL = 'W cm';
+export const HEIGHT_LABEL = 'H cm';
+export const ARITHMETIC = 'cm × cm × cm ÷ 1000 = litres';
+export const SECTION_PATH = 'M18 260 L74 260 L68 308 L24 308 Z';
+export const SECTION_SOIL_PATH = 'M25 292 L67 292 L65 308 L27 308 Z';
+export const FILL_LINE = 'M14 292 H78';
+export const FILL_LABEL = '≈ ⅔';
+export const FILL_SOURCE = 'Measured on three planters';
+export const FILL_TAPERED = 'Tapered / oblong ≈ 60%';
+export const FILL_STRAIGHT = 'Straight-sided up to 90%';
+export const FILL_START = 'Start at about two-thirds.';
+export const STEP_POUR = '1 Pour';
+export const STEP_SOAK = '2 Soak';
+export const STEP_REPEAT = '3 Repeat';
+export const STEP_ARROW = '→';
+export const STEP_TAIL = 'until water leaves the holes';
+export const FOOTNOTE = 'Water along the whole length of a long planter, and check the top few centimetres before watering again.';
+
+export const MARKER_PATH = 'M0 0L8 4L0 8Z';
+export const MARKER_REF_X = 7;
+export const MARKER_REF_Y = 4;
+export const MARKER_SIZE = 5;

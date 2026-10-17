@@ -1,0 +1,136 @@
+@reference "../../../app/globals.css";
+
+.root {
+    @apply w-72 max-w-full;
+}
+
+.diagram {
+    @apply block h-auto w-full;
+}
+
+.heading {
+    fill: var(--color-surface);
+    font-size: 0.7813rem;
+    font-weight: 800;
+}
+
+.lead {
+    fill: var(--color-green-100);
+    font-size: 0.6563rem;
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+.planterTop {
+    fill: var(--color-green-100);
+    fill-opacity: 0.3;
+    stroke: var(--color-green-100);
+    stroke-linejoin: round;
+    stroke-width: 1.5;
+}
+
+.planterFront {
+    fill: var(--color-green-100);
+    fill-opacity: 0.18;
+    stroke: var(--color-green-100);
+    stroke-linejoin: round;
+    stroke-width: 1.5;
+}
+
+.planterSide {
+    fill: var(--color-green-100);
+    fill-opacity: 0.1;
+    stroke: var(--color-green-100);
+    stroke-linejoin: round;
+    stroke-width: 1.5;
+}
+
+.dimension {
+    fill: none;
+    stroke: var(--color-green-100);
+    stroke-width: 1;
+}
+
+.extension {
+    opacity: 0.35;
+}
+
+.marker {
+    fill: var(--color-green-100);
+}
+
+.label {
+    fill: var(--color-surface);
+    font-size: 0.6875rem;
+    font-weight: 700;
+}
+
+.amount {
+    fill: var(--color-surface);
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.panel {
+    fill: var(--color-surface);
+    opacity: 0.08;
+}
+
+.panelSoft {
+    fill: var(--color-surface);
+    opacity: 0.06;
+}
+
+.section {
+    fill: var(--color-green-100);
+    fill-opacity: 0.12;
+    stroke: var(--color-green-100);
+    stroke-opacity: 0.45;
+    stroke-width: 1;
+}
+
+.sectionSoil {
+    fill: var(--color-green-100);
+    fill-opacity: 0.28;
+}
+
+.fillLine {
+    fill: none;
+    stroke: var(--color-surface);
+    stroke-dasharray: 4 3;
+    stroke-opacity: 0.55;
+    stroke-width: 1;
+}
+
+.mutedSmall {
+    fill: var(--color-green-100);
+    font-size: 0.625rem;
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+.step {
+    fill: var(--color-surface);
+    font-size: 0.6563rem;
+    font-weight: 700;
+}
+
+.stepArrow {
+    fill: var(--color-green-100);
+    font-size: 0.6563rem;
+    font-weight: 700;
+    opacity: 0.8;
+}
+
+.footnote {
+    margin: 0.5rem 0 0;
+    color: var(--color-green-100);
+    font-size: 0.6563rem;
+    font-weight: 600;
+    line-height: 1.35;
+    opacity: 0.8;
+}
+
+.srOnly {
+    @apply ui-visually-hidden;
+}

@@ -162,7 +162,8 @@ describe('<PlantDetail />', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 12
             },
-            potDiameter: undefined
+            potDiameter: undefined,
+            soilVolumeLitres: undefined
         });
         expect(await screen.findByText('Schedule saved.')).toBeInTheDocument();
         expect(screen.getByRole('button', {
@@ -183,7 +184,7 @@ describe('<PlantDetail />', () => {
             name: 'Set pot size'
         }));
         await user.click(screen.getByRole('radio', {
-            name: '12 cm pot'
+            name: 'Select 12 cm pot'
         }));
         await user.click(screen.getByRole('button', {
             name: 'Save changes'
@@ -196,7 +197,153 @@ describe('<PlantDetail />', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 12
             },
+            potDiameter: 12,
+            soilVolumeLitres: undefined
+        });
+        expect(vi.mocked(markCareDone)).not.toHaveBeenCalled();
+    });
+
+    it('saves a chosen soil volume without logging care', async () => {
+        const user = userEvent.setup();
+
+        render(
+            <ToastProvider>
+                <PlantDetail {...props} />
+            </ToastProvider>
+        );
+
+        await user.click(screen.getByRole('button', {
+            name: 'Set pot size'
+        }));
+        await user.click(screen.getByRole('radio', {
+            name: 'Litres'
+        }));
+        await user.type(screen.getByLabelText('Soil volume in litres'), '60');
+        await user.click(screen.getByRole('button', {
+            name: 'Save changes'
+        }));
+
+        expect(vi.mocked(updatePlant)).toHaveBeenCalledWith('plant-1', {
+            nickname: '',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
+            },
+            potDiameter: undefined,
+            soilVolumeLitres: 60
+        });
+        expect(vi.mocked(markCareDone)).not.toHaveBeenCalled();
+    });
+
+    it('clears a stored soil volume when a pot diameter replaces it', async () => {
+        const user = userEvent.setup();
+        const plant = makePlant({
+            soilVolumeLitres: 12
+        });
+
+        render(
+            <ToastProvider>
+                <PlantDetail {...props} plant={plant} />
+            </ToastProvider>
+        );
+
+        await user.click(screen.getByRole('button', {
+            name: 'Edit'
+        }));
+        await user.click(screen.getByRole('radio', {
+            name: 'Round pot'
+        }));
+        await user.click(screen.getByRole('radio', {
+            name: 'Select 12 cm pot'
+        }));
+        await user.click(screen.getByRole('button', {
+            name: 'Save changes'
+        }));
+
+        expect(vi.mocked(updatePlant)).toHaveBeenCalledWith('plant-1', {
+            nickname: '',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
+            },
+            potDiameter: 12,
+            soilVolumeLitres: undefined
+        });
+        expect(vi.mocked(markCareDone)).not.toHaveBeenCalled();
+    });
+
+    it('clears a stored pot diameter when litres replace it', async () => {
+        const user = userEvent.setup();
+        const plant = makePlant({
             potDiameter: 12
+        });
+
+        render(
+            <ToastProvider>
+                <PlantDetail {...props} plant={plant} />
+            </ToastProvider>
+        );
+
+        await user.click(screen.getByRole('button', {
+            name: 'Edit'
+        }));
+        await user.click(screen.getByRole('radio', {
+            name: 'Litres'
+        }));
+        await user.type(screen.getByLabelText('Soil volume in litres'), '60');
+        await user.click(screen.getByRole('button', {
+            name: 'Save changes'
+        }));
+
+        expect(vi.mocked(updatePlant)).toHaveBeenCalledWith('plant-1', {
+            nickname: '',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
+            },
+            potDiameter: undefined,
+            soilVolumeLitres: 60
+        });
+        expect(vi.mocked(markCareDone)).not.toHaveBeenCalled();
+    });
+
+    it('keeps the chosen pot size when the shape tabs are switched before saving', async () => {
+        const user = userEvent.setup();
+
+        render(
+            <ToastProvider>
+                <PlantDetail {...props} />
+            </ToastProvider>
+        );
+
+        await user.click(screen.getByRole('button', {
+            name: 'Set pot size'
+        }));
+        await user.click(screen.getByRole('radio', {
+            name: 'Select 12 cm pot'
+        }));
+        await user.click(screen.getByRole('radio', {
+            name: 'Litres'
+        }));
+        await user.click(screen.getByRole('radio', {
+            name: 'Round pot'
+        }));
+        await user.click(screen.getByRole('button', {
+            name: 'Save changes'
+        }));
+
+        expect(vi.mocked(updatePlant)).toHaveBeenCalledWith('plant-1', {
+            nickname: '',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
+            },
+            potDiameter: 12,
+            soilVolumeLitres: undefined
         });
         expect(vi.mocked(markCareDone)).not.toHaveBeenCalled();
     });

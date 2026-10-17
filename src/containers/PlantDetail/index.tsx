@@ -88,7 +88,8 @@ const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...prop
             await updatePlant(edited.id, {
                 nickname: edited.nickname,
                 care: edited.care,
-                potDiameter: edited.potDiameter
+                potDiameter: edited.potDiameter,
+                soilVolumeLitres: edited.soilVolumeLitres
             });
 
             showToast({

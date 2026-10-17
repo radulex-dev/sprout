@@ -109,7 +109,7 @@ describe('<PlantChips />', () => {
 
         render(<PlantChips {...props} plant={plant} />);
 
-        expect(screen.getByText('160 ml')).toBeInTheDocument();
+        expect(screen.getByText('80 ml')).toBeInTheDocument();
     });
 
     it('renders no water amount flag when watering is not due', () => {
@@ -125,7 +125,7 @@ describe('<PlantChips />', () => {
 
         render(<PlantChips {...props} plant={plant} />);
 
-        expect(screen.queryByText('160 ml')).not.toBeInTheDocument();
+        expect(screen.queryByText('80 ml')).not.toBeInTheDocument();
     });
 
     it('renders no water amount flag when the plant has no pot size', () => {
@@ -143,7 +143,26 @@ describe('<PlantChips />', () => {
 
         render(<PlantChips {...props} plant={plant} />);
 
-        expect(screen.queryByText('160 ml')).not.toBeInTheDocument();
+        expect(screen.queryByText('80 ml')).not.toBeInTheDocument();
+    });
+
+    it('renders the litre-derived water amount flag when watering is due', () => {
+        const now = Date.now();
+        const plant = makePlant({
+            care: {
+                waterEveryDays: 2
+            },
+            lastCare: {
+                [CareKind.Water]: now - 5 * DAY_MS,
+                [CareKind.Fertilize]: now,
+                [CareKind.Repot]: now
+            },
+            soilVolumeLitres: 12
+        });
+
+        render(<PlantChips {...props} plant={plant} />);
+
+        expect(screen.getByText('1.2 L')).toBeInTheDocument();
     });
 
     it('renders no chips when the plant has no care intervals', () => {

@@ -411,6 +411,70 @@ describe('PlantInputSchema', () => {
             });
         }).toThrow();
     });
+
+    it.each([1, 12, 1000])('accepts the soil volume %s L', (soilVolumeLitres) => {
+        expect(PlantInputSchema.parse({
+            nickname: 'Kitchen monstera',
+            species: 'Monstera deliciosa',
+            commonName: 'Swiss cheese plant',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1_700_000_000_000,
+            soilVolumeLitres
+        }).soilVolumeLitres).toBe(soilVolumeLitres);
+    });
+
+    it.each([0, 1001, 10.5, -1, NaN])('rejects the soil volume %s', (soilVolumeLitres) => {
+        expect(() => {
+            return PlantInputSchema.parse({
+                nickname: 'Kitchen monstera',
+                species: 'Monstera deliciosa',
+                commonName: 'Swiss cheese plant',
+                care: {
+                    waterEveryDays: 7,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 18
+                },
+                acquiredAt: 1_700_000_000_000,
+                soilVolumeLitres
+            });
+        }).toThrow();
+    });
+
+    it('accepts an omitted soil volume', () => {
+        expect(PlantInputSchema.parse({
+            nickname: 'Kitchen monstera',
+            species: 'Monstera deliciosa',
+            commonName: 'Swiss cheese plant',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1_700_000_000_000
+        })).not.toHaveProperty('soilVolumeLitres');
+    });
+
+    it('rejects a plant that carries both a pot diameter and litres', () => {
+        expect(() => {
+            return PlantInputSchema.parse({
+                nickname: 'Kitchen monstera',
+                species: 'Monstera deliciosa',
+                commonName: 'Swiss cheese plant',
+                care: {
+                    waterEveryDays: 7,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 18
+                },
+                acquiredAt: 1_700_000_000_000,
+                potDiameter: 12,
+                soilVolumeLitres: 12
+            });
+        }).toThrow();
+    });
 });
 
 describe('LastCareSchema', () => {
@@ -522,6 +586,47 @@ describe('UpdatePlantSchema', () => {
             });
         }).toThrow();
     });
+
+    it.each([1, 12, 1000])('accepts the soil volume %s L', (soilVolumeLitres) => {
+        expect(UpdatePlantSchema.parse({
+            nickname: 'Fern',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            soilVolumeLitres
+        }).soilVolumeLitres).toBe(soilVolumeLitres);
+    });
+
+    it.each([0, 1001, 10.5, -1])('rejects the soil volume %s', (soilVolumeLitres) => {
+        expect(() => {
+            return UpdatePlantSchema.parse({
+                nickname: 'Fern',
+                care: {
+                    waterEveryDays: 7,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 18
+                },
+                soilVolumeLitres
+            });
+        }).toThrow();
+    });
+
+    it('rejects an update that sets both a pot diameter and litres', () => {
+        expect(() => {
+            return UpdatePlantSchema.parse({
+                nickname: 'Fern',
+                care: {
+                    waterEveryDays: 7,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 18
+                },
+                potDiameter: 12,
+                soilVolumeLitres: 60
+            });
+        }).toThrow();
+    });
 });
 
 describe('NotifiedAtSchema', () => {
@@ -610,7 +715,8 @@ describe('plant mutations', () => {
             lastNotified: {},
             notes: '',
             photo: Buffer.from('leaf'),
-            potDiameter: 10.5
+            potDiameter: 10.5,
+            soilVolumeLitres: undefined
         });
     });
 
@@ -646,7 +752,46 @@ describe('plant mutations', () => {
             lastNotified: {},
             notes: '',
             photo: undefined,
-            potDiameter: undefined
+            potDiameter: undefined,
+            soilVolumeLitres: undefined
+        });
+    });
+
+    it('createPlant stores the given soil volume', async () => {
+        const insertChain = mockInsertChain();
+
+        mockInsert.mockReturnValueOnce(insertChain);
+
+        await createPlant('user-1', {
+            nickname: 'Fern',
+            species: 'Nephrolepis exaltata',
+            commonName: '',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: NOW,
+            soilVolumeLitres: 60
+        });
+
+        expect(insertChain.values).toHaveBeenCalledWith({
+            userId: 'user-1',
+            nickname: 'Fern',
+            species: 'Nephrolepis exaltata',
+            commonName: '',
+            acquiredAt: NOW,
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            lastCare: {},
+            lastNotified: {},
+            notes: '',
+            photo: undefined,
+            potDiameter: undefined,
+            soilVolumeLitres: 60
         });
     });
 
@@ -678,12 +823,13 @@ describe('plant mutations', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            potDiameter: sql`null`
+            potDiameter: sql`null`,
+            soilVolumeLitres: sql`null`
         });
         expect(where).toHaveBeenCalledTimes(1);
     });
 
-    it('updatePlant writes a chosen pot diameter and never writes lastCare', async () => {
+    it('updatePlant writes a chosen pot diameter, clears litres and never writes lastCare', async () => {
         const where = vi.fn();
         const set = vi.fn(() => {
             return {
@@ -712,7 +858,43 @@ describe('plant mutations', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            potDiameter: 10.5
+            potDiameter: 10.5,
+            soilVolumeLitres: sql`null`
+        });
+        expect(where).toHaveBeenCalledTimes(1);
+    });
+
+    it('updatePlant writes a chosen soil volume, clears the pot diameter and never writes lastCare', async () => {
+        const where = vi.fn();
+        const set = vi.fn(() => {
+            return {
+                where
+            };
+        });
+
+        mockUpdate.mockReturnValueOnce({
+            set
+        });
+
+        await updatePlant('user-1', 'plant-1', {
+            nickname: 'Fern',
+            care: {
+                waterEveryDays: 5,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            soilVolumeLitres: 60
+        });
+
+        expect(set).toHaveBeenCalledWith({
+            nickname: 'Fern',
+            care: {
+                waterEveryDays: 5,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            potDiameter: sql`null`,
+            soilVolumeLitres: 60
         });
         expect(where).toHaveBeenCalledTimes(1);
     });

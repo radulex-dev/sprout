@@ -31,7 +31,7 @@ export interface Props extends Omit<React.ComponentPropsWithoutRef<'button'>, 'c
 
 const CareStatValue: React.FunctionComponent<Props> = ({ plant, kind, now, onRequestPotSize, ...props }) => {
     const due = nextDue(plant, kind);
-    const amount = kind === CareKind.Water ? getWaterAmountMl(plant.potDiameter) : undefined;
+    const amount = kind === CareKind.Water ? getWaterAmountMl(plant) : undefined;
 
     const renderValue = () => {
         if (due === undefined) {

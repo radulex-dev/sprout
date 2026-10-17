@@ -30,6 +30,7 @@ import type { IdentifyResult } from '@/services/identify/types';
 import styles from './styles.module.css';
 
 // Types
+import type { ContainerSize } from '@/helpers/pot/types';
 import type { CareSchedule, LastCareDates, PlantInput } from '@/types';
 
 export interface Props extends React.ComponentProps<'div'> {
@@ -49,7 +50,7 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
         return result.defaultCare;
     });
     const [lastCareDates, setLastCareDates] = useState<LastCareDates>({});
-    const [potDiameter, setPotDiameter] = useState<number | undefined>(undefined);
+    const [size, setSize] = useState<ContainerSize | undefined>();
     const photoUrl = useObjectUrl(photo);
     const nicknameId = useId();
 
@@ -61,8 +62,8 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
         setLastCareDates(dates);
     }, []);
 
-    const handlePotDiameterChange = useCallback((value: number | undefined) => {
-        setPotDiameter(value);
+    const handleSizeChange = useCallback((value?: ContainerSize) => {
+        setSize(value);
     }, []);
 
     const handleSave = useCallback(() => {
@@ -72,11 +73,11 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
             commonName: result.commonName,
             photo,
             care,
-            potDiameter,
+            ...size,
             acquiredAt: Date.now(),
             lastCare: resolveLastCare(lastCareDates)
         });
-    }, [nickname, result, photo, care, potDiameter, lastCareDates, onSave]);
+    }, [nickname, result, photo, care, size, lastCareDates, onSave]);
 
     return (
         <div className={classes} {...props}>
@@ -102,7 +103,7 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
                     <input id={nicknameId} value={nickname} onChange={handleNicknameChange} placeholder={NICKNAME_PLACEHOLDER} />
                 </div>
 
-                <PotSizePicker className={styles.potField} value={potDiameter} onChange={handlePotDiameterChange} hint={POT_SIZE_HINT} />
+                <PotSizePicker className={styles.potField} value={size} onChange={handleSizeChange} hint={POT_SIZE_HINT} />
 
                 <h2 className={styles.sectionTitle}>
                     {LAST_CARE_TITLE}

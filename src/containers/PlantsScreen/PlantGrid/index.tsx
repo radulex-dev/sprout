@@ -12,6 +12,7 @@ import PlantChips from '../PlantChips';
 
 // Helpers
 import { displayName } from '@/helpers/plant';
+import { hasContainerSize } from '@/components/PotSizePicker/helpers';
 
 // Styles
 import styles from './styles.module.css';
@@ -44,7 +45,7 @@ const PlantGrid: React.FunctionComponent<Props> = ({ plants, className, ...props
                                 </div>
                                 <div className={styles.chips}>
                                     <PlantChips plant={plant} />
-                                    {plant.potDiameter === undefined && (
+                                    {!hasContainerSize(plant) && (
                                         <span className={styles.potSizeFlag}>
                                             <Ruler aria-hidden size="0.875rem" />
                                             {SET_POT_SIZE_LABEL}

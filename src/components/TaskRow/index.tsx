@@ -47,7 +47,7 @@ const TaskRow: React.FunctionComponent<Props> = ({ task, onSelect, className, ..
             return;
         }
 
-        return <WaterAmount amount={getWaterAmountMl(task.plant.potDiameter)} />;
+        return <WaterAmount amount={getWaterAmountMl(task.plant)} />;
     };
 
     return (

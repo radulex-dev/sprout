@@ -34,7 +34,8 @@ export const createPlant = async (userId: string, input: PlantInput): Promise<st
             lastNotified: {},
             notes: '',
             photo,
-            potDiameter: input.potDiameter
+            potDiameter: input.potDiameter,
+            soilVolumeLitres: input.soilVolumeLitres
         })
         .returning({
             id: plants.id
@@ -49,7 +50,8 @@ export const updatePlant = async (userId: string, id: string, input: UpdatePlant
         .set({
             nickname: input.nickname,
             care: input.care,
-            potDiameter: input.potDiameter ?? sql`null`
+            potDiameter: input.potDiameter ?? sql`null`,
+            soilVolumeLitres: input.soilVolumeLitres ?? sql`null`
         })
         .where(and(eq(plants.id, id), eq(plants.userId, userId)));
 };

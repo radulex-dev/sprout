@@ -116,7 +116,20 @@ describe('<CareStatValue />', () => {
 
         render(<CareStatValue {...props} plant={plant} />);
 
-        expect(screen.getByText('160 ml')).toBeInTheDocument();
+        expect(screen.getByText('80 ml')).toBeInTheDocument();
+    });
+
+    it('renders the watering amount for a litre-sized plant without the prompt', () => {
+        const plant = makePlant({
+            soilVolumeLitres: 12
+        });
+
+        render(<CareStatValue {...props} plant={plant} />);
+
+        expect(screen.getByText('1.2 L')).toBeInTheDocument();
+        expect(screen.queryByRole('button', {
+            name: 'Set pot size'
+        })).not.toBeInTheDocument();
     });
 
     it('starts the pot size edit when the prompt is clicked', async () => {
@@ -138,7 +151,7 @@ describe('<CareStatValue />', () => {
 
         render(<CareStatValue {...props} kind={kind} plant={plant} />);
 
-        expect(screen.queryByText('160 ml')).not.toBeInTheDocument();
+        expect(screen.queryByText('80 ml')).not.toBeInTheDocument();
         expect(screen.queryByRole('button', {
             name: 'Set pot size'
         })).not.toBeInTheDocument();

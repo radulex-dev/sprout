@@ -63,8 +63,11 @@ export const POT_SIZES: readonly PotSize[] = [{
     volumeUnit: PotVolumeUnit.Litres
 }];
 
-export const WATER_AMOUNT_RATIO = 0.2;
+export const WATER_AMOUNT_RATIO = 0.1;
 export const ML_PER_LITRE = 1000;
+
+export const MIN_SOIL_VOLUME_LITRES = 1;
+export const MAX_SOIL_VOLUME_LITRES = 1000;
 
 export const ML_PER_VOLUME_UNIT: Record<PotVolumeUnit, number> = {
     [PotVolumeUnit.Litres]: ML_PER_LITRE

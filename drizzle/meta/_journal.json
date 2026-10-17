@@ -50,6 +50,13 @@
       "when": 1792175152548,
       "tag": "0006_added_pot_diameter",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792235507246,
+      "tag": "0007_added_soil_volume_litres",
+      "breakpoints": true
     }
   ]
 }

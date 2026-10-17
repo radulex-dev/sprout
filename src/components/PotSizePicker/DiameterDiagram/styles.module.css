@@ -1,0 +1,114 @@
+@reference "../../../app/globals.css";
+
+.root {
+    @apply w-72 max-w-full;
+}
+
+.diagram {
+    @apply block h-auto w-full;
+}
+
+.title {
+    fill: var(--color-surface);
+    font-size: 0.7813rem;
+    font-weight: 800;
+}
+
+.lead {
+    fill: var(--color-green-100);
+    font-size: 0.6563rem;
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+.potBody {
+    fill: var(--color-green-100);
+    fill-opacity: 0.16;
+    stroke: var(--color-green-100);
+    stroke-linejoin: round;
+    stroke-width: 1.5;
+}
+
+.potRim {
+    fill: var(--color-green-100);
+    stroke: var(--color-green-100);
+    stroke-linejoin: round;
+    stroke-width: 1.5;
+}
+
+.dimension {
+    fill: none;
+    stroke: var(--color-green-100);
+    stroke-width: 1;
+}
+
+.dimensionWrong {
+    fill: none;
+    opacity: 0.7;
+    stroke: var(--color-red-100);
+    stroke-width: 1;
+}
+
+.extension {
+    opacity: 0.35;
+}
+
+.marker {
+    fill: var(--color-green-100);
+}
+
+.markerWrong {
+    fill: var(--color-red-100);
+}
+
+.label {
+    fill: var(--color-surface);
+    font-size: 0.6875rem;
+    font-weight: 700;
+}
+
+.checkCircle {
+    fill: var(--color-green-100);
+}
+
+.checkMark {
+    fill: none;
+    stroke: var(--color-green-900);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.6;
+}
+
+.crossCircle {
+    fill: var(--color-red-100);
+}
+
+.crossMark {
+    fill: none;
+    stroke: var(--color-red-ink);
+    stroke-linecap: round;
+    stroke-width: 1.6;
+}
+
+.crossText {
+    fill: var(--color-red-100);
+    font-size: 0.6563rem;
+    font-weight: 700;
+}
+
+.rangeLine {
+    fill: var(--color-surface);
+    font-size: 0.6875rem;
+    font-weight: 700;
+}
+
+.mutedLine {
+    fill: var(--color-green-100);
+    font-size: 0.6563rem;
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+.srOnly {
+    @apply ui-visually-hidden;
+}

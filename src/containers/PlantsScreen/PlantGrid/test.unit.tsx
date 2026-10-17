@@ -97,6 +97,18 @@ describe('<PlantGrid />', () => {
         expect(screen.queryByText('Set pot size')).not.toBeInTheDocument();
     });
 
+    it('does not render the pot size flag for a litre-sized plant', () => {
+        const plants = [
+            makePlant({
+                soilVolumeLitres: 60
+            })
+        ];
+
+        render(<PlantGrid {...props} plants={plants} />);
+
+        expect(screen.queryByText('Set pot size')).not.toBeInTheDocument();
+    });
+
     it('renders the pot size flag on every unsized card', () => {
         const plants = [
             makePlant(),

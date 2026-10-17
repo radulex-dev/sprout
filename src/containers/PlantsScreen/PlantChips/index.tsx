@@ -85,7 +85,7 @@ const PlantChips: React.FunctionComponent<Props> = ({ plant, className, ...props
             return;
         }
 
-        return <WaterAmount amount={getWaterAmountMl(plant.potDiameter)} variant={WaterAmountVariant.Flag} />;
+        return <WaterAmount amount={getWaterAmountMl(plant)} variant={WaterAmountVariant.Flag} />;
     };
 
     return (

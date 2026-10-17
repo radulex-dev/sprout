@@ -4,7 +4,7 @@ import { fromAbsolute, fromDate, getLocalTimeZone, parseDate, toCalendarDate } f
 import { CARE_META, CARE_NOTIFICATION_TAG, DAY_MS, DAYS_PER_MONTH, MAX_LISTED_PLANTS, POT_SIZE_NUDGE_SENTENCE, POT_SIZE_NUDGE_SLOT } from './constants';
 
 // Helpers
-import { getWaterAmountMl } from '@/helpers/pot';
+import { formatWaterAmount, getWaterAmountMl } from '@/helpers/pot';
 
 // Types
 import { CareKind, type LastCareDates, type Plant } from '@/types';
@@ -145,23 +145,23 @@ export const plantDisplayName = (plant: Plant): string => {
 };
 
 const formatWaterSlot = (plant: Plant): string => {
-    const amount = getWaterAmountMl(plant.potDiameter);
+    const amount = getWaterAmountMl(plant);
 
     if (amount === undefined) {
         return POT_SIZE_NUDGE_SLOT;
     }
 
-    return `about ${amount} ml`;
+    return `about ${formatWaterAmount(amount)}`;
 };
 
 const formatWaterFollowUp = (plant: Plant): string => {
-    const amount = getWaterAmountMl(plant.potDiameter);
+    const amount = getWaterAmountMl(plant);
 
     if (amount === undefined) {
         return POT_SIZE_NUDGE_SENTENCE;
     }
 
-    return `Give it about ${amount} ml.`;
+    return `Give it about ${formatWaterAmount(amount)}.`;
 };
 
 const buildOneTaskCareNotification = (task: CareTask): CareNotification => {

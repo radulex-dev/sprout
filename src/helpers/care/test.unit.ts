@@ -638,7 +638,7 @@ describe('buildCareNotification', () => {
 
         expect(notification).toEqual({
             title: 'Time to water Fern',
-            body: 'Fern is due for watering today. Give it about 160 ml.',
+            body: 'Fern is due for watering today. Give it about 80 ml.',
             tag: 'sprout-care-today'
         });
     });
@@ -657,7 +657,7 @@ describe('buildCareNotification', () => {
             daysUntil: -2
         }]);
 
-        expect(notification.body).toBe('Fern is 2 days overdue for watering. Give it about 160 ml.');
+        expect(notification.body).toBe('Fern is 2 days overdue for watering. Give it about 80 ml.');
     });
 
     it('adds the watering amount to a sized water row in a plant listing', () => {
@@ -679,7 +679,7 @@ describe('buildCareNotification', () => {
             daysUntil: 0
         }]);
 
-        expect(notification.body).toBe('Fern: water (about 160 ml), fertilise');
+        expect(notification.body).toBe('Fern: water (about 80 ml), fertilise');
     });
 
     it('keeps the pot size nudge in an unsized water row of a plant listing', () => {
@@ -730,5 +730,48 @@ describe('buildCareNotification', () => {
         }]);
 
         expect(notification.body).toBe('Fern: fertilise · Monstera: repot');
+    });
+
+    it('appends the litre-derived amount to a litre-sized single water task', () => {
+        const plant = makePlant({
+            id: 'plant-fern',
+            nickname: 'Fern',
+            soilVolumeLitres: 12
+        });
+
+        const notification = buildCareNotification([{
+            plant,
+            kind: CareKind.Water,
+            dueAt: NOW,
+            daysUntil: 0
+        }]);
+
+        expect(notification).toEqual({
+            title: 'Time to water Fern',
+            body: 'Fern is due for watering today. Give it about 1.2 L.',
+            tag: 'sprout-care-today'
+        });
+    });
+
+    it('adds the litre-derived amount to a litre-sized water row in a plant listing', () => {
+        const plant = makePlant({
+            id: 'plant-fern',
+            nickname: 'Fern',
+            soilVolumeLitres: 12
+        });
+
+        const notification = buildCareNotification([{
+            plant,
+            kind: CareKind.Water,
+            dueAt: NOW,
+            daysUntil: 0
+        }, {
+            plant,
+            kind: CareKind.Fertilize,
+            dueAt: NOW,
+            daysUntil: 0
+        }]);
+
+        expect(notification.body).toBe('Fern: water (about 1.2 L), fertilise');
     });
 });

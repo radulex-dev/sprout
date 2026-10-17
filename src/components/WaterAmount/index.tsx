@@ -3,7 +3,10 @@ import classNames from 'classnames';
 import { Droplet } from 'lucide-react';
 
 // Constants
-import { WATER_AMOUNT_ICON_SIZE, WATER_AMOUNT_UNIT, WaterAmountVariant } from './constants';
+import { WATER_AMOUNT_ICON_SIZE, WaterAmountVariant } from './constants';
+
+// Helpers
+import { formatWaterAmount } from '@/helpers/pot';
 
 // Styles
 import styles from './styles.module.css';
@@ -26,7 +29,7 @@ const WaterAmount: React.FunctionComponent<Props> = ({ amount, variant = WaterAm
     return (
         <span className={classes} {...props}>
             <Droplet aria-hidden size={WATER_AMOUNT_ICON_SIZE} />
-            {`${amount} ${WATER_AMOUNT_UNIT}`}
+            {formatWaterAmount(amount)}
         </span>
     );
 };

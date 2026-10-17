@@ -30,6 +30,7 @@ export const plants = pgTable(
         commonName: text('common_name').notNull().default(''),
         photo: bytea('photo'),
         potDiameter: real('pot_diameter'),
+        soilVolumeLitres: integer('soil_volume_litres'),
         acquiredAt: bigint('acquired_at', {
             mode: 'number'
         }).notNull(),

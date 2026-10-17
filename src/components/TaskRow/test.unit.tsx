@@ -62,7 +62,7 @@ describe('<TaskRow />', () => {
 
         render(<TaskRow {...props} task={task} />);
 
-        expect(screen.getByText('160 ml')).toBeInTheDocument();
+        expect(screen.getByText('80 ml')).toBeInTheDocument();
     });
 
     it('renders no amount on a fertilise row even when the plant has a pot size', () => {
@@ -77,7 +77,7 @@ describe('<TaskRow />', () => {
 
         render(<TaskRow {...props} task={task} />);
 
-        expect(screen.queryByText('160 ml')).not.toBeInTheDocument();
+        expect(screen.queryByText('80 ml')).not.toBeInTheDocument();
     });
 
     it('renders no amount on a water row for a plant with no pot size', () => {
@@ -91,5 +91,20 @@ describe('<TaskRow />', () => {
         render(<TaskRow {...props} task={task} />);
 
         expect(screen.queryByText(/ml/)).not.toBeInTheDocument();
+    });
+
+    it('renders the litre-derived amount on a water row for a litre-sized plant', () => {
+        const task: CareTask = {
+            plant: makePlant({
+                soilVolumeLitres: 12
+            }),
+            kind: CareKind.Water,
+            dueAt: NOW,
+            daysUntil: 0
+        };
+
+        render(<TaskRow {...props} task={task} />);
+
+        expect(screen.getByText('1.2 L')).toBeInTheDocument();
     });
 });

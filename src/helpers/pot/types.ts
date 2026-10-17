@@ -12,3 +12,8 @@ export interface PotSize {
     volume: number;
     volumeUnit: PotVolumeUnit;
 }
+
+export interface ContainerSize {
+    potDiameter?: number;
+    soilVolumeLitres?: number;
+}

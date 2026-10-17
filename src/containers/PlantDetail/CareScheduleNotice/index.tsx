@@ -3,11 +3,15 @@ import React from 'react';
 import { Ruler } from 'lucide-react';
 
 // Constants
+import { NOT_SET_LABEL } from './constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
 import { CARE_META } from '@/helpers/care/constants';
 
 // Components
 import Button from '@/design-system/Button';
+
+// Helpers
+import { formatContainerSize } from '@/components/PotSizePicker/helpers';
 
 // Styles
 import styles from './styles.module.css';
@@ -25,6 +29,7 @@ const CareScheduleNotice: React.FunctionComponent<Props> = ({ plant, onEdit, cla
     const WaterIcon = CARE_META[CareKind.Water].icon;
     const FertilizeIcon = CARE_META[CareKind.Fertilize].icon;
     const RepotIcon = CARE_META[CareKind.Repot].icon;
+    const potSize = formatContainerSize(plant) ?? NOT_SET_LABEL;
 
     return (
         <React.Fragment>
@@ -50,7 +55,7 @@ const CareScheduleNotice: React.FunctionComponent<Props> = ({ plant, onEdit, cla
                 <div className={styles.row}>
                     <Ruler size="0.875rem" aria-hidden />
                     <span>
-                        {plant.potDiameter === undefined ? 'Not set' : `${plant.potDiameter} cm`}
+                        {potSize}
                     </span>
                 </div>
             </div>

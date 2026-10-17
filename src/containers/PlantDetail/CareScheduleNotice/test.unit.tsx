@@ -24,6 +24,16 @@ describe('<CareScheduleNotice />', () => {
         expect(screen.getByText('12 cm')).toBeInTheDocument();
     });
 
+    it('renders the recorded soil volume', () => {
+        const plant = makePlant({
+            soilVolumeLitres: 60
+        });
+
+        render(<CareScheduleNotice {...props} plant={plant} />);
+
+        expect(screen.getByText('60 L')).toBeInTheDocument();
+    });
+
     it('renders Not set when the plant has no pot size', () => {
         render(<CareScheduleNotice {...props} />);
 
