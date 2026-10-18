@@ -45,29 +45,29 @@ const LitresDiagram: React.FunctionComponent<Props> = ({ className, ...props }) 
                     <path className={styles.extension} d={HEIGHT_EXTENSION_BOTTOM} />
                     <path d={HEIGHT_ARROW} markerEnd={markerStart} markerStart={markerStart} />
                 </g>
-                <text className={styles.label} textAnchor="middle" x="130" y="62">{LENGTH_LABEL}</text>
-                <text className={styles.label} textAnchor="middle" x="92" y="200">{WIDTH_LABEL}</text>
-                <text className={styles.label} x="210" y="112">{HEIGHT_LABEL}</text>
-                <rect className={styles.panel} height="30" rx="8" width="288" x="0" y="210" />
-                <text className={styles.amount} textAnchor="middle" x="144" y="229.5">{ARITHMETIC}</text>
-                <rect className={styles.panelSoft} height="68" rx="8" width="288" x="0" y="250" />
+                <text className={styles.label} textAnchor="middle" x="130" y="68">{LENGTH_LABEL}</text>
+                <text className={styles.label} textAnchor="middle" x="92" y="220">{WIDTH_LABEL}</text>
+                <text className={styles.label} x="210" y="132">{HEIGHT_LABEL}</text>
+                <rect className={styles.panel} height="30" rx="8" width="288" x="0" y="230" />
+                <text className={styles.amount} textAnchor="middle" x="144" y="249.5">{ARITHMETIC}</text>
+                <rect className={styles.panelSoft} height="68" rx="8" width="288" x="0" y="270" />
                 <path className={styles.section} d={SECTION_PATH} />
                 <path className={styles.sectionSoil} d={SECTION_SOIL_PATH} />
                 <path className={styles.fillLine} d={FILL_LINE} />
-                <text className={styles.mutedSmall} textAnchor="middle" x="46" y="287">{FILL_LABEL}</text>
-                <text className={styles.mutedSmall} x="92" y="264">{FILL_SOURCE}</text>
-                <text className={styles.label} x="92" y="281">{FILL_TAPERED}</text>
-                <text className={styles.label} x="92" y="296">{FILL_STRAIGHT}</text>
-                <text className={styles.mutedSmall} x="92" y="311">{FILL_START}</text>
-                <rect className={styles.panel} height="22" rx="6" width="82" x="0" y="328" />
-                <text className={styles.step} textAnchor="middle" x="41" y="342.5">{STEP_POUR}</text>
-                <text className={styles.stepArrow} textAnchor="middle" x="91" y="342.5">{STEP_ARROW}</text>
-                <rect className={styles.panel} height="22" rx="6" width="82" x="100" y="328" />
-                <text className={styles.step} textAnchor="middle" x="141" y="342.5">{STEP_SOAK}</text>
-                <text className={styles.stepArrow} textAnchor="middle" x="191" y="342.5">{STEP_ARROW}</text>
-                <rect className={styles.panel} height="22" rx="6" width="88" x="200" y="328" />
-                <text className={styles.step} textAnchor="middle" x="244" y="342.5">{STEP_REPEAT}</text>
-                <text className={styles.mutedSmall} x="0" y="364">{STEP_TAIL}</text>
+                <text className={styles.mutedSmall} textAnchor="middle" x="46" y="307">{FILL_LABEL}</text>
+                <text className={styles.mutedSmall} x="92" y="284">{FILL_SOURCE}</text>
+                <text className={styles.label} x="92" y="301">{FILL_TAPERED}</text>
+                <text className={styles.label} x="92" y="316">{FILL_STRAIGHT}</text>
+                <text className={styles.mutedSmall} x="92" y="331">{FILL_START}</text>
+                <rect className={styles.panel} height="22" rx="6" width="82" x="0" y="348" />
+                <text className={styles.step} textAnchor="middle" x="41" y="362.5">{STEP_POUR}</text>
+                <text className={styles.stepArrow} textAnchor="middle" x="91" y="362.5">{STEP_ARROW}</text>
+                <rect className={styles.panel} height="22" rx="6" width="82" x="100" y="348" />
+                <text className={styles.step} textAnchor="middle" x="141" y="362.5">{STEP_SOAK}</text>
+                <text className={styles.stepArrow} textAnchor="middle" x="191" y="362.5">{STEP_ARROW}</text>
+                <rect className={styles.panel} height="22" rx="6" width="88" x="200" y="348" />
+                <text className={styles.step} textAnchor="middle" x="244" y="362.5">{STEP_REPEAT}</text>
+                <text className={styles.mutedSmall} x="0" y="384">{STEP_TAIL}</text>
             </svg>
             <p className={styles.footnote}>{FOOTNOTE}</p>
             <p className={styles.srOnly}>{DIAGRAM_TEXT}</p>

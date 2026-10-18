@@ -36,6 +36,13 @@
     stroke-width: 1.5;
 }
 
+.potSoil {
+    fill: var(--color-green-900);
+    fill-opacity: 0.5;
+    stroke: var(--color-green-100);
+    stroke-width: 1.5;
+}
+
 .dimension {
     fill: none;
     stroke: var(--color-green-100);

@@ -6,12 +6,15 @@ export const DIAGRAM_LEAD = 'Rim to rim, across the top.';
 export const DIAGRAM_DESC = 'Measure across the top of the pot, rim to rim, in centimetres. Do not measure the base; on a tapered nursery pot the base is narrower and gives a wrong number. The twelve standard round sizes run 9 to 30 cm; wider than 30 cm goes in Litres, where a pot is sold by its litres rather than its diameter.';
 export const DIAGRAM_TEXT = 'Measuring the pot diameter. Measure across the top of the pot, rim to rim, in centimetres. Do not measure the base; on a tapered nursery pot the base is narrower and gives a wrong number. The twelve standard round sizes run 9 to 30 cm; wider than 30 cm goes in Litres, because a pot that large is sold by its litres rather than its diameter.';
 
-export const MAIN_POT_TRANSFORM = 'translate(67 70) scale(2.4)';
+export const MAIN_POT_CENTER_X = 143.8;
+export const MAIN_POT_CENTER_Y = 149.2;
+export const MAIN_POT_RADIUS = 67.2;
+export const MAIN_POT_SOIL_RADIUS = 55.2;
 export const TOP_POT_TRANSFORM = 'translate(40 228)';
 export const BASE_POT_TRANSFORM = 'translate(176 228)';
 
-export const MAIN_EXTENSION_LEFT = 'M76.6 82 V58';
-export const MAIN_EXTENSION_RIGHT = 'M211 82 V58';
+export const MAIN_EXTENSION_LEFT = 'M76.6 149.2 V58';
+export const MAIN_EXTENSION_RIGHT = 'M211 149.2 V58';
 export const MAIN_ARROW = 'M76.6 62 H211';
 export const TOP_EXTENSION_LEFT = 'M44 233 V218';
 export const TOP_EXTENSION_RIGHT = 'M100 233 V218';
