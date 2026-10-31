@@ -8,6 +8,8 @@ export const DAY_MS = 24 * 60 * 60 * 1000;
 export const DAYS_PER_MONTH = 30;
 
 export const CARE_NOTIFICATION_TAG = 'sprout-care-today';
+export const NOTIFICATION_TIME_ZONE = 'Europe/Amsterdam';
+export const NOTIFICATION_HOUR = 10;
 
 export const MAX_LISTED_PLANTS = 3;
 

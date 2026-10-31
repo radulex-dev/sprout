@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { DAY_MS, DAYS_PER_MONTH, FALLBACK_CARE } from './constants';
 
 // Helpers
-import { allTasks, buildCareNotification, dueTasks, formatDue, isNotifiedToday, nextDue, resolveLastCare, startOfToday, toDateValue } from './index';
+import { allTasks, buildCareNotification, dueTasks, formatDue, isNotificationHour, isNotifiedToday, nextDue, resolveLastCare, startOfToday, toDateValue } from './index';
 import { resolveCare } from './resolve';
 
 // Mocks
@@ -233,6 +233,27 @@ describe('isNotifiedToday', () => {
 
         expect(isNotifiedToday(plant, CareKind.Fertilize, NOW)).toBe(false);
         expect(isNotifiedToday(plant, CareKind.Water, NOW)).toBe(true);
+    });
+});
+
+describe('isNotificationHour', () => {
+    it.each([{
+        expected: true,
+        iso: '2026-01-15T09:00:00Z'
+    }, {
+        expected: false,
+        iso: '2026-01-15T08:00:00Z'
+    }, {
+        expected: true,
+        iso: '2026-07-15T08:00:00Z'
+    }, {
+        expected: false,
+        iso: '2026-07-15T09:00:00Z'
+    }, {
+        expected: false,
+        iso: '2026-06-10T12:00:00Z'
+    }])('reads $iso as the notification hour: $expected', ({ expected, iso }) => {
+        expect(isNotificationHour(Date.parse(iso))).toBe(expected);
     });
 });
 

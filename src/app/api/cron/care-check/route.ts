@@ -5,7 +5,7 @@ import { groupBy } from 'lodash-es';
 import { HttpStatus } from '@/lib/http/constants';
 
 // Helpers
-import { buildCareNotification, dueTasks, isNotifiedToday } from '@/helpers/care';
+import { buildCareNotification, dueTasks, isNotificationHour, isNotifiedToday } from '@/helpers/care';
 
 // Services
 import { listPlants, recordNotified } from '@/services/server/plants';
@@ -25,6 +25,14 @@ export const GET = async (request: Request) => {
     }
 
     const now = Date.now();
+    const isForced = new URL(request.url).searchParams.get('force') === '1';
+
+    if (!isForced && !isNotificationHour(now)) {
+        return NextResponse.json({
+            skipped: true
+        });
+    }
+
     const subscriptions = await getAllActivePushSubscriptions();
     const subscriptionsByUser = groupBy(subscriptions, (subscription) => {
         return subscription.userId;

@@ -1,7 +1,7 @@
 import { fromAbsolute, fromDate, getLocalTimeZone, parseDate, toCalendarDate } from '@internationalized/date';
 
 // Constants
-import { CARE_META, CARE_NOTIFICATION_TAG, DAY_MS, DAYS_PER_MONTH, MAX_LISTED_PLANTS, POT_SIZE_NUDGE_SENTENCE, POT_SIZE_NUDGE_SLOT } from './constants';
+import { CARE_META, CARE_NOTIFICATION_TAG, DAY_MS, DAYS_PER_MONTH, MAX_LISTED_PLANTS, NOTIFICATION_HOUR, NOTIFICATION_TIME_ZONE, POT_SIZE_NUDGE_SENTENCE, POT_SIZE_NUDGE_SLOT } from './constants';
 
 // Helpers
 import { formatWaterAmount, getWaterAmountMl } from '@/helpers/pot';
@@ -79,6 +79,10 @@ export const isNotifiedToday = (plant: Plant, kind: CareKind, now: number): bool
     const last = plant.lastNotified[kind];
 
     return last !== undefined && utcDayIndex(last) === utcDayIndex(now);
+};
+
+export const isNotificationHour = (now = Date.now()): boolean => {
+    return fromAbsolute(now, NOTIFICATION_TIME_ZONE).hour === NOTIFICATION_HOUR;
 };
 
 const startOfLocalDay = (timestamp: number, timeZone: string): number => {
