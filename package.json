@@ -83,7 +83,7 @@
     "eslint-plugin-better-tailwindcss": "^4.7.0",
     "eslint-plugin-react": "^7.37.5",
     "husky": "^9.1.7",
-    "jsdom": "^30.0.1",
+    "jsdom": "^31.0.0",
     "lint-staged": "^17.5.1",
     "size-limit": "^14.0.0",
     "storybook": "^10.6.2",
