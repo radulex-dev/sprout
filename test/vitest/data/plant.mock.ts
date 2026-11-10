@@ -1,7 +1,7 @@
 // Types
 import { CareKind, type Plant } from '@/types';
 
-export const NOW = 1_700_000_000_000;
+export const NOW = 1700000000000;
 
 const DEFAULT_CARE = {
     waterEveryDays: 7,
