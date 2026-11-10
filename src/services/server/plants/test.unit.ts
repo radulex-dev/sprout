@@ -145,7 +145,7 @@ describe('PlantInputSchema', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         })).toEqual({
             nickname: 'Kitchen monstera',
             species: 'Monstera deliciosa',
@@ -155,7 +155,7 @@ describe('PlantInputSchema', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         });
     });
 
@@ -169,7 +169,7 @@ describe('PlantInputSchema', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000,
+            acquiredAt: 1700000000000,
             photo: new Blob(['x'])
         });
 
@@ -186,7 +186,7 @@ describe('PlantInputSchema', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         });
 
         expect(parsed.nickname).toBe('Fern');
@@ -203,7 +203,7 @@ describe('PlantInputSchema', () => {
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
-                acquiredAt: 1_700_000_000_000
+                acquiredAt: 1700000000000
             });
         }).toThrow();
     });
@@ -219,7 +219,7 @@ describe('PlantInputSchema', () => {
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
-                acquiredAt: 1_700_000_000_000
+                acquiredAt: 1700000000000
             });
         }).toThrow();
     });
@@ -235,7 +235,7 @@ describe('PlantInputSchema', () => {
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
-                acquiredAt: 1_700_000_000_000
+                acquiredAt: 1700000000000
             });
         }).toThrow();
     });
@@ -251,7 +251,7 @@ describe('PlantInputSchema', () => {
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
-                acquiredAt: 1_700_000_000_000
+                acquiredAt: 1700000000000
             });
         }).toThrow();
     });
@@ -267,7 +267,7 @@ describe('PlantInputSchema', () => {
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
-                acquiredAt: 1_700_000_000_000,
+                acquiredAt: 1700000000000,
                 photo: 'not-a-blob'
             });
         }).toThrow();
@@ -315,7 +315,7 @@ describe('PlantInputSchema', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000,
+            acquiredAt: 1700000000000,
             extra: 'ignored'
         });
 
@@ -328,7 +328,7 @@ describe('PlantInputSchema', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         });
         expect(parsed).not.toHaveProperty('extra');
     });
@@ -343,13 +343,13 @@ describe('PlantInputSchema', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         })).not.toHaveProperty('lastCare');
     });
 
     it('accepts a lastCare map', () => {
         const lastCare = {
-            [CareKind.Water]: 1_700_000_000_000
+            [CareKind.Water]: 1700000000000
         };
 
         expect(PlantInputSchema.parse({
@@ -361,7 +361,7 @@ describe('PlantInputSchema', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000,
+            acquiredAt: 1700000000000,
             lastCare
         }).lastCare).toEqual(lastCare);
     });
@@ -376,7 +376,7 @@ describe('PlantInputSchema', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000,
+            acquiredAt: 1700000000000,
             potDiameter
         }).potDiameter).toBe(potDiameter);
     });
@@ -391,7 +391,7 @@ describe('PlantInputSchema', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         })).not.toHaveProperty('potDiameter');
     });
 
@@ -406,7 +406,7 @@ describe('PlantInputSchema', () => {
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
-                acquiredAt: 1_700_000_000_000,
+                acquiredAt: 1700000000000,
                 potDiameter
             });
         }).toThrow();
@@ -422,7 +422,7 @@ describe('PlantInputSchema', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000,
+            acquiredAt: 1700000000000,
             soilVolumeLitres
         }).soilVolumeLitres).toBe(soilVolumeLitres);
     });
@@ -438,7 +438,7 @@ describe('PlantInputSchema', () => {
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
-                acquiredAt: 1_700_000_000_000,
+                acquiredAt: 1700000000000,
                 soilVolumeLitres
             });
         }).toThrow();
@@ -454,7 +454,7 @@ describe('PlantInputSchema', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         })).not.toHaveProperty('soilVolumeLitres');
     });
 
@@ -469,7 +469,7 @@ describe('PlantInputSchema', () => {
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
-                acquiredAt: 1_700_000_000_000,
+                acquiredAt: 1700000000000,
                 potDiameter: 12,
                 soilVolumeLitres: 12
             });
@@ -480,9 +480,9 @@ describe('PlantInputSchema', () => {
 describe('LastCareSchema', () => {
     it('accepts a full triple', () => {
         const lastCare = {
-            [CareKind.Water]: 1_700_000_000_000,
-            [CareKind.Fertilize]: 1_700_000_000_000,
-            [CareKind.Repot]: 1_700_000_000_000
+            [CareKind.Water]: 1700000000000,
+            [CareKind.Fertilize]: 1700000000000,
+            [CareKind.Repot]: 1700000000000
         };
 
         expect(LastCareSchema.parse(lastCare)).toEqual(lastCare);
@@ -490,9 +490,9 @@ describe('LastCareSchema', () => {
 
     it('accepts a partial map', () => {
         expect(LastCareSchema.parse({
-            [CareKind.Water]: 1_700_000_000_000
+            [CareKind.Water]: 1700000000000
         })).toEqual({
-            [CareKind.Water]: 1_700_000_000_000
+            [CareKind.Water]: 1700000000000
         });
     });
 
@@ -631,7 +631,7 @@ describe('UpdatePlantSchema', () => {
 
 describe('NotifiedAtSchema', () => {
     it('accepts a non-negative integer', () => {
-        expect(NotifiedAtSchema.parse(1_700_000_000_000)).toBe(1_700_000_000_000);
+        expect(NotifiedAtSchema.parse(1700000000000)).toBe(1700000000000);
     });
 
     it('rejects a float', () => {
@@ -909,7 +909,7 @@ describe('plant mutations', () => {
 
         mockSelect.mockReturnValueOnce(mockSelectChain([{
             lastCare: {
-                [CareKind.Water]: NOW - 1_000_000
+                [CareKind.Water]: NOW - 1000000
             }
         }]));
         mockUpdate.mockReturnValueOnce({

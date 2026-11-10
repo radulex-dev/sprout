@@ -64,7 +64,7 @@ describe('createPlant', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         })).rejects.toThrow();
 
         expect(serviceCreatePlant).not.toHaveBeenCalled();
@@ -82,7 +82,7 @@ describe('createPlant', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         })).rejects.toBeInstanceOf(UnverifiedEmailError);
 
         expect(requireVerifiedUser).toHaveBeenCalledTimes(1);
@@ -99,7 +99,7 @@ describe('createPlant', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         });
 
         expect(serviceCreatePlant).toHaveBeenCalledWith('user-1', {
@@ -111,7 +111,7 @@ describe('createPlant', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         });
         expect(id).toBe('plant-1');
         expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
@@ -119,8 +119,8 @@ describe('createPlant', () => {
 
     it('forwards lastCare timestamps to the service', async () => {
         const lastCare = {
-            [CareKind.Water]: 1_699_000_000_000,
-            [CareKind.Fertilize]: 1_699_000_000_000
+            [CareKind.Water]: 1699000000000,
+            [CareKind.Fertilize]: 1699000000000
         };
 
         await createPlant({
@@ -132,7 +132,7 @@ describe('createPlant', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000,
+            acquiredAt: 1700000000000,
             lastCare
         });
 
@@ -145,7 +145,7 @@ describe('createPlant', () => {
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000,
+            acquiredAt: 1700000000000,
             lastCare
         });
     });
@@ -209,15 +209,15 @@ describe('markCareDone', () => {
     });
 
     it('forwards an explicit at timestamp to the service', async () => {
-        await markCareDone('123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1_699_000_000_000);
+        await markCareDone('123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1699000000000);
 
-        expect(serviceMarkCareDone).toHaveBeenCalledWith('user-1', '123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1_699_000_000_000);
+        expect(serviceMarkCareDone).toHaveBeenCalledWith('user-1', '123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1699000000000);
         expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
     });
 
     it.each([
-        9_999_999_999_999,
-        1_699_000_000_000.5,
+        9999999999999,
+        1699000000000.5,
         -1
     ])('rejects the timestamp %s before calling the service', async (at) => {
         await expect(markCareDone('123e4567-e89b-42d3-a456-426614174000', CareKind.Water, at)).rejects.toThrow();
@@ -234,9 +234,9 @@ describe('recordNotified', () => {
     });
 
     it('validates and delegates without revalidating', async () => {
-        await recordNotified('123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1_700_000_000_000);
+        await recordNotified('123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1700000000000);
 
-        expect(serviceRecordNotified).toHaveBeenCalledWith('user-1', '123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1_700_000_000_000);
+        expect(serviceRecordNotified).toHaveBeenCalledWith('user-1', '123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1700000000000);
         expect(revalidatePath).not.toHaveBeenCalled();
     });
 });

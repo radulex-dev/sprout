@@ -1,1 +1,1 @@
-export const CLOCK_TICK_INTERVAL_MS = 60_000;
+export const CLOCK_TICK_INTERVAL_MS = 60000;

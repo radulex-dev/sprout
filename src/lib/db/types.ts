@@ -1,10 +1,11 @@
 // Database
-import type { careReference, plants, pushSubscriptions } from './schema';
+import type { aiUsage, careReference, plants, pushSubscriptions } from './schema';
 
 export enum TableName {
     Plants = 'plants',
     CareReference = 'care_reference',
     PushSubscriptions = 'push_subscriptions',
+    AiUsage = 'ai_usage',
     User = 'user',
     Session = 'session',
     Account = 'account',
@@ -22,3 +23,4 @@ export type PlantListRow = Omit<PlantRow, 'photo'> & {
 };
 export type CareReferenceRow = typeof careReference.$inferSelect;
 export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect;
+export type AiUsageRow = typeof aiUsage.$inferSelect;

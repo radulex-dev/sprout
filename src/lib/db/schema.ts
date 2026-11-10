@@ -97,3 +97,23 @@ export const pushSubscriptions = pgTable(
         ];
     }
 );
+
+export const aiUsage = pgTable(
+    TableName.AiUsage,
+    {
+        id: uuid('id').primaryKey().defaultRandom(),
+        userId: text('user_id')
+            .notNull()
+            .references(() => { return user.id; }, {
+                onDelete: 'cascade'
+            }),
+        day: integer('day').notNull(),
+        calls: integer('calls').notNull().default(0),
+        createdAt: bigint('created_at', {
+            mode: 'number'
+        }).notNull()
+    },
+    (table) => {
+        return [uniqueIndex('ai_usage_user_day_idx').on(table.userId, table.day)];
+    }
+);
