@@ -141,7 +141,7 @@ describe('getResetTokenStatus', () => {
     it('returns Valid when the token row has not expired', async () => {
         selectMock.mockReturnValueOnce(mockSelectChain([{
             value: 'user-1',
-            expiresAt: new Date(Date.now() + 60_000)
+            expiresAt: new Date(Date.now() + 60000)
         }]));
 
         await expect(getResetTokenStatus('tok')).resolves.toEqual({
@@ -152,7 +152,7 @@ describe('getResetTokenStatus', () => {
     it('returns Expired with the verified owner when the token row is past', async () => {
         selectMock.mockReturnValueOnce(mockSelectChain([{
             value: 'user-1',
-            expiresAt: new Date(Date.now() - 60_000)
+            expiresAt: new Date(Date.now() - 60000)
         }]));
         selectMock.mockReturnValueOnce(mockSelectChain([{
             email: 'user@example.test',
@@ -169,7 +169,7 @@ describe('getResetTokenStatus', () => {
     it('returns Expired with emailVerified false for an unverified owner', async () => {
         selectMock.mockReturnValueOnce(mockSelectChain([{
             value: 'user-1',
-            expiresAt: new Date(Date.now() - 60_000)
+            expiresAt: new Date(Date.now() - 60000)
         }]));
         selectMock.mockReturnValueOnce(mockSelectChain([{
             email: 'user@example.test',

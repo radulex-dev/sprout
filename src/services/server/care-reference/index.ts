@@ -56,8 +56,14 @@ const scheduleFrom = (row: CareReferenceRow): CareSchedule => {
         throw new Error(`Care reference row '${row.matchKey}' is missing a value or unit`);
     }
 
+    const waterEveryDays = toDays(row.waterInterval, row.waterUnit);
+
     return {
-        waterEveryDays: toDays(row.waterInterval, row.waterUnit),
+        waterEveryDaysSpring: waterEveryDays,
+        waterEveryDaysSummer: waterEveryDays,
+        waterEveryDaysAutumn: waterEveryDays,
+        waterEveryDaysWinter: waterEveryDays,
+        waterAmountMl: 0,
         fertilizeEveryDays: toDays(row.fertilizeInterval, row.fertilizeUnit),
         repotEveryMonths: toMonths(row.repotInterval, row.repotUnit)
     };

@@ -21,7 +21,11 @@ import { CareKind } from '@/types';
 const props: React.ComponentProps<typeof CareStatValue> = {
     plant: makePlant({
         care: {
-            waterEveryDays: 7,
+            waterEveryDaysSpring: 7,
+            waterEveryDaysSummer: 7,
+            waterEveryDaysAutumn: 7,
+            waterEveryDaysWinter: 7,
+            waterAmountMl: 0,
             fertilizeEveryDays: undefined,
             repotEveryMonths: undefined
         },
@@ -40,7 +44,11 @@ describe('<CareStatValue />', () => {
     it('renders "not set" when the kind is never scheduled', () => {
         const plant = makePlant({
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: undefined,
                 repotEveryMonths: undefined
             }
@@ -54,7 +62,11 @@ describe('<CareStatValue />', () => {
     it('renders no popup trigger when the kind is never scheduled', () => {
         const plant = makePlant({
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: undefined,
                 repotEveryMonths: undefined
             }
@@ -68,7 +80,11 @@ describe('<CareStatValue />', () => {
     it('renders the overdue text for an overdue plant', () => {
         const plant = makePlant({
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: undefined,
                 repotEveryMonths: undefined
             },
@@ -117,6 +133,63 @@ describe('<CareStatValue />', () => {
         render(<CareStatValue {...props} plant={plant} />);
 
         expect(screen.getByText('80 ml')).toBeInTheDocument();
+    });
+
+    it('prefers the stored watering amount over the pot-derived one', () => {
+        const plant = makePlant({
+            potDiameter: 12,
+            care: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 250,
+                fertilizeEveryDays: undefined,
+                repotEveryMonths: undefined
+            }
+        });
+
+        render(<CareStatValue {...props} plant={plant} />);
+
+        expect(screen.getByText('250 ml')).toBeInTheDocument();
+        expect(screen.queryByText('80 ml')).not.toBeInTheDocument();
+    });
+
+    it('falls back to the pot-derived amount when the stored amount is zero', () => {
+        const plant = makePlant({
+            potDiameter: 12,
+            care: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
+                fertilizeEveryDays: undefined,
+                repotEveryMonths: undefined
+            }
+        });
+
+        render(<CareStatValue {...props} plant={plant} />);
+
+        expect(screen.getByText('80 ml')).toBeInTheDocument();
+    });
+
+    it('renders no amount when the stored amount is zero and no pot size is set', () => {
+        const plant = makePlant({
+            care: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
+                fertilizeEveryDays: undefined,
+                repotEveryMonths: undefined
+            }
+        });
+        const { container } = render(<CareStatValue {...props} plant={plant} />);
+
+        expect(screen.queryByText('0 ml')).not.toBeInTheDocument();
+        expect(container.textContent).not.toContain('ml');
     });
 
     it('renders the watering amount for a litre-sized plant without the prompt', () => {

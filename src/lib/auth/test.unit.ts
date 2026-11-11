@@ -69,7 +69,7 @@ describe('<auth /> password reset config', () => {
     it('nests the token TTL, session revocation and send callback inside emailAndPassword', async () => {
         const { auth } = await import('./index');
 
-        expect(auth.options.emailAndPassword.resetPasswordTokenExpiresIn).toBe(86_400);
+        expect(auth.options.emailAndPassword.resetPasswordTokenExpiresIn).toBe(86400);
         expect(auth.options.emailAndPassword.revokeSessionsOnPasswordReset).toBe(true);
         expect(typeof auth.options.emailAndPassword.sendResetPassword).toBe('function');
     });

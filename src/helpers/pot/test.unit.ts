@@ -34,8 +34,8 @@ describe('getWaterAmountMl', () => {
         [12, 1200],
         [60, 6000],
         [86, 8600],
-        [100, 10_000],
-        [1000, 100_000]
+        [100, 10000],
+        [1000, 100000]
     ])('maps a %s L container to %s ml', (litres, ml) => {
         expect(getWaterAmountMl({
             soilVolumeLitres: litres
@@ -55,7 +55,7 @@ describe('getWaterAmountMl', () => {
     it('derives the amount from a litre size when no diameter is set', () => {
         expect(getWaterAmountMl({
             soilVolumeLitres: 1000
-        })).toBe(100_000);
+        })).toBe(100000);
     });
 
     it('prefers the diameter when a size carries both', () => {
@@ -83,10 +83,10 @@ describe('formatWaterAmount', () => {
         amount: 6000,
         text: '6 L'
     }, {
-        amount: 62_500,
+        amount: 62500,
         text: '62.5 L'
     }, {
-        amount: 100_000,
+        amount: 100000,
         text: '100 L'
     }])('renders $amount ml as $text', ({ amount, text }) => {
         expect(formatWaterAmount(amount)).toBe(text);

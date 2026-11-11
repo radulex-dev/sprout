@@ -8,29 +8,49 @@ export const careReference: CareReference = {
     },
     family: {
         urticaceae: {
-            waterEveryDays: 6,
+            waterEveryDaysSpring: 6,
+            waterEveryDaysSummer: 6,
+            waterEveryDaysAutumn: 6,
+            waterEveryDaysWinter: 6,
+            waterAmountMl: 0,
             fertilizeEveryDays: 30,
             repotEveryMonths: 18
         }
     },
     genus: {
         dracaena: {
-            waterEveryDays: 10,
+            waterEveryDaysSpring: 10,
+            waterEveryDaysSummer: 10,
+            waterEveryDaysAutumn: 10,
+            waterEveryDaysWinter: 10,
+            waterAmountMl: 0,
             fertilizeEveryDays: 30,
             repotEveryMonths: 30
         },
         goeppertia: {
-            waterEveryDays: 4,
+            waterEveryDaysSpring: 4,
+            waterEveryDaysSummer: 4,
+            waterEveryDaysAutumn: 4,
+            waterEveryDaysWinter: 4,
+            waterAmountMl: 0,
             fertilizeEveryDays: 21,
             repotEveryMonths: 12
         },
         monstera: {
-            waterEveryDays: 5,
+            waterEveryDaysSpring: 5,
+            waterEveryDaysSummer: 5,
+            waterEveryDaysAutumn: 5,
+            waterEveryDaysWinter: 5,
+            waterAmountMl: 0,
             fertilizeEveryDays: 30,
             repotEveryMonths: 18
         },
         sansevieria: {
-            waterEveryDays: 21,
+            waterEveryDaysSpring: 21,
+            waterEveryDaysSummer: 21,
+            waterEveryDaysAutumn: 21,
+            waterEveryDaysWinter: 21,
+            waterAmountMl: 0,
             fertilizeEveryDays: 90,
             repotEveryMonths: 30
         }

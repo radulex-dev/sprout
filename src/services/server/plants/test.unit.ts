@@ -12,7 +12,7 @@ import { makePlant, NOW } from '@test/vitest/data/plant.mock';
 
 // Services
 import { createPlant, deletePlant, listPlants, markCareDone, readPlantPhoto, recordNotified, updatePlant } from './index';
-import { CareKindSchema, CareScheduleSchema, LastCareSchema, NotifiedAtSchema, PlantInputSchema, UpdatePlantSchema } from './schema';
+import { CareKindSchema, CareScheduleSchema, LastCareSchema, NotifiedAtSchema, parsePlantInput, PlantInputSchema, UpdatePlantSchema } from './schema';
 
 // Database
 import { getPlantPhoto, getPlantsForUser } from '@/lib/db/queries';
@@ -65,11 +65,19 @@ describe('CareKindSchema', () => {
 describe('CareScheduleSchema', () => {
     it('accepts a valid schedule', () => {
         expect(CareScheduleSchema.parse({
-            waterEveryDays: 7,
+            waterEveryDaysSpring: 14,
+            waterEveryDaysSummer: 7,
+            waterEveryDaysAutumn: 10,
+            waterEveryDaysWinter: 21,
+            waterAmountMl: 80,
             fertilizeEveryDays: 30,
             repotEveryMonths: 18
         })).toEqual({
-            waterEveryDays: 7,
+            waterEveryDaysSpring: 14,
+            waterEveryDaysSummer: 7,
+            waterEveryDaysAutumn: 10,
+            waterEveryDaysWinter: 21,
+            waterAmountMl: 80,
             fertilizeEveryDays: 30,
             repotEveryMonths: 18
         });
@@ -77,16 +85,51 @@ describe('CareScheduleSchema', () => {
 
     it('accepts an omitted interval for the kinds that can be never', () => {
         expect(CareScheduleSchema.parse({
-            waterEveryDays: 7
+            waterEveryDaysSpring: 7,
+            waterEveryDaysSummer: 7,
+            waterEveryDaysAutumn: 7,
+            waterEveryDaysWinter: 7,
+            waterAmountMl: 0
         })).toEqual({
-            waterEveryDays: 7
+            waterEveryDaysSpring: 7,
+            waterEveryDaysSummer: 7,
+            waterEveryDaysAutumn: 7,
+            waterEveryDaysWinter: 7,
+            waterAmountMl: 0
         });
+    });
+
+    it('rejects a water interval under the minimum', () => {
+        expect(() => {
+            return CareScheduleSchema.parse({
+                waterEveryDaysSpring: 1,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0
+            });
+        }).toThrow();
+    });
+
+    it('rejects a missing water amount', () => {
+        expect(() => {
+            return CareScheduleSchema.parse({
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7
+            });
+        }).toThrow();
     });
 
     it('rejects a zero interval', () => {
         expect(() => {
             return CareScheduleSchema.parse({
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 0,
                 repotEveryMonths: 0
             });
@@ -96,8 +139,12 @@ describe('CareScheduleSchema', () => {
     it('rejects a negative interval', () => {
         expect(() => {
             return CareScheduleSchema.parse({
-                waterEveryDays: -1,
-                fertilizeEveryDays: 30,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
+                fertilizeEveryDays: -1,
                 repotEveryMonths: 18
             });
         }).toThrow();
@@ -106,7 +153,11 @@ describe('CareScheduleSchema', () => {
     it('rejects a float interval', () => {
         expect(() => {
             return CareScheduleSchema.parse({
-                waterEveryDays: 1.5,
+                waterEveryDaysSpring: 1.5,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             });
@@ -116,7 +167,11 @@ describe('CareScheduleSchema', () => {
     it('rejects an interval over the day maximum', () => {
         expect(() => {
             return CareScheduleSchema.parse({
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 3651,
                 repotEveryMonths: 18
             });
@@ -126,11 +181,143 @@ describe('CareScheduleSchema', () => {
     it('rejects an interval over the month maximum', () => {
         expect(() => {
             return CareScheduleSchema.parse({
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 601
             });
         }).toThrow();
+    });
+});
+
+describe('seasonal water schedule', () => {
+    it('accepts the maximum winter interval', () => {
+        expect(parsePlantInput({
+            nickname: 'Fern',
+            species: 'Nephrolepis exaltata',
+            commonName: '',
+            care: {
+                waterEveryDaysSpring: 14,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 10,
+                waterEveryDaysWinter: 28,
+                waterAmountMl: 80,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1700000000000
+        }).care.waterEveryDaysWinter).toBe(28);
+    });
+
+    it('rejects a winter interval over the maximum', () => {
+        const result = PlantInputSchema.safeParse({
+            nickname: 'Fern',
+            species: 'Nephrolepis exaltata',
+            commonName: '',
+            care: {
+                waterEveryDaysSpring: 14,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 10,
+                waterEveryDaysWinter: 29,
+                waterAmountMl: 80,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1700000000000
+        });
+
+        expect(result.success).toBe(false);
+
+        if (result.success) {
+            throw new Error('Expected the winter interval to be rejected.');
+        }
+
+        expect(result.error.issues.map((issue) => {
+            return issue.path.join('.');
+        })).toEqual([
+            'care.waterEveryDaysWinter'
+        ]);
+    });
+
+    it('rejects a water amount over the maximum', () => {
+        const result = PlantInputSchema.safeParse({
+            nickname: 'Fern',
+            species: 'Nephrolepis exaltata',
+            commonName: '',
+            care: {
+                waterEveryDaysSpring: 14,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 10,
+                waterEveryDaysWinter: 21,
+                waterAmountMl: 5001,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1700000000000
+        });
+
+        expect(result.success).toBe(false);
+
+        if (result.success) {
+            throw new Error('Expected the water amount to be rejected.');
+        }
+
+        expect(result.error.issues.map((issue) => {
+            return issue.path.join('.');
+        })).toEqual([
+            'care.waterAmountMl'
+        ]);
+    });
+
+    it('accepts a zero water amount', () => {
+        expect(parsePlantInput({
+            nickname: 'Fern',
+            species: 'Nephrolepis exaltata',
+            commonName: '',
+            care: {
+                waterEveryDaysSpring: 14,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 10,
+                waterEveryDaysWinter: 21,
+                waterAmountMl: 0,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1700000000000
+        }).care.waterAmountMl).toBe(0);
+    });
+
+    it('rejects the old flat water interval', () => {
+        const result = PlantInputSchema.safeParse({
+            nickname: 'Fern',
+            species: 'Nephrolepis exaltata',
+            commonName: '',
+            care: {
+                waterEveryDays: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            },
+            acquiredAt: 1700000000000
+        });
+
+        expect(result.success).toBe(false);
+
+        if (result.success) {
+            throw new Error('Expected the old flat water interval to be rejected.');
+        }
+
+        expect(result.error.issues.map((issue) => {
+            return issue.path.join('.');
+        })).toEqual([
+            'care.waterEveryDaysSpring',
+            'care.waterEveryDaysSummer',
+            'care.waterEveryDaysAutumn',
+            'care.waterEveryDaysWinter',
+            'care.waterAmountMl'
+        ]);
     });
 });
 
@@ -141,21 +328,29 @@ describe('PlantInputSchema', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         })).toEqual({
             nickname: 'Kitchen monstera',
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         });
     });
 
@@ -165,11 +360,15 @@ describe('PlantInputSchema', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000,
+            acquiredAt: 1700000000000,
             photo: new Blob(['x'])
         });
 
@@ -182,11 +381,15 @@ describe('PlantInputSchema', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         });
 
         expect(parsed.nickname).toBe('Fern');
@@ -199,11 +402,15 @@ describe('PlantInputSchema', () => {
                 species: 'Monstera deliciosa',
                 commonName: 'Swiss cheese plant',
                 care: {
-                    waterEveryDays: 7,
+                    waterEveryDaysSpring: 7,
+                    waterEveryDaysSummer: 7,
+                    waterEveryDaysAutumn: 7,
+                    waterEveryDaysWinter: 7,
+                    waterAmountMl: 0,
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
-                acquiredAt: 1_700_000_000_000
+                acquiredAt: 1700000000000
             });
         }).toThrow();
     });
@@ -215,11 +422,15 @@ describe('PlantInputSchema', () => {
                 species: 'Monstera deliciosa',
                 commonName: 'Swiss cheese plant',
                 care: {
-                    waterEveryDays: 7,
+                    waterEveryDaysSpring: 7,
+                    waterEveryDaysSummer: 7,
+                    waterEveryDaysAutumn: 7,
+                    waterEveryDaysWinter: 7,
+                    waterAmountMl: 0,
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
-                acquiredAt: 1_700_000_000_000
+                acquiredAt: 1700000000000
             });
         }).toThrow();
     });
@@ -231,11 +442,15 @@ describe('PlantInputSchema', () => {
                 species: undefined,
                 commonName: 'Swiss cheese plant',
                 care: {
-                    waterEveryDays: 7,
+                    waterEveryDaysSpring: 7,
+                    waterEveryDaysSummer: 7,
+                    waterEveryDaysAutumn: 7,
+                    waterEveryDaysWinter: 7,
+                    waterAmountMl: 0,
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
-                acquiredAt: 1_700_000_000_000
+                acquiredAt: 1700000000000
             });
         }).toThrow();
     });
@@ -247,11 +462,15 @@ describe('PlantInputSchema', () => {
                 species: 'Monstera deliciosa',
                 commonName: 'Swiss cheese plant',
                 care: {
-                    waterEveryDays: 7,
+                    waterEveryDaysSpring: 7,
+                    waterEveryDaysSummer: 7,
+                    waterEveryDaysAutumn: 7,
+                    waterEveryDaysWinter: 7,
+                    waterAmountMl: 0,
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
-                acquiredAt: 1_700_000_000_000
+                acquiredAt: 1700000000000
             });
         }).toThrow();
     });
@@ -263,11 +482,15 @@ describe('PlantInputSchema', () => {
                 species: 'Monstera deliciosa',
                 commonName: 'Swiss cheese plant',
                 care: {
-                    waterEveryDays: 7,
+                    waterEveryDaysSpring: 7,
+                    waterEveryDaysSummer: 7,
+                    waterEveryDaysAutumn: 7,
+                    waterEveryDaysWinter: 7,
+                    waterAmountMl: 0,
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
-                acquiredAt: 1_700_000_000_000,
+                acquiredAt: 1700000000000,
                 photo: 'not-a-blob'
             });
         }).toThrow();
@@ -280,7 +503,11 @@ describe('PlantInputSchema', () => {
                 species: 'Monstera deliciosa',
                 commonName: 'Swiss cheese plant',
                 care: {
-                    waterEveryDays: 7,
+                    waterEveryDaysSpring: 7,
+                    waterEveryDaysSummer: 7,
+                    waterEveryDaysAutumn: 7,
+                    waterEveryDaysWinter: 7,
+                    waterAmountMl: 0,
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
@@ -296,7 +523,11 @@ describe('PlantInputSchema', () => {
                 species: 'Monstera deliciosa',
                 commonName: 'Swiss cheese plant',
                 care: {
-                    waterEveryDays: 7,
+                    waterEveryDaysSpring: 7,
+                    waterEveryDaysSummer: 7,
+                    waterEveryDaysAutumn: 7,
+                    waterEveryDaysWinter: 7,
+                    waterAmountMl: 0,
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
@@ -311,11 +542,15 @@ describe('PlantInputSchema', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000,
+            acquiredAt: 1700000000000,
             extra: 'ignored'
         });
 
@@ -324,11 +559,15 @@ describe('PlantInputSchema', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         });
         expect(parsed).not.toHaveProperty('extra');
     });
@@ -339,17 +578,21 @@ describe('PlantInputSchema', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         })).not.toHaveProperty('lastCare');
     });
 
     it('accepts a lastCare map', () => {
         const lastCare = {
-            [CareKind.Water]: 1_700_000_000_000
+            [CareKind.Water]: 1700000000000
         };
 
         expect(PlantInputSchema.parse({
@@ -357,11 +600,15 @@ describe('PlantInputSchema', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000,
+            acquiredAt: 1700000000000,
             lastCare
         }).lastCare).toEqual(lastCare);
     });
@@ -372,11 +619,15 @@ describe('PlantInputSchema', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000,
+            acquiredAt: 1700000000000,
             potDiameter
         }).potDiameter).toBe(potDiameter);
     });
@@ -387,11 +638,15 @@ describe('PlantInputSchema', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         })).not.toHaveProperty('potDiameter');
     });
 
@@ -402,11 +657,15 @@ describe('PlantInputSchema', () => {
                 species: 'Monstera deliciosa',
                 commonName: 'Swiss cheese plant',
                 care: {
-                    waterEveryDays: 7,
+                    waterEveryDaysSpring: 7,
+                    waterEveryDaysSummer: 7,
+                    waterEveryDaysAutumn: 7,
+                    waterEveryDaysWinter: 7,
+                    waterAmountMl: 0,
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
-                acquiredAt: 1_700_000_000_000,
+                acquiredAt: 1700000000000,
                 potDiameter
             });
         }).toThrow();
@@ -418,11 +677,15 @@ describe('PlantInputSchema', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000,
+            acquiredAt: 1700000000000,
             soilVolumeLitres
         }).soilVolumeLitres).toBe(soilVolumeLitres);
     });
@@ -434,11 +697,15 @@ describe('PlantInputSchema', () => {
                 species: 'Monstera deliciosa',
                 commonName: 'Swiss cheese plant',
                 care: {
-                    waterEveryDays: 7,
+                    waterEveryDaysSpring: 7,
+                    waterEveryDaysSummer: 7,
+                    waterEveryDaysAutumn: 7,
+                    waterEveryDaysWinter: 7,
+                    waterAmountMl: 0,
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
-                acquiredAt: 1_700_000_000_000,
+                acquiredAt: 1700000000000,
                 soilVolumeLitres
             });
         }).toThrow();
@@ -450,11 +717,15 @@ describe('PlantInputSchema', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         })).not.toHaveProperty('soilVolumeLitres');
     });
 
@@ -465,11 +736,15 @@ describe('PlantInputSchema', () => {
                 species: 'Monstera deliciosa',
                 commonName: 'Swiss cheese plant',
                 care: {
-                    waterEveryDays: 7,
+                    waterEveryDaysSpring: 7,
+                    waterEveryDaysSummer: 7,
+                    waterEveryDaysAutumn: 7,
+                    waterEveryDaysWinter: 7,
+                    waterAmountMl: 0,
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
-                acquiredAt: 1_700_000_000_000,
+                acquiredAt: 1700000000000,
                 potDiameter: 12,
                 soilVolumeLitres: 12
             });
@@ -480,9 +755,9 @@ describe('PlantInputSchema', () => {
 describe('LastCareSchema', () => {
     it('accepts a full triple', () => {
         const lastCare = {
-            [CareKind.Water]: 1_700_000_000_000,
-            [CareKind.Fertilize]: 1_700_000_000_000,
-            [CareKind.Repot]: 1_700_000_000_000
+            [CareKind.Water]: 1700000000000,
+            [CareKind.Fertilize]: 1700000000000,
+            [CareKind.Repot]: 1700000000000
         };
 
         expect(LastCareSchema.parse(lastCare)).toEqual(lastCare);
@@ -490,9 +765,9 @@ describe('LastCareSchema', () => {
 
     it('accepts a partial map', () => {
         expect(LastCareSchema.parse({
-            [CareKind.Water]: 1_700_000_000_000
+            [CareKind.Water]: 1700000000000
         })).toEqual({
-            [CareKind.Water]: 1_700_000_000_000
+            [CareKind.Water]: 1700000000000
         });
     });
 
@@ -534,14 +809,22 @@ describe('UpdatePlantSchema', () => {
         expect(UpdatePlantSchema.parse({
             nickname: 'Fern',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             }
         })).toEqual({
             nickname: 'Fern',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             }
@@ -553,7 +836,11 @@ describe('UpdatePlantSchema', () => {
             return UpdatePlantSchema.parse({
                 nickname: '',
                 care: {
-                    waterEveryDays: 7,
+                    waterEveryDaysSpring: 7,
+                    waterEveryDaysSummer: 7,
+                    waterEveryDaysAutumn: 7,
+                    waterEveryDaysWinter: 7,
+                    waterAmountMl: 0,
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 }
@@ -565,7 +852,11 @@ describe('UpdatePlantSchema', () => {
         expect(UpdatePlantSchema.parse({
             nickname: 'Fern',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -578,7 +869,11 @@ describe('UpdatePlantSchema', () => {
             return UpdatePlantSchema.parse({
                 nickname: 'Fern',
                 care: {
-                    waterEveryDays: 7,
+                    waterEveryDaysSpring: 7,
+                    waterEveryDaysSummer: 7,
+                    waterEveryDaysAutumn: 7,
+                    waterEveryDaysWinter: 7,
+                    waterAmountMl: 0,
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
@@ -591,7 +886,11 @@ describe('UpdatePlantSchema', () => {
         expect(UpdatePlantSchema.parse({
             nickname: 'Fern',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -604,7 +903,11 @@ describe('UpdatePlantSchema', () => {
             return UpdatePlantSchema.parse({
                 nickname: 'Fern',
                 care: {
-                    waterEveryDays: 7,
+                    waterEveryDaysSpring: 7,
+                    waterEveryDaysSummer: 7,
+                    waterEveryDaysAutumn: 7,
+                    waterEveryDaysWinter: 7,
+                    waterAmountMl: 0,
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
@@ -618,7 +921,11 @@ describe('UpdatePlantSchema', () => {
             return UpdatePlantSchema.parse({
                 nickname: 'Fern',
                 care: {
-                    waterEveryDays: 7,
+                    waterEveryDaysSpring: 7,
+                    waterEveryDaysSummer: 7,
+                    waterEveryDaysAutumn: 7,
+                    waterEveryDaysWinter: 7,
+                    waterAmountMl: 0,
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
@@ -631,7 +938,7 @@ describe('UpdatePlantSchema', () => {
 
 describe('NotifiedAtSchema', () => {
     it('accepts a non-negative integer', () => {
-        expect(NotifiedAtSchema.parse(1_700_000_000_000)).toBe(1_700_000_000_000);
+        expect(NotifiedAtSchema.parse(1700000000000)).toBe(1700000000000);
     });
 
     it('rejects a float', () => {
@@ -685,7 +992,11 @@ describe('plant mutations', () => {
             species: 'Nephrolepis exaltata',
             commonName: '',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -705,7 +1016,11 @@ describe('plant mutations', () => {
             commonName: '',
             acquiredAt: NOW,
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -730,7 +1045,11 @@ describe('plant mutations', () => {
             species: 'Nephrolepis exaltata',
             commonName: '',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -744,7 +1063,11 @@ describe('plant mutations', () => {
             commonName: '',
             acquiredAt: NOW,
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -767,7 +1090,11 @@ describe('plant mutations', () => {
             species: 'Nephrolepis exaltata',
             commonName: '',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -782,7 +1109,11 @@ describe('plant mutations', () => {
             commonName: '',
             acquiredAt: NOW,
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -810,7 +1141,11 @@ describe('plant mutations', () => {
         await updatePlant('user-1', 'plant-1', {
             nickname: 'Fern',
             care: {
-                waterEveryDays: 5,
+                waterEveryDaysSpring: 5,
+                waterEveryDaysSummer: 5,
+                waterEveryDaysAutumn: 5,
+                waterEveryDaysWinter: 5,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             }
@@ -819,7 +1154,11 @@ describe('plant mutations', () => {
         expect(set).toHaveBeenCalledWith({
             nickname: 'Fern',
             care: {
-                waterEveryDays: 5,
+                waterEveryDaysSpring: 5,
+                waterEveryDaysSummer: 5,
+                waterEveryDaysAutumn: 5,
+                waterEveryDaysWinter: 5,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -844,7 +1183,11 @@ describe('plant mutations', () => {
         await updatePlant('user-1', 'plant-1', {
             nickname: 'Fern',
             care: {
-                waterEveryDays: 5,
+                waterEveryDaysSpring: 5,
+                waterEveryDaysSummer: 5,
+                waterEveryDaysAutumn: 5,
+                waterEveryDaysWinter: 5,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -854,7 +1197,11 @@ describe('plant mutations', () => {
         expect(set).toHaveBeenCalledWith({
             nickname: 'Fern',
             care: {
-                waterEveryDays: 5,
+                waterEveryDaysSpring: 5,
+                waterEveryDaysSummer: 5,
+                waterEveryDaysAutumn: 5,
+                waterEveryDaysWinter: 5,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -879,7 +1226,11 @@ describe('plant mutations', () => {
         await updatePlant('user-1', 'plant-1', {
             nickname: 'Fern',
             care: {
-                waterEveryDays: 5,
+                waterEveryDaysSpring: 5,
+                waterEveryDaysSummer: 5,
+                waterEveryDaysAutumn: 5,
+                waterEveryDaysWinter: 5,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -889,7 +1240,11 @@ describe('plant mutations', () => {
         expect(set).toHaveBeenCalledWith({
             nickname: 'Fern',
             care: {
-                waterEveryDays: 5,
+                waterEveryDaysSpring: 5,
+                waterEveryDaysSummer: 5,
+                waterEveryDaysAutumn: 5,
+                waterEveryDaysWinter: 5,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -909,7 +1264,7 @@ describe('plant mutations', () => {
 
         mockSelect.mockReturnValueOnce(mockSelectChain([{
             lastCare: {
-                [CareKind.Water]: NOW - 1_000_000
+                [CareKind.Water]: NOW - 1000000
             }
         }]));
         mockUpdate.mockReturnValueOnce({

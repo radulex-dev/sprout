@@ -1,10 +1,11 @@
 import { getLocalTimeZone, parseDate } from '@internationalized/date';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 // Constants
 import { DAY_MS, DAYS_PER_MONTH, FALLBACK_CARE } from './constants';
 
 // Helpers
+import { seasonForTimestamp } from './helpers';
 import { allTasks, buildCareNotification, dueTasks, formatDue, isNotificationHour, isNotifiedToday, nextDue, resolveLastCare, startOfToday, toDateValue } from './index';
 import { resolveCare } from './resolve';
 
@@ -13,7 +14,7 @@ import { careReference } from '@test/vitest/data/care-reference.mock';
 import { makePlant, NOW } from '@test/vitest/data/plant.mock';
 
 // Types
-import { CareKind, CareSource } from '@/types';
+import { CareKind, CareSeason, CareSource } from '@/types';
 
 const startOfLocalDay = (timestamp: number): number => {
     const date = new Date(timestamp);
@@ -29,7 +30,11 @@ describe('nextDue', () => {
     it('returns undefined when a kind is never scheduled', () => {
         const plant = makePlant({
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: undefined,
                 repotEveryMonths: undefined
             },
@@ -48,7 +53,11 @@ describe('nextDue', () => {
         const last = NOW - 3 * DAY_MS;
         const plant = makePlant({
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: undefined,
                 repotEveryMonths: undefined
             },
@@ -66,7 +75,11 @@ describe('nextDue', () => {
         const last = NOW - 40 * DAY_MS;
         const plant = makePlant({
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: undefined,
                 repotEveryMonths: 3
             },
@@ -84,7 +97,11 @@ describe('nextDue', () => {
         const plant = {
             ...makePlant({
                 care: {
-                    waterEveryDays: 7,
+                    waterEveryDaysSpring: 7,
+                    waterEveryDaysSummer: 7,
+                    waterEveryDaysAutumn: 7,
+                    waterEveryDaysWinter: 7,
+                    waterAmountMl: 0,
                     fertilizeEveryDays: undefined,
                     repotEveryMonths: undefined
                 }
@@ -93,6 +110,102 @@ describe('nextDue', () => {
         };
 
         expect(nextDue(plant, CareKind.Water)).toBe(plant.acquiredAt + 7 * DAY_MS);
+    });
+
+    it('takes the water interval from the season of the last watering', () => {
+        const january = Date.UTC(2026, 0, 15, 12);
+        const july = Date.UTC(2026, 6, 15, 12);
+
+        const januaryWatered = makePlant({
+            care: {
+                waterEveryDaysSpring: 14,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 10,
+                waterEveryDaysWinter: 21,
+                waterAmountMl: 0
+            },
+            lastCare: {
+                [CareKind.Water]: january
+            }
+        });
+        const julyWatered = makePlant({
+            care: {
+                waterEveryDaysSpring: 14,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 10,
+                waterEveryDaysWinter: 21,
+                waterAmountMl: 0
+            },
+            lastCare: {
+                [CareKind.Water]: july
+            }
+        });
+
+        expect(nextDue(januaryWatered, CareKind.Water)).toBe(january + 14 * DAY_MS);
+        expect(nextDue(julyWatered, CareKind.Water)).toBe(july + 10 * DAY_MS);
+    });
+});
+
+describe('seasonForTimestamp', () => {
+    it.each([{
+        expected: CareSeason.Spring,
+        iso: '2026-01-01T12:00:00Z'
+    }, {
+        expected: CareSeason.Spring,
+        iso: '2026-02-01T12:00:00Z'
+    }, {
+        expected: CareSeason.Spring,
+        iso: '2026-03-01T12:00:00Z'
+    }, {
+        expected: CareSeason.Summer,
+        iso: '2026-04-01T12:00:00Z'
+    }, {
+        expected: CareSeason.Summer,
+        iso: '2026-05-01T12:00:00Z'
+    }, {
+        expected: CareSeason.Summer,
+        iso: '2026-06-01T12:00:00Z'
+    }, {
+        expected: CareSeason.Autumn,
+        iso: '2026-07-01T12:00:00Z'
+    }, {
+        expected: CareSeason.Autumn,
+        iso: '2026-08-01T12:00:00Z'
+    }, {
+        expected: CareSeason.Autumn,
+        iso: '2026-09-01T12:00:00Z'
+    }, {
+        expected: CareSeason.Winter,
+        iso: '2026-10-01T12:00:00Z'
+    }, {
+        expected: CareSeason.Winter,
+        iso: '2026-11-01T12:00:00Z'
+    }, {
+        expected: CareSeason.Winter,
+        iso: '2026-12-01T12:00:00Z'
+    }])('reads $iso as $expected', ({ expected, iso }) => {
+        expect(seasonForTimestamp(Date.parse(iso))).toBe(expected);
+    });
+
+    describe('at a UTC month boundary', () => {
+        it.each([{
+            expected: CareSeason.Spring,
+            iso: '2026-03-31T23:30:00Z'
+        }, {
+            expected: CareSeason.Summer,
+            iso: '2026-06-30T23:30:00Z'
+        }, {
+            expected: CareSeason.Autumn,
+            iso: '2026-09-30T23:30:00Z'
+        }, {
+            expected: CareSeason.Winter,
+            iso: '2026-12-31T23:30:00Z'
+        }])('reads $iso as $expected without a local month lookup', ({ expected, iso }) => {
+            const getMonth = vi.spyOn(Date.prototype, 'getMonth');
+
+            expect(seasonForTimestamp(Date.parse(iso))).toBe(expected);
+            expect(getMonth).not.toHaveBeenCalled();
+        });
     });
 });
 
@@ -115,7 +228,11 @@ describe('dueTasks', () => {
         const overdue = makePlant({
             id: 'plant-overdue',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: undefined,
                 repotEveryMonths: undefined
             },
@@ -128,7 +245,11 @@ describe('dueTasks', () => {
         const future = makePlant({
             id: 'plant-future',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: undefined,
                 repotEveryMonths: undefined
             },
@@ -150,7 +271,11 @@ describe('dueTasks', () => {
     it('is unaffected by the pot size', () => {
         const unsized = makePlant({
             care: {
-                waterEveryDays: 7
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0
             },
             lastCare: {
                 [CareKind.Water]: NOW - 10 * DAY_MS
@@ -159,7 +284,11 @@ describe('dueTasks', () => {
         const sized = makePlant({
             potDiameter: 10.5,
             care: {
-                waterEveryDays: 7
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0
             },
             lastCare: {
                 [CareKind.Water]: NOW - 10 * DAY_MS
@@ -262,7 +391,11 @@ describe('allTasks', () => {
         const soon = makePlant({
             id: 'plant-soon',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: undefined,
                 repotEveryMonths: undefined
             },
@@ -275,7 +408,11 @@ describe('allTasks', () => {
         const later = makePlant({
             id: 'plant-later',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: undefined,
                 repotEveryMonths: undefined
             },
@@ -376,7 +513,11 @@ describe('resolveCare', () => {
 
         expect(resolved.source).toBe(CareSource.Genus);
         expect(resolved.care).toEqual({
-            waterEveryDays: 5,
+            waterEveryDaysSpring: 5,
+            waterEveryDaysSummer: 5,
+            waterEveryDaysAutumn: 5,
+            waterEveryDaysWinter: 5,
+            waterAmountMl: 0,
             fertilizeEveryDays: 30,
             repotEveryMonths: 18
         });
@@ -390,7 +531,11 @@ describe('resolveCare', () => {
 
         expect(resolved.source).toBe(CareSource.Family);
         expect(resolved.care).toEqual({
-            waterEveryDays: 6,
+            waterEveryDaysSpring: 6,
+            waterEveryDaysSummer: 6,
+            waterEveryDaysAutumn: 6,
+            waterEveryDaysWinter: 6,
+            waterAmountMl: 0,
             fertilizeEveryDays: 30,
             repotEveryMonths: 18
         });
@@ -404,7 +549,11 @@ describe('resolveCare', () => {
 
         expect(resolved.source).toBe(CareSource.Genus);
         expect(resolved.care).toEqual({
-            waterEveryDays: 5,
+            waterEveryDaysSpring: 5,
+            waterEveryDaysSummer: 5,
+            waterEveryDaysAutumn: 5,
+            waterEveryDaysWinter: 5,
+            waterAmountMl: 0,
             fertilizeEveryDays: 30,
             repotEveryMonths: 18
         });
@@ -440,7 +589,11 @@ describe('alias resolution', () => {
 
         expect(resolved.source).toBe(CareSource.Genus);
         expect(resolved.care).toEqual({
-            waterEveryDays: 4,
+            waterEveryDaysSpring: 4,
+            waterEveryDaysSummer: 4,
+            waterEveryDaysAutumn: 4,
+            waterEveryDaysWinter: 4,
+            waterAmountMl: 0,
             fertilizeEveryDays: 21,
             repotEveryMonths: 12
         });
@@ -454,7 +607,11 @@ describe('alias resolution', () => {
 
         expect(resolved.source).toBe(CareSource.Genus);
         expect(resolved.care).toEqual({
-            waterEveryDays: 21,
+            waterEveryDaysSpring: 21,
+            waterEveryDaysSummer: 21,
+            waterEveryDaysAutumn: 21,
+            waterEveryDaysWinter: 21,
+            waterAmountMl: 0,
             fertilizeEveryDays: 90,
             repotEveryMonths: 30
         });
@@ -468,7 +625,11 @@ describe('alias resolution', () => {
 
         expect(resolved.source).toBe(CareSource.Genus);
         expect(resolved.care).toEqual({
-            waterEveryDays: 21,
+            waterEveryDaysSpring: 21,
+            waterEveryDaysSummer: 21,
+            waterEveryDaysAutumn: 21,
+            waterEveryDaysWinter: 21,
+            waterAmountMl: 0,
             fertilizeEveryDays: 90,
             repotEveryMonths: 30
         });
@@ -482,7 +643,11 @@ describe('alias resolution', () => {
 
         expect(resolved.source).toBe(CareSource.Genus);
         expect(resolved.care).toEqual({
-            waterEveryDays: 10,
+            waterEveryDaysSpring: 10,
+            waterEveryDaysSummer: 10,
+            waterEveryDaysAutumn: 10,
+            waterEveryDaysWinter: 10,
+            waterAmountMl: 0,
             fertilizeEveryDays: 30,
             repotEveryMonths: 30
         });

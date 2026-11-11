@@ -31,7 +31,7 @@ export interface Props extends Omit<React.ComponentPropsWithoutRef<'button'>, 'c
 
 const CareStatValue: React.FunctionComponent<Props> = ({ plant, kind, now, onRequestPotSize, ...props }) => {
     const due = nextDue(plant, kind);
-    const amount = kind === CareKind.Water ? getWaterAmountMl(plant) : undefined;
+    const waterAmount = plant.care.waterAmountMl || getWaterAmountMl(plant);
 
     const renderValue = () => {
         if (due === undefined) {
@@ -60,7 +60,7 @@ const CareStatValue: React.FunctionComponent<Props> = ({ plant, kind, now, onReq
             return;
         }
 
-        if (amount === undefined) {
+        if (waterAmount === undefined) {
             return (
                 <Button className={styles.prompt} variant={ButtonVariant.Unstyled} onClick={onRequestPotSize}>
                     {SET_POT_SIZE_LABEL}
@@ -68,7 +68,7 @@ const CareStatValue: React.FunctionComponent<Props> = ({ plant, kind, now, onReq
             );
         }
 
-        return <WaterAmount amount={amount} />;
+        return <WaterAmount amount={waterAmount} />;
     };
 
     return (

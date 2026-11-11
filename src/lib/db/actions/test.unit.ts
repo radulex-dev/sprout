@@ -60,11 +60,15 @@ describe('createPlant', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 29,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         })).rejects.toThrow();
 
         expect(serviceCreatePlant).not.toHaveBeenCalled();
@@ -78,11 +82,15 @@ describe('createPlant', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         })).rejects.toBeInstanceOf(UnverifiedEmailError);
 
         expect(requireVerifiedUser).toHaveBeenCalledTimes(1);
@@ -95,11 +103,15 @@ describe('createPlant', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         });
 
         expect(serviceCreatePlant).toHaveBeenCalledWith('user-1', {
@@ -107,11 +119,15 @@ describe('createPlant', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000
+            acquiredAt: 1700000000000
         });
         expect(id).toBe('plant-1');
         expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
@@ -119,8 +135,8 @@ describe('createPlant', () => {
 
     it('forwards lastCare timestamps to the service', async () => {
         const lastCare = {
-            [CareKind.Water]: 1_699_000_000_000,
-            [CareKind.Fertilize]: 1_699_000_000_000
+            [CareKind.Water]: 1699000000000,
+            [CareKind.Fertilize]: 1699000000000
         };
 
         await createPlant({
@@ -128,11 +144,15 @@ describe('createPlant', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000,
+            acquiredAt: 1700000000000,
             lastCare
         });
 
@@ -141,11 +161,15 @@ describe('createPlant', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
-            acquiredAt: 1_700_000_000_000,
+            acquiredAt: 1700000000000,
             lastCare
         });
     });
@@ -156,7 +180,11 @@ describe('updatePlant', () => {
         await expect(updatePlant('not-a-uuid', {
             nickname: 'Fern',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             }
@@ -169,7 +197,11 @@ describe('updatePlant', () => {
         await updatePlant('123e4567-e89b-42d3-a456-426614174000', {
             nickname: 'Fern',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             }
@@ -178,7 +210,11 @@ describe('updatePlant', () => {
         expect(serviceUpdatePlant).toHaveBeenCalledWith('user-1', '123e4567-e89b-42d3-a456-426614174000', {
             nickname: 'Fern',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             }
@@ -209,15 +245,15 @@ describe('markCareDone', () => {
     });
 
     it('forwards an explicit at timestamp to the service', async () => {
-        await markCareDone('123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1_699_000_000_000);
+        await markCareDone('123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1699000000000);
 
-        expect(serviceMarkCareDone).toHaveBeenCalledWith('user-1', '123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1_699_000_000_000);
+        expect(serviceMarkCareDone).toHaveBeenCalledWith('user-1', '123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1699000000000);
         expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
     });
 
     it.each([
-        9_999_999_999_999,
-        1_699_000_000_000.5,
+        9999999999999,
+        1699000000000.5,
         -1
     ])('rejects the timestamp %s before calling the service', async (at) => {
         await expect(markCareDone('123e4567-e89b-42d3-a456-426614174000', CareKind.Water, at)).rejects.toThrow();
@@ -234,9 +270,9 @@ describe('recordNotified', () => {
     });
 
     it('validates and delegates without revalidating', async () => {
-        await recordNotified('123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1_700_000_000_000);
+        await recordNotified('123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1700000000000);
 
-        expect(serviceRecordNotified).toHaveBeenCalledWith('user-1', '123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1_700_000_000_000);
+        expect(serviceRecordNotified).toHaveBeenCalledWith('user-1', '123e4567-e89b-42d3-a456-426614174000', CareKind.Water, 1700000000000);
         expect(revalidatePath).not.toHaveBeenCalled();
     });
 });
