@@ -63,7 +63,13 @@ describe('<PlantGrid />', () => {
         const plants = [
             makePlant({
                 care: {
-                    waterEveryDays: 2
+                    waterEveryDaysSpring: 2,
+                    waterEveryDaysSummer: 2,
+                    waterEveryDaysAutumn: 2,
+                    waterEveryDaysWinter: 2,
+                    waterAmountMl: 0,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 12
                 },
                 lastCare: {
                     [CareKind.Water]: now - 5 * DAY_MS,
@@ -127,7 +133,13 @@ describe('<PlantGrid />', () => {
         const plants = [
             makePlant({
                 care: {
-                    waterEveryDays: 2
+                    waterEveryDaysSpring: 2,
+                    waterEveryDaysSummer: 2,
+                    waterEveryDaysAutumn: 2,
+                    waterEveryDaysWinter: 2,
+                    waterAmountMl: 0,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 12
                 },
                 lastCare: {
                     [CareKind.Water]: now - 5 * DAY_MS,

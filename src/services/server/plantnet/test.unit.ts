@@ -64,24 +64,40 @@ describe('plantnet', () => {
                 },
                 family: {
                     urticaceae: {
-                        waterEveryDays: 6,
+                        waterEveryDaysSpring: 6,
+                        waterEveryDaysSummer: 6,
+                        waterEveryDaysAutumn: 6,
+                        waterEveryDaysWinter: 6,
+                        waterAmountMl: 0,
                         fertilizeEveryDays: 30,
                         repotEveryMonths: 18
                     }
                 },
                 genus: {
                     dracaena: {
-                        waterEveryDays: 10,
+                        waterEveryDaysSpring: 10,
+                        waterEveryDaysSummer: 10,
+                        waterEveryDaysAutumn: 10,
+                        waterEveryDaysWinter: 10,
+                        waterAmountMl: 0,
                         fertilizeEveryDays: 30,
                         repotEveryMonths: 30
                     },
                     monstera: {
-                        waterEveryDays: 5,
+                        waterEveryDaysSpring: 5,
+                        waterEveryDaysSummer: 5,
+                        waterEveryDaysAutumn: 5,
+                        waterEveryDaysWinter: 5,
+                        waterAmountMl: 0,
                         fertilizeEveryDays: 30,
                         repotEveryMonths: 18
                     },
                     sansevieria: {
-                        waterEveryDays: 21,
+                        waterEveryDaysSpring: 21,
+                        waterEveryDaysSummer: 21,
+                        waterEveryDaysAutumn: 21,
+                        waterEveryDaysWinter: 21,
+                        waterAmountMl: 0,
                         fertilizeEveryDays: 90,
                         repotEveryMonths: 30
                     }
@@ -272,7 +288,11 @@ describe('plantnet', () => {
                 commonName: 'Swiss cheese plant',
                 confidence: 0.93,
                 defaultCare: {
-                    waterEveryDays: 5,
+                    waterEveryDaysSpring: 5,
+                    waterEveryDaysSummer: 5,
+                    waterEveryDaysAutumn: 5,
+                    waterEveryDaysWinter: 5,
+                    waterAmountMl: 0,
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
@@ -283,7 +303,11 @@ describe('plantnet', () => {
                 commonName: '',
                 confidence: 0,
                 defaultCare: {
-                    waterEveryDays: 7,
+                    waterEveryDaysSpring: 7,
+                    waterEveryDaysSummer: 7,
+                    waterEveryDaysAutumn: 7,
+                    waterEveryDaysWinter: 7,
+                    waterAmountMl: 0,
                     fertilizeEveryDays: 30,
                     repotEveryMonths: 18
                 },
@@ -316,7 +340,11 @@ describe('plantnet', () => {
             const [identified] = await identifySpecies(form);
 
             expect(identified.defaultCare).toEqual({
-                waterEveryDays: 21,
+                waterEveryDaysSpring: 21,
+                waterEveryDaysSummer: 21,
+                waterEveryDaysAutumn: 21,
+                waterEveryDaysWinter: 21,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 90,
                 repotEveryMonths: 30
             });
@@ -347,7 +375,11 @@ describe('plantnet', () => {
             const [identified] = await identifySpecies(form);
 
             expect(identified.defaultCare).toEqual({
-                waterEveryDays: 6,
+                waterEveryDaysSpring: 6,
+                waterEveryDaysSummer: 6,
+                waterEveryDaysAutumn: 6,
+                waterEveryDaysWinter: 6,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             });

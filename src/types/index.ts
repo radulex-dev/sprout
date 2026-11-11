@@ -22,8 +22,19 @@ export enum CareUnit {
     Years = 'Y'
 }
 
+export enum CareSeason {
+    Spring = 'spring',
+    Summer = 'summer',
+    Autumn = 'autumn',
+    Winter = 'winter'
+}
+
 export interface CareSchedule {
-    waterEveryDays: number;
+    waterEveryDaysSpring: number;
+    waterEveryDaysSummer: number;
+    waterEveryDaysAutumn: number;
+    waterEveryDaysWinter: number;
+    waterAmountMl: number;
     fertilizeEveryDays?: number;
     repotEveryMonths?: number;
 }

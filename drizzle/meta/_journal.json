@@ -64,6 +64,13 @@
       "when": 1794341513277,
       "tag": "0008_added_ai_usage",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794419907279,
+      "tag": "0009_seasonal_care_intervals",
+      "breakpoints": true
     }
   ]
 }

@@ -149,9 +149,13 @@ describe('<IdentifyScreen />', () => {
             commonName: 'Snake Plant',
             confidence: 0.91,
             defaultCare: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
-                repotEveryMonths: 18,
-                waterEveryDays: 7
+                repotEveryMonths: 18
             },
             species: 'Dracaena trifasciata'
         }, {
@@ -159,9 +163,13 @@ describe('<IdentifyScreen />', () => {
             commonName: 'ZZ Plant',
             confidence: 0.64,
             defaultCare: {
+                waterEveryDaysSpring: 14,
+                waterEveryDaysSummer: 14,
+                waterEveryDaysAutumn: 14,
+                waterEveryDaysWinter: 14,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
-                repotEveryMonths: 18,
-                waterEveryDays: 14
+                repotEveryMonths: 18
             },
             species: 'Zamioculcas zamiifolia'
         }]);
@@ -212,9 +220,13 @@ describe('<IdentifyScreen />', () => {
             commonName: 'Snake Plant',
             confidence: 0.91,
             defaultCare: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
-                repotEveryMonths: 18,
-                waterEveryDays: 7
+                repotEveryMonths: 18
             },
             species: 'Dracaena trifasciata'
         }]);
@@ -254,9 +266,13 @@ describe('<IdentifyScreen />', () => {
             commonName: 'Snake Plant',
             confidence: 0.91,
             defaultCare: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
-                repotEveryMonths: 18,
-                waterEveryDays: 7
+                repotEveryMonths: 18
             },
             species: 'Dracaena trifasciata'
         }]);
@@ -384,9 +400,13 @@ describe('<IdentifyScreen />', () => {
             commonName: 'Snake Plant',
             confidence: 0.91,
             defaultCare: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
-                repotEveryMonths: 18,
-                waterEveryDays: 7
+                repotEveryMonths: 18
             },
             species: 'Dracaena trifasciata'
         }]);

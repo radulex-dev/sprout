@@ -4,7 +4,11 @@ import { CareKind, type Plant } from '@/types';
 export const NOW = 1700000000000;
 
 const DEFAULT_CARE = {
-    waterEveryDays: 7,
+    waterEveryDaysSpring: 7,
+    waterEveryDaysSummer: 7,
+    waterEveryDaysAutumn: 7,
+    waterEveryDaysWinter: 7,
+    waterAmountMl: 0,
     fertilizeEveryDays: 30,
     repotEveryMonths: 12
 };

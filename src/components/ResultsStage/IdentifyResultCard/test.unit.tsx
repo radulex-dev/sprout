@@ -19,9 +19,13 @@ const props: React.ComponentProps<typeof IdentifyResultCard> = {
         commonName: 'Swiss Cheese Plant',
         confidence: 0.92,
         defaultCare: {
+            waterEveryDaysSpring: 5,
+            waterEveryDaysSummer: 5,
+            waterEveryDaysAutumn: 5,
+            waterEveryDaysWinter: 5,
+            waterAmountMl: 0,
             fertilizeEveryDays: 30,
-            repotEveryMonths: 18,
-            waterEveryDays: 5
+            repotEveryMonths: 18
         },
         species: 'Monstera deliciosa'
     },
@@ -44,9 +48,13 @@ describe('<IdentifyResultCard />', () => {
             commonName: '',
             confidence: 0.92,
             defaultCare: {
+                waterEveryDaysSpring: 5,
+                waterEveryDaysSummer: 5,
+                waterEveryDaysAutumn: 5,
+                waterEveryDaysWinter: 5,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
-                repotEveryMonths: 18,
-                waterEveryDays: 5
+                repotEveryMonths: 18
             },
             species: 'Monstera deliciosa'
         };
@@ -74,9 +82,13 @@ describe('<IdentifyResultCard />', () => {
             commonName: 'Swiss Cheese Plant',
             confidence,
             defaultCare: {
+                waterEveryDaysSpring: 5,
+                waterEveryDaysSummer: 5,
+                waterEveryDaysAutumn: 5,
+                waterEveryDaysWinter: 5,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
-                repotEveryMonths: 18,
-                waterEveryDays: 5
+                repotEveryMonths: 18
             },
             species: 'Monstera deliciosa'
         };

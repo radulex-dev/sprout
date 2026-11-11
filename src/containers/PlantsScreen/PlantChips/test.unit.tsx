@@ -23,7 +23,13 @@ describe('<PlantChips />', () => {
         const now = Date.now();
         const plant = makePlant({
             care: {
-                waterEveryDays: 2
+                waterEveryDaysSpring: 2,
+                waterEveryDaysSummer: 2,
+                waterEveryDaysAutumn: 2,
+                waterEveryDaysWinter: 2,
+                waterAmountMl: 0,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
             },
             lastCare: {
                 [CareKind.Water]: now - 5 * DAY_MS,
@@ -41,7 +47,13 @@ describe('<PlantChips />', () => {
         const now = Date.now();
         const plant = makePlant({
             care: {
-                waterEveryDays: 1
+                waterEveryDaysSpring: 1,
+                waterEveryDaysSummer: 1,
+                waterEveryDaysAutumn: 1,
+                waterEveryDaysWinter: 1,
+                waterAmountMl: 0,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
             },
             lastCare: {
                 [CareKind.Water]: now - DAY_MS,
@@ -59,7 +71,11 @@ describe('<PlantChips />', () => {
         const now = Date.now();
         const plant = makePlant({
             care: {
-                waterEveryDays: 2,
+                waterEveryDaysSpring: 2,
+                waterEveryDaysSummer: 2,
+                waterEveryDaysAutumn: 2,
+                waterEveryDaysWinter: 2,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 1
             },
@@ -97,7 +113,13 @@ describe('<PlantChips />', () => {
         const now = Date.now();
         const plant = makePlant({
             care: {
-                waterEveryDays: 2
+                waterEveryDaysSpring: 2,
+                waterEveryDaysSummer: 2,
+                waterEveryDaysAutumn: 2,
+                waterEveryDaysWinter: 2,
+                waterAmountMl: 0,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
             },
             lastCare: {
                 [CareKind.Water]: now - 5 * DAY_MS,
@@ -132,7 +154,13 @@ describe('<PlantChips />', () => {
         const now = Date.now();
         const plant = makePlant({
             care: {
-                waterEveryDays: 2
+                waterEveryDaysSpring: 2,
+                waterEveryDaysSummer: 2,
+                waterEveryDaysAutumn: 2,
+                waterEveryDaysWinter: 2,
+                waterAmountMl: 0,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
             },
             lastCare: {
                 [CareKind.Water]: now - 5 * DAY_MS,
@@ -150,7 +178,13 @@ describe('<PlantChips />', () => {
         const now = Date.now();
         const plant = makePlant({
             care: {
-                waterEveryDays: 2
+                waterEveryDaysSpring: 2,
+                waterEveryDaysSummer: 2,
+                waterEveryDaysAutumn: 2,
+                waterEveryDaysWinter: 2,
+                waterAmountMl: 0,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
             },
             lastCare: {
                 [CareKind.Water]: now - 5 * DAY_MS,
@@ -168,7 +202,11 @@ describe('<PlantChips />', () => {
     it('renders no chips when the plant has no care intervals', () => {
         const plant = makePlant({
             care: {
-                waterEveryDays: 0,
+                waterEveryDaysSpring: 0,
+                waterEveryDaysSummer: 0,
+                waterEveryDaysAutumn: 0,
+                waterEveryDaysWinter: 0,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 0,
                 repotEveryMonths: 0
             }

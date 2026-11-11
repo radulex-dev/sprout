@@ -1,9 +1,10 @@
 import { fromAbsolute, fromDate, getLocalTimeZone, parseDate, toCalendarDate } from '@internationalized/date';
 
 // Constants
-import { CARE_META, CARE_NOTIFICATION_TAG, DAY_MS, DAYS_PER_MONTH, MAX_LISTED_PLANTS, NOTIFICATION_HOUR, NOTIFICATION_TIME_ZONE, POT_SIZE_NUDGE_SENTENCE, POT_SIZE_NUDGE_SLOT } from './constants';
+import { CARE_META, CARE_NOTIFICATION_TAG, DAY_MS, DAYS_PER_MONTH, MAX_LISTED_PLANTS, NOTIFICATION_HOUR, NOTIFICATION_TIME_ZONE, POT_SIZE_NUDGE_SENTENCE, POT_SIZE_NUDGE_SLOT, WATER_SEASON_FIELDS } from './constants';
 
 // Helpers
+import { seasonForTimestamp } from './helpers';
 import { formatWaterAmount, getWaterAmountMl } from '@/helpers/pot';
 
 // Types
@@ -14,7 +15,10 @@ const intervalMs = (plant: Plant, kind: CareKind): number => {
     const care = plant.care;
 
     if (kind === CareKind.Water) {
-        return care.waterEveryDays * DAY_MS;
+        const season = seasonForTimestamp(plant.lastCare[CareKind.Water] ?? plant.acquiredAt);
+        const interval = care[WATER_SEASON_FIELDS[season]] * DAY_MS;
+
+        return Number.isFinite(interval) ? interval : 0;
     }
 
     if (kind === CareKind.Fertilize) {

@@ -1,7 +1,7 @@
 import { Droplets, Flower2, Leaf } from 'lucide-react';
 
 // Types
-import { CareKind, type CareSchedule } from '@/types';
+import { CareKind, CareSeason, type CareSchedule } from '@/types';
 import type { CareMeta } from './types';
 
 export const DAY_MS = 24 * 60 * 60 * 1000;
@@ -37,8 +37,19 @@ export const CARE_META: Record<CareKind, CareMeta> = {
     }
 };
 
+export const WATER_SEASON_FIELDS: Record<CareSeason, keyof Pick<CareSchedule, 'waterEveryDaysSpring' | 'waterEveryDaysSummer' | 'waterEveryDaysAutumn' | 'waterEveryDaysWinter'>> = {
+    [CareSeason.Spring]: 'waterEveryDaysSpring',
+    [CareSeason.Summer]: 'waterEveryDaysSummer',
+    [CareSeason.Autumn]: 'waterEveryDaysAutumn',
+    [CareSeason.Winter]: 'waterEveryDaysWinter'
+};
+
 export const FALLBACK_CARE: CareSchedule = {
-    waterEveryDays: 7,
+    waterEveryDaysSpring: 7,
+    waterEveryDaysSummer: 7,
+    waterEveryDaysAutumn: 7,
+    waterEveryDaysWinter: 7,
+    waterAmountMl: 0,
     fertilizeEveryDays: 30,
     repotEveryMonths: 18
 };

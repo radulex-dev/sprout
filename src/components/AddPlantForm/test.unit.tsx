@@ -23,9 +23,13 @@ const props: React.ComponentProps<typeof AddPlantForm> = {
         commonName: 'Swiss Cheese Plant',
         confidence: 0.92,
         defaultCare: {
+            waterEveryDaysSpring: 5,
+            waterEveryDaysSummer: 5,
+            waterEveryDaysAutumn: 5,
+            waterEveryDaysWinter: 5,
+            waterAmountMl: 0,
             fertilizeEveryDays: 30,
-            repotEveryMonths: 18,
-            waterEveryDays: 5
+            repotEveryMonths: 18
         },
         species: 'Monstera deliciosa'
     }
@@ -51,9 +55,13 @@ describe('<AddPlantForm />', () => {
             commonName: 'Swiss Cheese Plant',
             confidence: 0.92,
             defaultCare: {
+                waterEveryDaysSpring: 5,
+                waterEveryDaysSummer: 5,
+                waterEveryDaysAutumn: 5,
+                waterEveryDaysWinter: 5,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
-                repotEveryMonths: 18,
-                waterEveryDays: 5
+                repotEveryMonths: 18
             },
             species: 'Monstera deliciosa'
         };
@@ -69,9 +77,13 @@ describe('<AddPlantForm />', () => {
             commonName: 'Swiss Cheese Plant',
             confidence: 0.92,
             defaultCare: {
+                waterEveryDaysSpring: 5,
+                waterEveryDaysSummer: 5,
+                waterEveryDaysAutumn: 5,
+                waterEveryDaysWinter: 5,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
-                repotEveryMonths: 18,
-                waterEveryDays: 5
+                repotEveryMonths: 18
             },
             species: 'Monstera deliciosa'
         };
@@ -92,7 +104,7 @@ describe('<AddPlantForm />', () => {
 
         expect(screen.getAllByRole('combobox').map((field) => {
             return field.textContent;
-        })).toEqual(['5 days', '30 days', '18 months']);
+        })).toEqual(['5 days', '5 days', '5 days', '5 days', '30 days', '18 months']);
     });
 
     it('shows exactly one hint for the resolved source', () => {
@@ -101,9 +113,13 @@ describe('<AddPlantForm />', () => {
             commonName: 'Swiss Cheese Plant',
             confidence: 0.92,
             defaultCare: {
+                waterEveryDaysSpring: 5,
+                waterEveryDaysSummer: 5,
+                waterEveryDaysAutumn: 5,
+                waterEveryDaysWinter: 5,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
-                repotEveryMonths: 18,
-                waterEveryDays: 5
+                repotEveryMonths: 18
             },
             species: 'Monstera deliciosa'
         };

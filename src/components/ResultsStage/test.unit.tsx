@@ -17,9 +17,13 @@ const props: React.ComponentProps<typeof ResultsStage> = {
         commonName: 'Swiss Cheese Plant',
         confidence: 0.92,
         defaultCare: {
+            waterEveryDaysSpring: 5,
+            waterEveryDaysSummer: 5,
+            waterEveryDaysAutumn: 5,
+            waterEveryDaysWinter: 5,
+            waterAmountMl: 0,
             fertilizeEveryDays: 30,
-            repotEveryMonths: 18,
-            waterEveryDays: 5
+            repotEveryMonths: 18
         },
         species: 'Monstera deliciosa'
     }],
@@ -36,9 +40,13 @@ describe('<ResultsStage />', () => {
             commonName: 'Swiss Cheese Plant',
             confidence: 0.92,
             defaultCare: {
+                waterEveryDaysSpring: 5,
+                waterEveryDaysSummer: 5,
+                waterEveryDaysAutumn: 5,
+                waterEveryDaysWinter: 5,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
-                repotEveryMonths: 18,
-                waterEveryDays: 5
+                repotEveryMonths: 18
             },
             species: 'Monstera deliciosa'
         }, {
@@ -46,9 +54,13 @@ describe('<ResultsStage />', () => {
             commonName: 'Peace Lily',
             confidence: 0.71,
             defaultCare: {
+                waterEveryDaysSpring: 5,
+                waterEveryDaysSummer: 5,
+                waterEveryDaysAutumn: 5,
+                waterEveryDaysWinter: 5,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
-                repotEveryMonths: 18,
-                waterEveryDays: 5
+                repotEveryMonths: 18
             },
             species: 'Spathiphyllum wallisii'
         }];
