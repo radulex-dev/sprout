@@ -60,7 +60,11 @@ describe('createPlant', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 29,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -78,7 +82,11 @@ describe('createPlant', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -95,7 +103,11 @@ describe('createPlant', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -107,7 +119,11 @@ describe('createPlant', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -128,7 +144,11 @@ describe('createPlant', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -141,7 +161,11 @@ describe('createPlant', () => {
             species: 'Monstera deliciosa',
             commonName: 'Swiss cheese plant',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -156,7 +180,11 @@ describe('updatePlant', () => {
         await expect(updatePlant('not-a-uuid', {
             nickname: 'Fern',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             }
@@ -169,7 +197,11 @@ describe('updatePlant', () => {
         await updatePlant('123e4567-e89b-42d3-a456-426614174000', {
             nickname: 'Fern',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             }
@@ -178,7 +210,11 @@ describe('updatePlant', () => {
         expect(serviceUpdatePlant).toHaveBeenCalledWith('user-1', '123e4567-e89b-42d3-a456-426614174000', {
             nickname: 'Fern',
             care: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             }

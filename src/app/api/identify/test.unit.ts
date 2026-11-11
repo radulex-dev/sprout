@@ -72,7 +72,11 @@ describe('/api/identify', () => {
             commonName: 'Monstera',
             confidence: 0.9,
             defaultCare: {
-                waterEveryDays: 7,
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },

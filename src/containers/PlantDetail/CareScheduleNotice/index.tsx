@@ -12,6 +12,7 @@ import Button from '@/design-system/Button';
 
 // Helpers
 import { formatContainerSize } from '@/components/PotSizePicker/helpers';
+import { formatWaterSchedule } from './helpers';
 
 // Styles
 import styles from './styles.module.css';
@@ -37,7 +38,7 @@ const CareScheduleNotice: React.FunctionComponent<Props> = ({ plant, onEdit, cla
                 <div className={styles.row}>
                     <WaterIcon size="0.875rem" aria-hidden />
                     <span>
-                        {`${plant.care.waterEveryDays} days`}
+                        {formatWaterSchedule(plant.care)}
                     </span>
                 </div>
                 <div className={styles.row}>
