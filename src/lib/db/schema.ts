@@ -6,7 +6,7 @@ export { account, session, user, verification } from './auth-schema';
 import { user } from './auth-schema';
 
 // Types
-import type { CareKind, CareMatchType, CareSchedule, CareUnit } from '@/types';
+import type { CareKind, CareMatchType, CareProfileConfidence, CareSchedule, CareUnit } from '@/types';
 import { TableName, type ByteaColumn } from './types';
 
 /** Postgres `bytea` column. node-postgres already maps bytea <-> Buffer. */
@@ -95,6 +95,30 @@ export const pushSubscriptions = pgTable(
             uniqueIndex('push_subscriptions_endpoint_idx').on(table.endpoint),
             index('push_subscriptions_user_id_idx').on(table.userId)
         ];
+    }
+);
+
+export const aiCareProfile = pgTable(
+    TableName.AiCareProfile,
+    {
+        id: uuid('id').primaryKey().defaultRandom(),
+        speciesKey: text('species_key').notNull(),
+        soilVolumeMl: integer('soil_volume_ml').notNull(),
+        waterSpring: integer('water_spring').notNull(),
+        waterSummer: integer('water_summer').notNull(),
+        waterAutumn: integer('water_autumn').notNull(),
+        waterWinter: integer('water_winter').notNull(),
+        waterAmountMl: integer('water_amount_ml').notNull(),
+        fertilizeEveryDays: integer('fertilize_every_days'),
+        repotEveryMonths: integer('repot_every_months'),
+        confidence: text('confidence').$type<CareProfileConfidence>().notNull(),
+        model: text('model').notNull(),
+        createdAt: bigint('created_at', {
+            mode: 'number'
+        }).notNull()
+    },
+    (table) => {
+        return [uniqueIndex('ai_care_profile_lookup_idx').on(table.speciesKey, table.soilVolumeMl)];
     }
 );
 

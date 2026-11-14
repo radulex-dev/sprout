@@ -5,7 +5,8 @@ import React, { useCallback } from 'react';
 import { Flower2, Leaf } from 'lucide-react';
 
 // Constants
-import { FERTILIZE_OPTIONS, REPOT_OPTIONS, SEASON_META, WATER_OPTIONS } from './constants';
+import { SEASON_META } from './constants';
+import { FERTILIZE_OPTIONS, REPOT_OPTIONS, WATER_OPTIONS } from '@/helpers/care/constants';
 
 // Components
 import ScheduleField from './ScheduleField';
