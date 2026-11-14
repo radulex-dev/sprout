@@ -29,6 +29,12 @@ export enum CareSeason {
     Winter = 'winter'
 }
 
+export enum CareProfileConfidence {
+    High = 'high',
+    Medium = 'medium',
+    Low = 'low'
+}
+
 export interface CareSchedule {
     waterEveryDaysSpring: number;
     waterEveryDaysSummer: number;

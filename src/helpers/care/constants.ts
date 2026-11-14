@@ -13,6 +13,10 @@ export const NOTIFICATION_HOUR = 10;
 
 export const MAX_LISTED_PLANTS = 3;
 
+export const WATER_OPTIONS = [2, 3, 4, 5, 6, 7, 9, 10, 12, 14, 16, 18, 21, 28];
+export const FERTILIZE_OPTIONS = [14, 21, 30, 45, 60, 90];
+export const REPOT_OPTIONS = [6, 12, 18, 24, 30, 36];
+
 export const POT_SIZE_NUDGE_SENTENCE = 'Set a pot size for the amount.';
 export const POT_SIZE_NUDGE_SLOT = 'set a pot size';
 
