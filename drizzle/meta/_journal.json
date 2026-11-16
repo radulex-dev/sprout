@@ -75,8 +75,8 @@
     {
       "idx": 10,
       "version": "7",
-      "when": 1794688516964,
-      "tag": "0010_added_ai_care_profile",
+      "when": 1794865059725,
+      "tag": "0010_added_ai_care_tables",
       "breakpoints": true
     }
   ]

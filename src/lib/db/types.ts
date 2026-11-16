@@ -1,12 +1,13 @@
 // Database
-import type { aiCareProfile, aiUsage, careReference, plants, pushSubscriptions } from './schema';
+import type { aiCareInterval, aiUsage, aiWaterAmount, careReference, plants, pushSubscriptions } from './schema';
 
 export enum TableName {
     Plants = 'plants',
     CareReference = 'care_reference',
     PushSubscriptions = 'push_subscriptions',
     AiUsage = 'ai_usage',
-    AiCareProfile = 'ai_care_profile',
+    AiCareInterval = 'ai_care_interval',
+    AiWaterAmount = 'ai_water_amount',
     User = 'user',
     Session = 'session',
     Account = 'account',
@@ -25,4 +26,5 @@ export type PlantListRow = Omit<PlantRow, 'photo'> & {
 export type CareReferenceRow = typeof careReference.$inferSelect;
 export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect;
 export type AiUsageRow = typeof aiUsage.$inferSelect;
-export type AiCareProfileRow = typeof aiCareProfile.$inferSelect;
+export type AiCareIntervalRow = typeof aiCareInterval.$inferSelect;
+export type AiWaterAmountRow = typeof aiWaterAmount.$inferSelect;

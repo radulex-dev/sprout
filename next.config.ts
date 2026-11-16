@@ -9,6 +9,7 @@ const allowedDevelopmentOrigins = (process.env.NEXT_ALLOWED_DEV_ORIGINS ?? '')
     .filter(Boolean);
 
 const nextConfig: NextConfig = {
+    agentRules: false,
     allowedDevOrigins: allowedDevelopmentOrigins,
     output: 'standalone',
     env: {

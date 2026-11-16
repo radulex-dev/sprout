@@ -1,6 +1,20 @@
 import * as z from 'zod';
 
+// Constants
+import { MAX_SOIL_VOLUME_LITRES, ML_PER_LITRE } from '@/helpers/pot/constants';
+
 export const PLANT_ID_SCHEMA = z.uuid();
+
+export const MAX_SOIL_VOLUME_ML = MAX_SOIL_VOLUME_LITRES * ML_PER_LITRE;
+
+export const LOAD_CARE_INTERVALS_SCHEMA = z.object({
+    species: z.string().trim().min(1)
+});
+
+export const LOAD_WATER_AMOUNT_SCHEMA = z.object({
+    species: z.string().trim().min(1),
+    soilVolumeMl: z.int().min(1).max(MAX_SOIL_VOLUME_ML).optional()
+});
 
 export const ALL_PATH = '/';
 

@@ -3,15 +3,10 @@ import { MAX_PHOTO_BYTES } from '@/helpers/image/constants';
 import { HttpStatus } from '@/lib/http/constants';
 import { ERROR_BAD_IMAGE, ERROR_BAD_KEY, ERROR_IMAGE_TOO_LARGE, ERROR_NO_IMAGE, ERROR_NO_KEY, ERROR_NOT_RECOGNISED, ERROR_UNAVAILABLE, ERROR_UNREACHABLE, MAX_IDENTIFY_BYTES, PLANTNET_API_URL, PLANTNET_NB_RESULTS } from './constants';
 
-// Helpers
-import { resolveCare } from '@/helpers/care/resolve';
-
 // Services
-import { loadCareReference } from '@/services/server/care-reference';
 import type { IdentifyResult } from '@/services/identify/types';
 
 // Types
-import { CareSource } from '@/types';
 import type { PlantNetErrorBody, PlantNetResponse } from './types';
 
 export class PlantNetError extends Error {
@@ -132,33 +127,15 @@ export const identifySpecies = async (form: FormData): Promise<IdentifyResult[]>
     }
 
     const data = (await response.json()) as PlantNetResponse;
-    const reference = await loadCareReference();
 
     return (data.results ?? []).map((result) => {
         const species = result.species?.scientificNameWithoutAuthor ?? 'Unknown species';
         const commonName = result.species?.commonNames?.at(0) ?? '';
-        const genus = result.species?.genus?.scientificNameWithoutAuthor ?? undefined;
-        const family = result.species?.family?.scientificNameWithoutAuthor ?? undefined;
-        const resolved = resolveCare(reference, {
-            genus,
-            species,
-            family
-        });
-
-        if (resolved.source === CareSource.None) {
-            console.warn('No care data for identified plant', {
-                family,
-                genus,
-                species
-            });
-        }
 
         return {
             species,
             commonName,
-            confidence: result.score ?? 0,
-            defaultCare: resolved.care,
-            careSource: resolved.source
+            confidence: result.score ?? 0
         };
     });
 };

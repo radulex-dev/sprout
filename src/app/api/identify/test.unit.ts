@@ -70,17 +70,7 @@ describe('/api/identify', () => {
         const results = [{
             species: 'Monstera deliciosa',
             commonName: 'Monstera',
-            confidence: 0.9,
-            defaultCare: {
-                waterEveryDaysSpring: 7,
-                waterEveryDaysSummer: 7,
-                waterEveryDaysAutumn: 7,
-                waterEveryDaysWinter: 7,
-                waterAmountMl: 0,
-                fertilizeEveryDays: 30,
-                repotEveryMonths: 18
-            },
-            careSource: 'reference'
+            confidence: 0.9
         }];
         identifySpeciesMock.mockResolvedValue(results);
 
@@ -90,7 +80,10 @@ describe('/api/identify', () => {
         }));
 
         expect(response.status).toBe(HttpStatus.Ok);
-        await expect(response.json()).resolves.toEqual(results);
+
+        const body = await response.json();
+
+        expect(body).toEqual(results);
         expect(identifySpeciesMock).toHaveBeenCalledTimes(1);
     });
 

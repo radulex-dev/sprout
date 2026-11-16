@@ -8,23 +8,10 @@ import ResultsStage from './index';
 // Services
 import type { IdentifyResult } from '@/services/identify/types';
 
-// Types
-import { CareSource } from '@/types';
-
 const props: React.ComponentProps<typeof ResultsStage> = {
     results: [{
-        careSource: CareSource.Genus,
         commonName: 'Swiss Cheese Plant',
         confidence: 0.92,
-        defaultCare: {
-            waterEveryDaysSpring: 5,
-            waterEveryDaysSummer: 5,
-            waterEveryDaysAutumn: 5,
-            waterEveryDaysWinter: 5,
-            waterAmountMl: 0,
-            fertilizeEveryDays: 30,
-            repotEveryMonths: 18
-        },
         species: 'Monstera deliciosa'
     }],
     picked: undefined,
@@ -36,32 +23,12 @@ const props: React.ComponentProps<typeof ResultsStage> = {
 describe('<ResultsStage />', () => {
     it('renders a card per result with the rounded confidence', () => {
         const results: IdentifyResult[] = [{
-            careSource: CareSource.Genus,
             commonName: 'Swiss Cheese Plant',
             confidence: 0.92,
-            defaultCare: {
-                waterEveryDaysSpring: 5,
-                waterEveryDaysSummer: 5,
-                waterEveryDaysAutumn: 5,
-                waterEveryDaysWinter: 5,
-                waterAmountMl: 0,
-                fertilizeEveryDays: 30,
-                repotEveryMonths: 18
-            },
             species: 'Monstera deliciosa'
         }, {
-            careSource: CareSource.Family,
             commonName: 'Peace Lily',
             confidence: 0.71,
-            defaultCare: {
-                waterEveryDaysSpring: 5,
-                waterEveryDaysSummer: 5,
-                waterEveryDaysAutumn: 5,
-                waterEveryDaysWinter: 5,
-                waterAmountMl: 0,
-                fertilizeEveryDays: 30,
-                repotEveryMonths: 18
-            },
             species: 'Spathiphyllum wallisii'
         }];
 

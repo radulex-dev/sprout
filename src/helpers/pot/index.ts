@@ -4,7 +4,7 @@ import { ML_PER_LITRE, ML_PER_VOLUME_UNIT, POT_SIZES, WATER_AMOUNT_RATIO } from 
 // Types
 import type { ContainerSize } from './types';
 
-const resolveSoilVolumeMl = (size?: ContainerSize): number | undefined => {
+export const resolveSoilVolumeMl = (size?: ContainerSize): number | undefined => {
     if (size?.potDiameter !== undefined) {
         const pot = POT_SIZES.find((entry) => {
             return entry.diameter === size.potDiameter;
