@@ -2,13 +2,13 @@ import { clamp } from 'lodash-es';
 
 // Constants
 import { WATER_OPTIONS } from '@/helpers/care/constants';
-import { CARE_PROMPT_MILLILITRES_UNIT, CARE_PROMPT_SOIL_VOLUME_LABEL, CARE_PROMPT_SPECIES_LABEL, CARE_PROMPT_SYSTEM, MAX_FERTILIZE_DAYS, MAX_REPOT_MONTHS, MAX_WATER_AMOUNT_ML, MAX_WATER_DAYS, MIN_FERTILIZE_DAYS, MIN_REPOT_MONTHS, MIN_WATER_AMOUNT_ML, MIN_WATER_DAYS } from './constants';
+import { CARE_INTERVAL_PROMPT_SYSTEM, CARE_PROMPT_MILLILITRES_UNIT, CARE_PROMPT_SOIL_VOLUME_LABEL, CARE_PROMPT_SPECIES_LABEL, MAX_FERTILIZE_DAYS, MAX_REPOT_MONTHS, MAX_WATER_AMOUNT_ML, MAX_WATER_DAYS, MIN_FERTILIZE_DAYS, MIN_REPOT_MONTHS, MIN_WATER_AMOUNT_ML, MIN_WATER_DAYS, WATER_AMOUNT_PROMPT_SYSTEM } from './constants';
 
 // Types
 import type { AiMessage } from '@/services/server/ai/types';
-import type { AiCareProfileRow } from '@/lib/db/types';
+import type { AiCareIntervalRow } from '@/lib/db/types';
 import type { CareSchedule } from '@/types';
-import type { CareProfile, CareProfilePayload } from './types';
+import type { CareIntervals, CareIntervalsPayload } from './types';
 
 const snapToOption = (value: number, options: number[]): number => {
     return options.reduce((closest, option) => {
@@ -47,48 +47,56 @@ export const normaliseSpeciesKey = (species: string): string => {
     return species.toLowerCase().trim();
 };
 
-export const normaliseCareProfile = (raw: CareProfilePayload): CareProfile => {
+export const normaliseCareIntervals = (raw: CareIntervalsPayload): CareIntervals => {
     return {
         waterSpring: normaliseWaterDays(raw.waterSpring),
         waterSummer: normaliseWaterDays(raw.waterSummer),
         waterAutumn: normaliseWaterDays(raw.waterAutumn),
         waterWinter: normaliseWaterDays(raw.waterWinter),
-        waterAmountMl: normaliseAmountMl(raw.waterAmountMl),
         fertilizeEveryDays: normaliseFertilizeDays(raw.fertilizeEveryDays),
         repotEveryMonths: normaliseRepotMonths(raw.repotEveryMonths),
         confidence: raw.confidence
     };
 };
 
-export const toCareProfile = (row: AiCareProfileRow): CareProfile => {
+export const toCareIntervals = (row: AiCareIntervalRow): CareIntervals => {
     return {
         waterSpring: row.waterSpring,
         waterSummer: row.waterSummer,
         waterAutumn: row.waterAutumn,
         waterWinter: row.waterWinter,
-        waterAmountMl: row.waterAmountMl,
         fertilizeEveryDays: normaliseFertilizeDays(row.fertilizeEveryDays ?? 0),
         repotEveryMonths: normaliseRepotMonths(row.repotEveryMonths ?? 0),
         confidence: row.confidence
     };
 };
 
-export const toCareSchedule = (profile: CareProfile): CareSchedule => {
+export const toCareSchedule = (intervals: CareIntervals, waterAmountMl: number): CareSchedule => {
     return {
-        waterEveryDaysSpring: profile.waterSpring,
-        waterEveryDaysSummer: profile.waterSummer,
-        waterEveryDaysAutumn: profile.waterAutumn,
-        waterEveryDaysWinter: profile.waterWinter,
-        waterAmountMl: profile.waterAmountMl,
-        fertilizeEveryDays: profile.fertilizeEveryDays,
-        repotEveryMonths: profile.repotEveryMonths
+        waterEveryDaysSpring: intervals.waterSpring,
+        waterEveryDaysSummer: intervals.waterSummer,
+        waterEveryDaysAutumn: intervals.waterAutumn,
+        waterEveryDaysWinter: intervals.waterWinter,
+        waterAmountMl,
+        fertilizeEveryDays: intervals.fertilizeEveryDays,
+        repotEveryMonths: intervals.repotEveryMonths
     };
 };
 
-export const buildCarePrompt = (species: string, soilVolumeMl: number): AiMessage[] => {
+export const buildCareIntervalPrompt = (species: string): AiMessage[] => {
     return [{
         role: 'system',
-        content: CARE_PROMPT_SYSTEM
+        content: CARE_INTERVAL_PROMPT_SYSTEM
+    }, {
+        role: 'user',
+        content: `${CARE_PROMPT_SPECIES_LABEL}: ${species}`
+    }];
+};
+
+export const buildWaterAmountPrompt = (species: string, soilVolumeMl: number): AiMessage[] => {
+    return [{
+        role: 'system',
+        content: WATER_AMOUNT_PROMPT_SYSTEM
     }, {
         role: 'user',
         content: [

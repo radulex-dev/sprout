@@ -6,15 +6,15 @@ import { MAX_FERTILIZE_DAYS, MAX_REPOT_MONTHS, MAX_WATER_AMOUNT_ML, MIN_FERTILIZ
 
 // Helpers
 import { mockSelectChain } from '@test/vitest/helpers/mockDb';
-import { buildCarePrompt, normaliseAmountMl, normaliseCareProfile, normaliseFertilizeDays, normaliseRepotMonths, normaliseSpeciesKey, normaliseWaterDays, toCareSchedule } from './helpers';
+import { buildCareIntervalPrompt, buildWaterAmountPrompt, normaliseAmountMl, normaliseCareIntervals, normaliseFertilizeDays, normaliseRepotMonths, normaliseSpeciesKey, normaliseWaterDays, toCareSchedule } from './helpers';
 
 // Services
 import { AiCapReachedError, AiUnavailableError } from '@/services/server/ai';
-import { getCareProfile } from './index';
-import { CARE_PROFILE_JSON_SCHEMA, CareProfileSchema } from './schema';
+import { getCareIntervals, getWaterAmount } from './index';
+import { CARE_INTERVAL_JSON_SCHEMA, CareIntervalsSchema, WATER_AMOUNT_JSON_SCHEMA, WaterAmountSchema } from './schema';
 
 // Database
-import { aiCareProfile } from '@/lib/db/schema';
+import { aiCareInterval } from '@/lib/db/schema';
 
 // Types
 import { CareProfileConfidence } from '@/types';
@@ -143,14 +143,13 @@ describe('Helpers', () => {
         });
     });
 
-    describe('normaliseCareProfile', () => {
+    describe('normaliseCareIntervals', () => {
         it('clamps every interval and drops the reasoning', () => {
-            expect(normaliseCareProfile({
+            expect(normaliseCareIntervals({
                 waterSpring: 7,
                 waterSummer: 40,
                 waterAutumn: 10,
                 waterWinter: 1,
-                waterAmountMl: 99999,
                 fertilizeEveryDays: 0,
                 repotEveryMonths: 0,
                 confidence: CareProfileConfidence.Low,
@@ -160,7 +159,6 @@ describe('Helpers', () => {
                 waterSummer: 28,
                 waterAutumn: 10,
                 waterWinter: 2,
-                waterAmountMl: MAX_WATER_AMOUNT_ML,
                 fertilizeEveryDays: undefined,
                 repotEveryMonths: undefined,
                 confidence: CareProfileConfidence.Low
@@ -169,17 +167,16 @@ describe('Helpers', () => {
     });
 
     describe('toCareSchedule', () => {
-        it('maps the four quarters and the amount onto the schedule', () => {
+        it('maps the four quarters and the passed amount onto the schedule', () => {
             expect(toCareSchedule({
                 waterSpring: 14,
                 waterSummer: 7,
                 waterAutumn: 10,
                 waterWinter: 21,
-                waterAmountMl: 80,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18,
                 confidence: CareProfileConfidence.High
-            })).toEqual({
+            }, 80)).toEqual({
                 waterEveryDaysSpring: 14,
                 waterEveryDaysSummer: 7,
                 waterEveryDaysAutumn: 10,
@@ -196,11 +193,10 @@ describe('Helpers', () => {
                 waterSummer: 7,
                 waterAutumn: 7,
                 waterWinter: 7,
-                waterAmountMl: 80,
                 fertilizeEveryDays: undefined,
                 repotEveryMonths: undefined,
                 confidence: CareProfileConfidence.Medium
-            })).toEqual({
+            }, 80)).toEqual({
                 waterEveryDaysSpring: 7,
                 waterEveryDaysSummer: 7,
                 waterEveryDaysAutumn: 7,
@@ -212,9 +208,27 @@ describe('Helpers', () => {
         });
     });
 
-    describe('buildCarePrompt', () => {
+    describe('buildCareIntervalPrompt', () => {
+        it('builds a system message and a user message naming the species', () => {
+            const [system, user] = buildCareIntervalPrompt('Monstera deliciosa');
+
+            expect(system.role).toBe('system');
+            expect(user.role).toBe('user');
+            expect(user.content).toContain('Monstera deliciosa');
+        });
+
+        it('stays inside the input budget', () => {
+            const messages = buildCareIntervalPrompt('Monstera deliciosa');
+
+            expect(messages.reduce((total, message) => {
+                return total + message.content.length;
+            }, 0)).toBeLessThan(2000);
+        });
+    });
+
+    describe('buildWaterAmountPrompt', () => {
         it('builds a system message and a user message naming the species and the soil volume', () => {
-            const [system, user] = buildCarePrompt('Monstera deliciosa', 800);
+            const [system, user] = buildWaterAmountPrompt('Monstera deliciosa', 800);
 
             expect(system.role).toBe('system');
             expect(user.role).toBe('user');
@@ -223,7 +237,7 @@ describe('Helpers', () => {
         });
 
         it('stays inside the input budget', () => {
-            const messages = buildCarePrompt('Monstera deliciosa', 800);
+            const messages = buildWaterAmountPrompt('Monstera deliciosa', 800);
 
             expect(messages.reduce((total, message) => {
                 return total + message.content.length;
@@ -232,20 +246,33 @@ describe('Helpers', () => {
     });
 });
 
-describe('CARE_PROFILE_JSON_SCHEMA', () => {
+describe('CARE_INTERVAL_JSON_SCHEMA', () => {
     it('requires exactly the properties the zod schema defines', () => {
-        const keys = Object.keys(CareProfileSchema.shape);
+        const keys = Object.keys(CareIntervalsSchema.shape);
 
-        expect(CARE_PROFILE_JSON_SCHEMA.required).toEqual(keys);
-        expect(Object.keys(CARE_PROFILE_JSON_SCHEMA.properties as object)).toEqual(keys);
+        expect(CARE_INTERVAL_JSON_SCHEMA.required).toEqual(keys);
+        expect(Object.keys(CARE_INTERVAL_JSON_SCHEMA.properties as object)).toEqual(keys);
     });
 
     it('forbids unknown properties', () => {
-        expect(CARE_PROFILE_JSON_SCHEMA.additionalProperties).toBe(false);
+        expect(CARE_INTERVAL_JSON_SCHEMA.additionalProperties).toBe(false);
     });
 });
 
-describe('getCareProfile', () => {
+describe('WATER_AMOUNT_JSON_SCHEMA', () => {
+    it('requires exactly the properties the zod schema defines', () => {
+        const keys = Object.keys(WaterAmountSchema.shape);
+
+        expect(WATER_AMOUNT_JSON_SCHEMA.required).toEqual(keys);
+        expect(Object.keys(WATER_AMOUNT_JSON_SCHEMA.properties as object)).toEqual(keys);
+    });
+
+    it('forbids unknown properties', () => {
+        expect(WATER_AMOUNT_JSON_SCHEMA.additionalProperties).toBe(false);
+    });
+});
+
+describe('getCareIntervals', () => {
     beforeEach(() => {
         mockClaimAiUsage.mockReset();
         mockInsert.mockReset();
@@ -255,28 +282,25 @@ describe('getCareProfile', () => {
         mockSelect.mockReset();
     });
 
-    it('returns the stored profile without claiming a unit or calling the model', async () => {
+    it('returns the stored intervals without claiming a unit or calling the model', async () => {
         mockSelect.mockReturnValueOnce(mockSelectChain([{
             waterSpring: 14,
             waterSummer: 7,
             waterAutumn: 10,
             waterWinter: 21,
-            waterAmountMl: 80,
             fertilizeEveryDays: 30,
             repotEveryMonths: 18,
             confidence: CareProfileConfidence.High
         }]));
 
-        await expect(getCareProfile({
+        await expect(getCareIntervals({
             userId: 'user-1',
-            species: 'Monstera deliciosa',
-            soilVolumeMl: 800
+            species: 'Monstera deliciosa'
         })).resolves.toEqual({
             waterSpring: 14,
             waterSummer: 7,
             waterAutumn: 10,
             waterWinter: 21,
-            waterAmountMl: 80,
             fertilizeEveryDays: 30,
             repotEveryMonths: 18,
             confidence: CareProfileConfidence.High
@@ -292,20 +316,18 @@ describe('getCareProfile', () => {
             waterSummer: 7,
             waterAutumn: 7,
             waterWinter: 7,
-            waterAmountMl: 80,
             fertilizeEveryDays: 0,
             repotEveryMonths: 0,
             confidence: CareProfileConfidence.Medium
         }]));
 
-        const profile = await getCareProfile({
+        const intervals = await getCareIntervals({
             userId: 'user-1',
-            species: 'Monstera deliciosa',
-            soilVolumeMl: 800
+            species: 'Monstera deliciosa'
         });
 
-        expect(profile.fertilizeEveryDays).toBeUndefined();
-        expect(profile.repotEveryMonths).toBeUndefined();
+        expect(intervals.fertilizeEveryDays).toBeUndefined();
+        expect(intervals.repotEveryMonths).toBeUndefined();
     });
 
     it('claims a unit, calls the model and upserts on a miss', async () => {
@@ -324,7 +346,6 @@ describe('getCareProfile', () => {
             waterSummer: 40,
             waterAutumn: 11,
             waterWinter: 2,
-            waterAmountMl: 99999,
             fertilizeEveryDays: 30,
             repotEveryMonths: 0,
             confidence: CareProfileConfidence.High,
@@ -334,16 +355,14 @@ describe('getCareProfile', () => {
             values
         });
 
-        await expect(getCareProfile({
+        await expect(getCareIntervals({
             userId: 'user-1',
-            species: 'Monstera deliciosa',
-            soilVolumeMl: 800
+            species: 'Monstera deliciosa'
         })).resolves.toEqual({
             waterSpring: 9,
             waterSummer: 28,
             waterAutumn: 12,
             waterWinter: 2,
-            waterAmountMl: MAX_WATER_AMOUNT_ML,
             fertilizeEveryDays: 30,
             repotEveryMonths: undefined,
             confidence: CareProfileConfidence.High
@@ -352,65 +371,16 @@ describe('getCareProfile', () => {
         expect(mockClaimAiUsage).toHaveBeenCalledWith('user-1');
         expect(values).toHaveBeenCalledWith({
             speciesKey: 'monstera deliciosa',
-            soilVolumeMl: 800,
             waterSpring: 9,
             waterSummer: 28,
             waterAutumn: 12,
             waterWinter: 2,
-            waterAmountMl: MAX_WATER_AMOUNT_ML,
             fertilizeEveryDays: 30,
             repotEveryMonths: undefined,
             confidence: CareProfileConfidence.High,
             model: '',
             createdAt: expect.any(Number)
         });
-    });
-
-    it('keys an unknown soil volume as zero and prompts with the standard pot', async () => {
-        const onConflictDoUpdate = vi.fn(() => {
-            return Promise.resolve();
-        });
-        const values = vi.fn(() => {
-            return {
-                onConflictDoUpdate
-            };
-        });
-
-        mockSelect.mockReturnValueOnce(mockSelectChain([]));
-        mockClaimAiUsage.mockResolvedValueOnce(true);
-        mockRequestStructured.mockResolvedValueOnce({
-            waterSpring: 7,
-            waterSummer: 7,
-            waterAutumn: 7,
-            waterWinter: 7,
-            waterAmountMl: 80,
-            fertilizeEveryDays: 30,
-            repotEveryMonths: 18,
-            confidence: CareProfileConfidence.High,
-            reasoning: 'because'
-        });
-        mockInsert.mockReturnValueOnce({
-            values
-        });
-
-        await getCareProfile({
-            userId: 'user-1',
-            species: 'Monstera deliciosa'
-        });
-
-        expect(mockRequestStructured).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({
-            content: expect.stringContaining('800 ml')
-        })]), CARE_PROFILE_JSON_SCHEMA, CareProfileSchema);
-        expect(values).toHaveBeenCalledWith(expect.objectContaining({
-            soilVolumeMl: 0
-        }));
-        expect(onConflictDoUpdate).toHaveBeenCalledWith(expect.objectContaining({
-            set: expect.objectContaining({
-                soilVolumeMl: 0,
-                fertilizeEveryDays: 30,
-                repotEveryMonths: 18
-            })
-        }));
     });
 
     it('clears a never fertilise and repot with an explicit null on the upsert', async () => {
@@ -430,7 +400,6 @@ describe('getCareProfile', () => {
             waterSummer: 7,
             waterAutumn: 7,
             waterWinter: 7,
-            waterAmountMl: 80,
             fertilizeEveryDays: 0,
             repotEveryMonths: 0,
             confidence: CareProfileConfidence.High,
@@ -440,22 +409,19 @@ describe('getCareProfile', () => {
             values
         });
 
-        await getCareProfile({
+        await getCareIntervals({
             userId: 'user-1',
-            species: 'Monstera deliciosa',
-            soilVolumeMl: 800
+            species: 'Monstera deliciosa'
         });
 
         expect(onConflictDoUpdate).toHaveBeenCalledWith({
-            target: [aiCareProfile.speciesKey, aiCareProfile.soilVolumeMl],
+            target: [aiCareInterval.speciesKey],
             set: {
                 speciesKey: 'monstera deliciosa',
-                soilVolumeMl: 800,
                 waterSpring: 7,
                 waterSummer: 7,
                 waterAutumn: 7,
                 waterWinter: 7,
-                waterAmountMl: 80,
                 fertilizeEveryDays: sql`null`,
                 repotEveryMonths: sql`null`,
                 confidence: CareProfileConfidence.High,
@@ -469,7 +435,130 @@ describe('getCareProfile', () => {
         mockIsAiConfigured.mockReturnValueOnce(false);
         mockSelect.mockReturnValueOnce(mockSelectChain([]));
 
-        await expect(getCareProfile({
+        await expect(getCareIntervals({
+            userId: 'user-1',
+            species: 'Monstera deliciosa'
+        })).rejects.toBeInstanceOf(AiUnavailableError);
+
+        expect(mockClaimAiUsage).not.toHaveBeenCalled();
+        expect(mockInsert).not.toHaveBeenCalled();
+    });
+
+    it('throws when the daily cap is reached and writes nothing', async () => {
+        mockSelect.mockReturnValueOnce(mockSelectChain([]));
+        mockClaimAiUsage.mockResolvedValueOnce(false);
+
+        await expect(getCareIntervals({
+            userId: 'user-1',
+            species: 'Monstera deliciosa'
+        })).rejects.toBeInstanceOf(AiCapReachedError);
+
+        expect(mockRequestStructured).not.toHaveBeenCalled();
+        expect(mockInsert).not.toHaveBeenCalled();
+    });
+});
+
+describe('getWaterAmount', () => {
+    beforeEach(() => {
+        mockClaimAiUsage.mockReset();
+        mockInsert.mockReset();
+        mockIsAiConfigured.mockReset();
+        mockIsAiConfigured.mockReturnValue(true);
+        mockRequestStructured.mockReset();
+        mockSelect.mockReset();
+    });
+
+    it('returns the stored amount without claiming a unit or calling the model', async () => {
+        mockSelect.mockReturnValueOnce(mockSelectChain([{
+            waterAmountMl: 80
+        }]));
+
+        await expect(getWaterAmount({
+            userId: 'user-1',
+            species: 'Monstera deliciosa',
+            soilVolumeMl: 800
+        })).resolves.toBe(80);
+
+        expect(mockClaimAiUsage).not.toHaveBeenCalled();
+        expect(mockRequestStructured).not.toHaveBeenCalled();
+    });
+
+    it('claims a unit, calls the model and upserts on a miss', async () => {
+        const values = vi.fn(() => {
+            return {
+                onConflictDoUpdate: vi.fn(() => {
+                    return Promise.resolve();
+                })
+            };
+        });
+
+        mockSelect.mockReturnValueOnce(mockSelectChain([]));
+        mockClaimAiUsage.mockResolvedValueOnce(true);
+        mockRequestStructured.mockResolvedValueOnce({
+            waterAmountMl: 99999
+        });
+        mockInsert.mockReturnValueOnce({
+            values
+        });
+
+        await expect(getWaterAmount({
+            userId: 'user-1',
+            species: 'Monstera deliciosa',
+            soilVolumeMl: 800
+        })).resolves.toBe(MAX_WATER_AMOUNT_ML);
+
+        expect(mockClaimAiUsage).toHaveBeenCalledWith('user-1');
+        expect(values).toHaveBeenCalledWith({
+            speciesKey: 'monstera deliciosa',
+            soilVolumeMl: 800,
+            waterAmountMl: MAX_WATER_AMOUNT_ML,
+            model: '',
+            createdAt: expect.any(Number)
+        });
+    });
+
+    it('keys an unknown soil volume as zero and prompts with the standard pot', async () => {
+        const onConflictDoUpdate = vi.fn(() => {
+            return Promise.resolve();
+        });
+        const values = vi.fn(() => {
+            return {
+                onConflictDoUpdate
+            };
+        });
+
+        mockSelect.mockReturnValueOnce(mockSelectChain([]));
+        mockClaimAiUsage.mockResolvedValueOnce(true);
+        mockRequestStructured.mockResolvedValueOnce({
+            waterAmountMl: 80
+        });
+        mockInsert.mockReturnValueOnce({
+            values
+        });
+
+        await getWaterAmount({
+            userId: 'user-1',
+            species: 'Monstera deliciosa'
+        });
+
+        expect(mockRequestStructured).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({
+            content: expect.stringContaining('800 ml')
+        })]), WATER_AMOUNT_JSON_SCHEMA, WaterAmountSchema);
+        expect(values).toHaveBeenCalledWith(expect.objectContaining({
+            soilVolumeMl: 0
+        }));
+        expect(onConflictDoUpdate).toHaveBeenCalledWith(expect.objectContaining({
+            set: expect.objectContaining({
+                soilVolumeMl: 0
+            })
+        }));
+    });
+
+    it('throws when AI is not configured without claiming a unit', async () => {
+        mockIsAiConfigured.mockReturnValueOnce(false);
+        mockSelect.mockReturnValueOnce(mockSelectChain([]));
+
+        await expect(getWaterAmount({
             userId: 'user-1',
             species: 'Monstera deliciosa',
             soilVolumeMl: 800
@@ -483,7 +572,7 @@ describe('getCareProfile', () => {
         mockSelect.mockReturnValueOnce(mockSelectChain([]));
         mockClaimAiUsage.mockResolvedValueOnce(false);
 
-        await expect(getCareProfile({
+        await expect(getWaterAmount({
             userId: 'user-1',
             species: 'Monstera deliciosa',
             soilVolumeMl: 800

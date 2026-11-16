@@ -1,5 +1,5 @@
 {
-  "id": "385e15cd-2d48-4d0a-8f6d-1be038e45056",
+  "id": "83359dc5-9a76-420a-a423-368736dc4c4f",
   "prevId": "158f8dff-b842-43f7-9e6e-15633a529f1c",
   "version": "7",
   "dialect": "postgresql",
@@ -126,8 +126,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.ai_care_profile": {
-      "name": "ai_care_profile",
+    "public.ai_care_interval": {
+      "name": "ai_care_interval",
       "schema": "",
       "columns": {
         "id": {
@@ -140,12 +140,6 @@
         "species_key": {
           "name": "species_key",
           "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "soil_volume_ml": {
-          "name": "soil_volume_ml",
-          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
@@ -169,12 +163,6 @@
         },
         "water_winter": {
           "name": "water_winter",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "water_amount_ml": {
-          "name": "water_amount_ml",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -211,17 +199,11 @@
         }
       },
       "indexes": {
-        "ai_care_profile_lookup_idx": {
-          "name": "ai_care_profile_lookup_idx",
+        "ai_care_interval_species_idx": {
+          "name": "ai_care_interval_species_idx",
           "columns": [
             {
               "expression": "species_key",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "soil_volume_ml",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -315,6 +297,78 @@
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ai_water_amount": {
+      "name": "ai_water_amount",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "species_key": {
+          "name": "species_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "soil_volume_ml": {
+          "name": "soil_volume_ml",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "water_amount_ml": {
+          "name": "water_amount_ml",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "model": {
+          "name": "model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "ai_water_amount_lookup_idx": {
+          "name": "ai_water_amount_lookup_idx",
+          "columns": [
+            {
+              "expression": "species_key",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "soil_volume_ml",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},

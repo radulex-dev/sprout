@@ -3,6 +3,9 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, render, screen, waitFor } from '@testing-library/react';
 
+// Constants
+import { PROFILE_CAPPED } from '@/components/AddPlantForm/constants';
+
 // Components
 import ToastProvider from '@/design-system/ToastProvider';
 import IdentifyScreen from './index';
@@ -43,7 +46,9 @@ vi.mock('@/services/identify', () => {
 
 vi.mock('@/lib/db/actions', () => {
     return {
-        createPlant: vi.fn()
+        createPlant: vi.fn(),
+        loadCareIntervals: vi.fn(),
+        loadWaterAmount: vi.fn()
     };
 });
 
@@ -51,10 +56,10 @@ vi.mock('@/lib/db/actions', () => {
 import { identifyPlant } from '@/services/identify';
 
 // Database
-import { createPlant } from '@/lib/db/actions';
+import { createPlant, loadCareIntervals, loadWaterAmount } from '@/lib/db/actions';
 
 // Types
-import { CareSource } from '@/types';
+import { CareProfileStatus } from '@/lib/db/actions/types';
 
 const props: React.ComponentProps<typeof IdentifyScreen> = {
     emailVerified: true
@@ -66,6 +71,22 @@ describe('<IdentifyScreen />', () => {
             return 'blob:preview';
         });
         URL.revokeObjectURL = vi.fn();
+        vi.mocked(loadCareIntervals).mockResolvedValue({
+            status: CareProfileStatus.Ok,
+            care: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 18
+            }
+        });
+        vi.mocked(loadWaterAmount).mockResolvedValue({
+            status: CareProfileStatus.Ok,
+            waterAmountMl: 80
+        });
     });
 
     it('shows the capture flow and no verify notice for a verified user', () => {
@@ -145,32 +166,12 @@ describe('<IdentifyScreen />', () => {
         const user = userEvent.setup();
         vi.mocked(compressPhoto).mockResolvedValue(new Blob(['leaf']));
         vi.mocked(identifyPlant).mockResolvedValue([{
-            careSource: CareSource.Genus,
             commonName: 'Snake Plant',
             confidence: 0.91,
-            defaultCare: {
-                waterEveryDaysSpring: 7,
-                waterEveryDaysSummer: 7,
-                waterEveryDaysAutumn: 7,
-                waterEveryDaysWinter: 7,
-                waterAmountMl: 0,
-                fertilizeEveryDays: 30,
-                repotEveryMonths: 18
-            },
             species: 'Dracaena trifasciata'
         }, {
-            careSource: CareSource.Genus,
             commonName: 'ZZ Plant',
             confidence: 0.64,
-            defaultCare: {
-                waterEveryDaysSpring: 14,
-                waterEveryDaysSummer: 14,
-                waterEveryDaysAutumn: 14,
-                waterEveryDaysWinter: 14,
-                waterAmountMl: 0,
-                fertilizeEveryDays: 30,
-                repotEveryMonths: 18
-            },
             species: 'Zamioculcas zamiifolia'
         }]);
 
@@ -216,18 +217,8 @@ describe('<IdentifyScreen />', () => {
         const user = userEvent.setup();
         vi.mocked(compressPhoto).mockResolvedValue(new Blob(['leaf']));
         vi.mocked(identifyPlant).mockResolvedValue([{
-            careSource: CareSource.Genus,
             commonName: 'Snake Plant',
             confidence: 0.91,
-            defaultCare: {
-                waterEveryDaysSpring: 7,
-                waterEveryDaysSummer: 7,
-                waterEveryDaysAutumn: 7,
-                waterEveryDaysWinter: 7,
-                waterAmountMl: 0,
-                fertilizeEveryDays: 30,
-                repotEveryMonths: 18
-            },
             species: 'Dracaena trifasciata'
         }]);
         vi.mocked(createPlant).mockResolvedValue('plant-42');
@@ -262,18 +253,8 @@ describe('<IdentifyScreen />', () => {
         vi.spyOn(console, 'error').mockImplementation(vi.fn());
         vi.mocked(compressPhoto).mockResolvedValue(new Blob(['leaf']));
         vi.mocked(identifyPlant).mockResolvedValue([{
-            careSource: CareSource.Genus,
             commonName: 'Snake Plant',
             confidence: 0.91,
-            defaultCare: {
-                waterEveryDaysSpring: 7,
-                waterEveryDaysSummer: 7,
-                waterEveryDaysAutumn: 7,
-                waterEveryDaysWinter: 7,
-                waterAmountMl: 0,
-                fertilizeEveryDays: 30,
-                repotEveryMonths: 18
-            },
             species: 'Dracaena trifasciata'
         }]);
         vi.mocked(createPlant).mockRejectedValue(new Error('db down'));
@@ -396,18 +377,8 @@ describe('<IdentifyScreen />', () => {
         const user = userEvent.setup();
         vi.mocked(compressPhoto).mockResolvedValue(new Blob(['leaf']));
         vi.mocked(identifyPlant).mockResolvedValue([{
-            careSource: CareSource.Genus,
             commonName: 'Snake Plant',
             confidence: 0.91,
-            defaultCare: {
-                waterEveryDaysSpring: 7,
-                waterEveryDaysSummer: 7,
-                waterEveryDaysAutumn: 7,
-                waterEveryDaysWinter: 7,
-                waterAmountMl: 0,
-                fertilizeEveryDays: 30,
-                repotEveryMonths: 18
-            },
             species: 'Dracaena trifasciata'
         }]);
 
@@ -432,5 +403,108 @@ describe('<IdentifyScreen />', () => {
             name: 'Open camera'
         })).toBeInTheDocument();
         expect(screen.getByText('Use the camera or upload a photo of the plant you want to identify.')).toBeInTheDocument();
+    });
+
+    it('asks for the intervals for the picked species on mount', async () => {
+        const user = userEvent.setup();
+        vi.mocked(compressPhoto).mockResolvedValue(new Blob(['leaf']));
+        vi.mocked(identifyPlant).mockResolvedValue([{
+            commonName: 'Snake Plant',
+            confidence: 0.91,
+            species: 'Dracaena trifasciata'
+        }]);
+
+        render(
+            <ToastProvider>
+                <IdentifyScreen {...props} />
+            </ToastProvider>
+        );
+
+        await user.upload(screen.getByLabelText('Upload a photo of your plant'), new File(['leaf'], 'leaf.jpg', {
+            type: 'image/jpeg'
+        }));
+        await user.click(await screen.findByRole('button', {
+            name: 'Identify plant'
+        }));
+        await user.click(await screen.findByRole('button', {
+            name: 'Continue'
+        }));
+
+        await waitFor(() => {
+            expect(loadCareIntervals).toHaveBeenCalledWith({
+                species: 'Dracaena trifasciata'
+            });
+        });
+    });
+
+    it('asks for the amount without a volume on submit', async () => {
+        const user = userEvent.setup();
+        vi.mocked(compressPhoto).mockResolvedValue(new Blob(['leaf']));
+        vi.mocked(identifyPlant).mockResolvedValue([{
+            commonName: 'Snake Plant',
+            confidence: 0.91,
+            species: 'Dracaena trifasciata'
+        }]);
+
+        render(
+            <ToastProvider>
+                <IdentifyScreen {...props} />
+            </ToastProvider>
+        );
+
+        await user.upload(screen.getByLabelText('Upload a photo of your plant'), new File(['leaf'], 'leaf.jpg', {
+            type: 'image/jpeg'
+        }));
+        await user.click(await screen.findByRole('button', {
+            name: 'Identify plant'
+        }));
+        await user.click(await screen.findByRole('button', {
+            name: 'Continue'
+        }));
+        await user.click(screen.getByRole('button', {
+            name: 'Add to my plants'
+        }));
+
+        await waitFor(() => {
+            expect(loadWaterAmount).toHaveBeenCalledWith({
+                species: 'Dracaena trifasciata',
+                soilVolumeMl: undefined
+            });
+        });
+    });
+
+    it('keeps the form open with the capped sentence and does not navigate when the limit is reached', async () => {
+        const user = userEvent.setup();
+        vi.mocked(compressPhoto).mockResolvedValue(new Blob(['leaf']));
+        vi.mocked(identifyPlant).mockResolvedValue([{
+            commonName: 'Snake Plant',
+            confidence: 0.91,
+            species: 'Dracaena trifasciata'
+        }]);
+        vi.mocked(loadCareIntervals).mockResolvedValue({
+            status: CareProfileStatus.Capped
+        });
+
+        render(
+            <ToastProvider>
+                <IdentifyScreen {...props} />
+            </ToastProvider>
+        );
+
+        await user.upload(screen.getByLabelText('Upload a photo of your plant'), new File(['leaf'], 'leaf.jpg', {
+            type: 'image/jpeg'
+        }));
+        await user.click(await screen.findByRole('button', {
+            name: 'Identify plant'
+        }));
+        await user.click(await screen.findByRole('button', {
+            name: 'Continue'
+        }));
+
+        expect(await screen.findByText(PROFILE_CAPPED)).toBeInTheDocument();
+        expect(screen.getByRole('button', {
+            name: 'Add to my plants'
+        })).toBeDisabled();
+        expect(pushMock).not.toHaveBeenCalled();
     });
 });

@@ -1,0 +1,11 @@
+@reference "../../app/globals.css";
+
+.root {
+    @apply text-xs text-ink-soft;
+}
+
+.warn {
+    @apply ui-notice ui-notice-warn;
+
+    margin-block: 0;
+}

@@ -5,24 +5,8 @@ import { MAX_PHOTO_BYTES } from '@/helpers/image/constants';
 import { HttpStatus } from '@/lib/http/constants';
 import { ERROR_BAD_IMAGE, ERROR_BAD_KEY, ERROR_IMAGE_TOO_LARGE, ERROR_NO_IMAGE, ERROR_NO_KEY, ERROR_NOT_RECOGNISED, ERROR_UNAVAILABLE, ERROR_UNREACHABLE } from './constants';
 
-// Helpers
-import type { CareReference } from '@/helpers/care/types';
-
 // Services
 import { identifySpecies, PlantNetError, readIdentifyForm } from './index';
-
-// Types
-import { CareSource } from '@/types';
-
-const mockLoadCareReference = vi.hoisted(() => {
-    return vi.fn<() => Promise<CareReference>>();
-});
-
-vi.mock('@/services/server/care-reference', () => {
-    return {
-        loadCareReference: mockLoadCareReference
-    };
-});
 
 const mockResponse = (body: unknown, status: number): Response => {
     const isOk = status >= 200 && status < 300;
@@ -58,51 +42,6 @@ describe('plantnet', () => {
             fetchMock = vi.fn();
             vi.stubGlobal('fetch', fetchMock);
             vi.stubEnv('PLANTNET_API_KEY', 'env-test-key');
-            mockLoadCareReference.mockResolvedValue({
-                alias: {
-                    'dracaena trifasciata': 'sansevieria'
-                },
-                family: {
-                    urticaceae: {
-                        waterEveryDaysSpring: 6,
-                        waterEveryDaysSummer: 6,
-                        waterEveryDaysAutumn: 6,
-                        waterEveryDaysWinter: 6,
-                        waterAmountMl: 0,
-                        fertilizeEveryDays: 30,
-                        repotEveryMonths: 18
-                    }
-                },
-                genus: {
-                    dracaena: {
-                        waterEveryDaysSpring: 10,
-                        waterEveryDaysSummer: 10,
-                        waterEveryDaysAutumn: 10,
-                        waterEveryDaysWinter: 10,
-                        waterAmountMl: 0,
-                        fertilizeEveryDays: 30,
-                        repotEveryMonths: 30
-                    },
-                    monstera: {
-                        waterEveryDaysSpring: 5,
-                        waterEveryDaysSummer: 5,
-                        waterEveryDaysAutumn: 5,
-                        waterEveryDaysWinter: 5,
-                        waterAmountMl: 0,
-                        fertilizeEveryDays: 30,
-                        repotEveryMonths: 18
-                    },
-                    sansevieria: {
-                        waterEveryDaysSpring: 21,
-                        waterEveryDaysSummer: 21,
-                        waterEveryDaysAutumn: 21,
-                        waterEveryDaysWinter: 21,
-                        waterAmountMl: 0,
-                        fertilizeEveryDays: 90,
-                        repotEveryMonths: 30
-                    }
-                }
-            });
         });
 
         it('rejects with 400 when no image is provided', async () => {
@@ -253,7 +192,7 @@ describe('plantnet', () => {
             expect(error.message).toBe(ERROR_UNREACHABLE);
         });
 
-        it('maps PlantNet results to IdentifyResult with resolved care', async () => {
+        it('maps PlantNet results to IdentifyResult without care', async () => {
             fetchMock.mockResolvedValue(mockResponse({
                 results: [{
                     species: {
@@ -281,171 +220,17 @@ describe('plantnet', () => {
             const results = await identifySpecies(form);
             const [identified, unknown] = results;
 
-            expect(mockLoadCareReference).toHaveBeenCalledTimes(1);
             expect(results).toHaveLength(2);
             expect(identified).toEqual({
                 species: 'Monstera deliciosa',
                 commonName: 'Swiss cheese plant',
-                confidence: 0.93,
-                defaultCare: {
-                    waterEveryDaysSpring: 5,
-                    waterEveryDaysSummer: 5,
-                    waterEveryDaysAutumn: 5,
-                    waterEveryDaysWinter: 5,
-                    waterAmountMl: 0,
-                    fertilizeEveryDays: 30,
-                    repotEveryMonths: 18
-                },
-                careSource: CareSource.Genus
+                confidence: 0.93
             });
             expect(unknown).toEqual({
                 species: 'Unknown species',
                 commonName: '',
-                confidence: 0,
-                defaultCare: {
-                    waterEveryDaysSpring: 7,
-                    waterEveryDaysSummer: 7,
-                    waterEveryDaysAutumn: 7,
-                    waterEveryDaysWinter: 7,
-                    waterAmountMl: 0,
-                    fertilizeEveryDays: 30,
-                    repotEveryMonths: 18
-                },
-                careSource: CareSource.None
+                confidence: 0
             });
-        });
-
-        it('resolves the current botanical name through its genus alias', async () => {
-            fetchMock.mockResolvedValue(mockResponse({
-                results: [{
-                    species: {
-                        scientificNameWithoutAuthor: 'Dracaena trifasciata',
-                        genus: {
-                            scientificNameWithoutAuthor: 'Dracaena'
-                        },
-                        family: {
-                            scientificNameWithoutAuthor: 'Asparagaceae'
-                        },
-                        commonNames: ['Snake plant']
-                    },
-                    score: 0.88
-                }]
-            }, 200));
-
-            const form = new FormData();
-            form.append('images', new File(['leaf'], 'plant.jpg', {
-                type: 'image/jpeg'
-            }));
-
-            const [identified] = await identifySpecies(form);
-
-            expect(identified.defaultCare).toEqual({
-                waterEveryDaysSpring: 21,
-                waterEveryDaysSummer: 21,
-                waterEveryDaysAutumn: 21,
-                waterEveryDaysWinter: 21,
-                waterAmountMl: 0,
-                fertilizeEveryDays: 90,
-                repotEveryMonths: 30
-            });
-            expect(identified.careSource).toBe(CareSource.Genus);
-        });
-
-        it('falls back to the family care when the genus is not in the table', async () => {
-            fetchMock.mockResolvedValue(mockResponse({
-                results: [{
-                    species: {
-                        scientificNameWithoutAuthor: 'Soleirolia soleirolii',
-                        genus: {
-                            scientificNameWithoutAuthor: 'Soleirolia'
-                        },
-                        family: {
-                            scientificNameWithoutAuthor: 'Urticaceae'
-                        }
-                    },
-                    score: 0.71
-                }]
-            }, 200));
-
-            const form = new FormData();
-            form.append('images', new File(['leaf'], 'plant.jpg', {
-                type: 'image/jpeg'
-            }));
-
-            const [identified] = await identifySpecies(form);
-
-            expect(identified.defaultCare).toEqual({
-                waterEveryDaysSpring: 6,
-                waterEveryDaysSummer: 6,
-                waterEveryDaysAutumn: 6,
-                waterEveryDaysWinter: 6,
-                waterAmountMl: 0,
-                fertilizeEveryDays: 30,
-                repotEveryMonths: 18
-            });
-            expect(identified.careSource).toBe(CareSource.Family);
-        });
-
-        it('warns with the identification when no care data matches', async () => {
-            vi.spyOn(console, 'warn').mockImplementation(vi.fn());
-
-            fetchMock.mockResolvedValue(mockResponse({
-                results: [{
-                    species: {
-                        scientificNameWithoutAuthor: 'Ficus unknownia',
-                        genus: {
-                            scientificNameWithoutAuthor: 'Unknownia'
-                        },
-                        family: {
-                            scientificNameWithoutAuthor: 'Unknownaceae'
-                        }
-                    },
-                    score: 0.42
-                }]
-            }, 200));
-
-            const form = new FormData();
-            form.append('images', new File(['leaf'], 'plant.jpg', {
-                type: 'image/jpeg'
-            }));
-
-            const [identified] = await identifySpecies(form);
-
-            expect(identified.careSource).toBe(CareSource.None);
-            expect(console.warn).toHaveBeenCalledWith('No care data for identified plant', {
-                family: 'Unknownaceae',
-                genus: 'Unknownia',
-                species: 'Ficus unknownia'
-            });
-        });
-
-        it('does not warn when the genus resolves', async () => {
-            vi.spyOn(console, 'warn').mockImplementation(vi.fn());
-
-            fetchMock.mockResolvedValue(mockResponse({
-                results: [{
-                    species: {
-                        scientificNameWithoutAuthor: 'Monstera deliciosa',
-                        genus: {
-                            scientificNameWithoutAuthor: 'Monstera'
-                        },
-                        family: {
-                            scientificNameWithoutAuthor: 'Araceae'
-                        }
-                    },
-                    score: 0.93
-                }]
-            }, 200));
-
-            const form = new FormData();
-            form.append('images', new File(['leaf'], 'plant.jpg', {
-                type: 'image/jpeg'
-            }));
-
-            const [identified] = await identifySpecies(form);
-
-            expect(identified.careSource).toBe(CareSource.Genus);
-            expect(console.warn).not.toHaveBeenCalled();
         });
 
         it('returns an empty list when PlantNet omits results', async () => {

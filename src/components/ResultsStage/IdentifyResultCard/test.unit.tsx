@@ -8,25 +8,12 @@ import IdentifyResultCard from './index';
 // Services
 import type { IdentifyResult } from '@/services/identify/types';
 
-// Types
-import { CareSource } from '@/types';
-
 const CALLER_CLASS_NAME = 'caller-class-name';
 
 const props: React.ComponentProps<typeof IdentifyResultCard> = {
     result: {
-        careSource: CareSource.Genus,
         commonName: 'Swiss Cheese Plant',
         confidence: 0.92,
-        defaultCare: {
-            waterEveryDaysSpring: 5,
-            waterEveryDaysSummer: 5,
-            waterEveryDaysAutumn: 5,
-            waterEveryDaysWinter: 5,
-            waterAmountMl: 0,
-            fertilizeEveryDays: 30,
-            repotEveryMonths: 18
-        },
         species: 'Monstera deliciosa'
     },
     selected: false,
@@ -44,18 +31,8 @@ describe('<IdentifyResultCard />', () => {
 
     it('falls back to the species when the result has no common name', () => {
         const result: IdentifyResult = {
-            careSource: CareSource.Genus,
             commonName: '',
             confidence: 0.92,
-            defaultCare: {
-                waterEveryDaysSpring: 5,
-                waterEveryDaysSummer: 5,
-                waterEveryDaysAutumn: 5,
-                waterEveryDaysWinter: 5,
-                waterAmountMl: 0,
-                fertilizeEveryDays: 30,
-                repotEveryMonths: 18
-            },
             species: 'Monstera deliciosa'
         };
 
@@ -78,18 +55,8 @@ describe('<IdentifyResultCard />', () => {
         expected: '100%'
     }])('renders $expected for a confidence of $confidence', ({ confidence, expected }) => {
         const result: IdentifyResult = {
-            careSource: CareSource.Genus,
             commonName: 'Swiss Cheese Plant',
             confidence,
-            defaultCare: {
-                waterEveryDaysSpring: 5,
-                waterEveryDaysSummer: 5,
-                waterEveryDaysAutumn: 5,
-                waterEveryDaysWinter: 5,
-                waterAmountMl: 0,
-                fertilizeEveryDays: 30,
-                repotEveryMonths: 18
-            },
             species: 'Monstera deliciosa'
         };
 

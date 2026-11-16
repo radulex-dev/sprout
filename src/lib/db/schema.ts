@@ -98,17 +98,15 @@ export const pushSubscriptions = pgTable(
     }
 );
 
-export const aiCareProfile = pgTable(
-    TableName.AiCareProfile,
+export const aiCareInterval = pgTable(
+    TableName.AiCareInterval,
     {
         id: uuid('id').primaryKey().defaultRandom(),
         speciesKey: text('species_key').notNull(),
-        soilVolumeMl: integer('soil_volume_ml').notNull(),
         waterSpring: integer('water_spring').notNull(),
         waterSummer: integer('water_summer').notNull(),
         waterAutumn: integer('water_autumn').notNull(),
         waterWinter: integer('water_winter').notNull(),
-        waterAmountMl: integer('water_amount_ml').notNull(),
         fertilizeEveryDays: integer('fertilize_every_days'),
         repotEveryMonths: integer('repot_every_months'),
         confidence: text('confidence').$type<CareProfileConfidence>().notNull(),
@@ -118,7 +116,24 @@ export const aiCareProfile = pgTable(
         }).notNull()
     },
     (table) => {
-        return [uniqueIndex('ai_care_profile_lookup_idx').on(table.speciesKey, table.soilVolumeMl)];
+        return [uniqueIndex('ai_care_interval_species_idx').on(table.speciesKey)];
+    }
+);
+
+export const aiWaterAmount = pgTable(
+    TableName.AiWaterAmount,
+    {
+        id: uuid('id').primaryKey().defaultRandom(),
+        speciesKey: text('species_key').notNull(),
+        soilVolumeMl: integer('soil_volume_ml').notNull(),
+        waterAmountMl: integer('water_amount_ml').notNull(),
+        model: text('model').notNull(),
+        createdAt: bigint('created_at', {
+            mode: 'number'
+        }).notNull()
+    },
+    (table) => {
+        return [uniqueIndex('ai_water_amount_lookup_idx').on(table.speciesKey, table.soilVolumeMl)];
     }
 );
 
