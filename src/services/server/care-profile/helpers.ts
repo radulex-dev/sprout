@@ -2,7 +2,7 @@ import { clamp } from 'lodash-es';
 
 // Constants
 import { WATER_OPTIONS } from '@/helpers/care/constants';
-import { CARE_INTERVAL_PROMPT_SYSTEM, CARE_PROMPT_MILLILITRES_UNIT, CARE_PROMPT_SOIL_VOLUME_LABEL, CARE_PROMPT_SPECIES_LABEL, MAX_FERTILIZE_DAYS, MAX_REPOT_MONTHS, MAX_WATER_AMOUNT_ML, MAX_WATER_DAYS, MIN_FERTILIZE_DAYS, MIN_REPOT_MONTHS, MIN_WATER_AMOUNT_ML, MIN_WATER_DAYS, WATER_AMOUNT_PROMPT_SYSTEM } from './constants';
+import { CARE_INTERVAL_PROMPT_SYSTEM, CARE_PROMPT_SPECIES_LABEL, MAX_FERTILIZE_DAYS, MAX_REPOT_MONTHS, MAX_WATER_AMOUNT_ML, MAX_WATER_DAYS, MIN_FERTILIZE_DAYS, MIN_REPOT_MONTHS, MIN_WATER_AMOUNT_ML, MIN_WATER_DAYS, WATER_AMOUNT_PROMPT_SYSTEM } from './constants';
 
 // Types
 import type { AiMessage } from '@/services/server/ai/types';
@@ -39,8 +39,8 @@ export const normaliseRepotMonths = (value: number): number | undefined => {
     return clamp(value, MIN_REPOT_MONTHS, MAX_REPOT_MONTHS);
 };
 
-export const normaliseAmountMl = (value: number): number => {
-    return clamp(value, MIN_WATER_AMOUNT_ML, MAX_WATER_AMOUNT_ML);
+export const resolveWaterAmountMl = (soilVolumeMl: number, waterPercent: number): number => {
+    return clamp(Math.round((soilVolumeMl * waterPercent) / 100), MIN_WATER_AMOUNT_ML, MAX_WATER_AMOUNT_ML);
 };
 
 export const normaliseSpeciesKey = (species: string): string => {
@@ -93,15 +93,12 @@ export const buildCareIntervalPrompt = (species: string): AiMessage[] => {
     }];
 };
 
-export const buildWaterAmountPrompt = (species: string, soilVolumeMl: number): AiMessage[] => {
+export const buildWaterAmountPrompt = (species: string): AiMessage[] => {
     return [{
         role: 'system',
         content: WATER_AMOUNT_PROMPT_SYSTEM
     }, {
         role: 'user',
-        content: [
-            `${CARE_PROMPT_SPECIES_LABEL}: ${species}`,
-            `${CARE_PROMPT_SOIL_VOLUME_LABEL}: ${soilVolumeMl} ${CARE_PROMPT_MILLILITRES_UNIT}`
-        ].join('\n')
+        content: `${CARE_PROMPT_SPECIES_LABEL}: ${species}`
     }];
 };

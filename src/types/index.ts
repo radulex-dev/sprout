@@ -40,7 +40,7 @@ export interface CareSchedule {
     waterEveryDaysSummer: number;
     waterEveryDaysAutumn: number;
     waterEveryDaysWinter: number;
-    waterAmountMl: number;
+    waterAmountMl?: number;
     fertilizeEveryDays?: number;
     repotEveryMonths?: number;
 }

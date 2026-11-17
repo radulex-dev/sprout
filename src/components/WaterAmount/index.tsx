@@ -17,7 +17,7 @@ export interface Props extends React.ComponentProps<'span'> {
 }
 
 const WaterAmount: React.FunctionComponent<Props> = ({ amount, variant = WaterAmountVariant.Plain, className, ...props }) => {
-    if (amount === undefined) {
+    if (amount === undefined || amount === 0) {
         return;
     }
 

@@ -3,4 +3,4 @@ export const MAX_DAYS = 3650;
 export const MAX_MONTHS = 600;
 export const MIN_WATER_DAYS = 2;
 export const MAX_WATER_DAYS = 28;
-export const MAX_WATER_AMOUNT_ML = 5000;
+export const MAX_WATER_AMOUNT_ML = 100000;

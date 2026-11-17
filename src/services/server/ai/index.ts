@@ -85,7 +85,8 @@ export const requestStructured = async <T>(messages: AiMessage[], jsonSchema: Re
             body: JSON.stringify({
                 model: environment.model,
                 messages,
-                response_format: responseFormat
+                response_format: responseFormat,
+                temperature: 0
             })
         });
     } catch {

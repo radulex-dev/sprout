@@ -11,11 +11,12 @@ import { mockDeleteChain, mockInsertChain, mockSelectChain } from '@test/vitest/
 import { makePlant, NOW } from '@test/vitest/data/plant.mock';
 
 // Services
-import { createPlant, deletePlant, listPlants, markCareDone, readPlantPhoto, recordNotified, updatePlant } from './index';
+import { createPlant, deletePlant, listPlants, markCareDone, readPlantPhoto, recordNotified, updateCareAmount, updatePlant } from './index';
 import { CareKindSchema, CareScheduleSchema, LastCareSchema, NotifiedAtSchema, parsePlantInput, PlantInputSchema, UpdatePlantSchema } from './schema';
 
 // Database
 import { getPlantPhoto, getPlantsForUser } from '@/lib/db/queries';
+import { plants } from '@/lib/db/schema';
 
 // Types
 import { CareKind } from '@/types';
@@ -111,7 +112,7 @@ describe('CareScheduleSchema', () => {
         }).toThrow();
     });
 
-    it('rejects a missing water amount', () => {
+    it('accepts a missing water amount', () => {
         expect(() => {
             return CareScheduleSchema.parse({
                 waterEveryDaysSpring: 7,
@@ -119,7 +120,7 @@ describe('CareScheduleSchema', () => {
                 waterEveryDaysAutumn: 7,
                 waterEveryDaysWinter: 7
             });
-        }).toThrow();
+        }).not.toThrow();
     });
 
     it('rejects a zero interval', () => {
@@ -252,7 +253,7 @@ describe('seasonal water schedule', () => {
                 waterEveryDaysSummer: 7,
                 waterEveryDaysAutumn: 10,
                 waterEveryDaysWinter: 21,
-                waterAmountMl: 5001,
+                waterAmountMl: 100001,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -315,8 +316,7 @@ describe('seasonal water schedule', () => {
             'care.waterEveryDaysSpring',
             'care.waterEveryDaysSummer',
             'care.waterEveryDaysAutumn',
-            'care.waterEveryDaysWinter',
-            'care.waterAmountMl'
+            'care.waterEveryDaysWinter'
         ]);
     });
 });
@@ -1252,6 +1252,27 @@ describe('plant mutations', () => {
             soilVolumeLitres: 60
         });
         expect(where).toHaveBeenCalledTimes(1);
+    });
+
+    it('updateCareAmount writes only the water amount and never reads the row', async () => {
+        const where = vi.fn();
+        const set = vi.fn(() => {
+            return {
+                where
+            };
+        });
+
+        mockUpdate.mockReturnValueOnce({
+            set
+        });
+
+        await updateCareAmount('user-1', 'plant-1', 250);
+
+        expect(set).toHaveBeenCalledWith({
+            care: sql`jsonb_set(${plants.care}, '{waterAmountMl}', to_jsonb(${250}::int))`
+        });
+        expect(where).toHaveBeenCalledTimes(1);
+        expect(mockSelect).not.toHaveBeenCalled();
     });
 
     it('markCareDone merges the kind into the stored lastCare', async () => {

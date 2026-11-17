@@ -22,8 +22,7 @@ import PotSizePicker from '@/components/PotSizePicker';
 
 // Helpers
 import { resolveLastCare } from '@/helpers/care';
-import { hasContainerSize } from '@/components/PotSizePicker/helpers';
-import { resolveSoilVolumeMl } from '@/helpers/pot';
+import { hasContainerSize, resolveSoilVolumeMl } from '@/helpers/pot';
 
 // Hooks
 import { useObjectUrl } from '@/hooks';
@@ -107,15 +106,19 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
         setAmountStatus(undefined);
 
         try {
-            const loaded = await loadWaterAmount({
+            const waterAmountRequestBody = {
                 species: result.species,
                 soilVolumeMl: resolveSoilVolumeMl(size)
-            });
+            };
 
-            setAmountStatus(loaded.status);
+            const loaded = hasContainerSize(size) ? await loadWaterAmount(waterAmountRequestBody) : undefined;
 
-            if (loaded.status !== CareProfileStatus.Ok) {
-                return;
+            if (loaded !== undefined) {
+                setAmountStatus(loaded.status);
+
+                if (loaded.status !== CareProfileStatus.Ok) {
+                    return;
+                }
             }
 
             onSave({
@@ -125,7 +128,7 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
                 photo,
                 care: {
                     ...care,
-                    waterAmountMl: loaded.waterAmountMl
+                    waterAmountMl: loaded?.waterAmountMl
                 },
                 ...size,
                 acquiredAt: Date.now(),

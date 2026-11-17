@@ -16,7 +16,6 @@ import WaterAmount from '@/components/WaterAmount';
 // Helpers
 import { displayName } from '@/helpers/plant';
 import { formatDue } from '@/helpers/care';
-import { getWaterAmountMl } from '@/helpers/pot';
 import type { CareTask } from '@/helpers/care/types';
 
 // Styles
@@ -47,7 +46,7 @@ const TaskRow: React.FunctionComponent<Props> = ({ task, onSelect, className, ..
             return;
         }
 
-        return <WaterAmount amount={getWaterAmountMl(task.plant)} />;
+        return <WaterAmount amount={task.plant.care.waterAmountMl} />;
     };
 
     return (

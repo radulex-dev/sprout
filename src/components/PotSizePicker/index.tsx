@@ -2,7 +2,7 @@
 
 import classNames from 'classnames';
 import React, { useCallback, useId, useState } from 'react';
-import { Droplet, Info } from 'lucide-react';
+import { Info } from 'lucide-react';
 
 // Constants
 import { DOSE_MARKS, LITRES_ERROR, LITRES_FIELD_LABEL, LITRES_INFO_LABEL, LITRES_UNIT, LONG_SHAPE_LABEL, POT_CLEAR_LABEL, POT_DIAMETER_INFO_LABEL, POT_SIZE_LABEL, ROUND_SHAPE_LABEL, SHAPE_GROUP_LABEL } from './constants';
@@ -18,8 +18,8 @@ import LitresDiagram from './LitresDiagram';
 import PotGlyph from './PotGlyph';
 
 // Helpers
-import { dosePillStyle, doseTickStyle, formatLitresAmount, formatPotOptionName, formatRoundAmountSentence, hasContainerSize, litreFillStyle, parseSoilVolumeLitres } from './helpers';
-import { formatWaterAmount, getWaterAmountMl } from '@/helpers/pot';
+import { hasContainerSize } from '@/helpers/pot';
+import { doseTickStyle, formatPotOptionName, litreFillStyle, parseSoilVolumeLitres } from './helpers';
 
 // Styles
 import styles from './styles.module.css';
@@ -44,7 +44,6 @@ const PotSizePicker: React.FunctionComponent<Props> = ({ value, onChange, hint, 
     const [litresText, setLitresText] = useState(() => {
         return value?.soilVolumeLitres === undefined ? '' : String(value.soilVolumeLitres);
     });
-    const amount = getWaterAmountMl(value);
     const describedBy = hint ? hintId : undefined;
     const isSet = hasContainerSize(value);
 
@@ -147,46 +146,19 @@ const PotSizePicker: React.FunctionComponent<Props> = ({ value, onChange, hint, 
         });
     };
 
-    const renderResult = (sentence: string | undefined) => {
-        if (sentence === undefined) {
-            return;
-        }
-
-        return (
-            <p aria-live="polite" className={styles.result}>
-                <Droplet aria-hidden className={styles.resultIcon} size="0.875rem" />
-                <span>{sentence}</span>
-            </p>
-        );
-    };
-
     const renderRound = () => {
-        const sentence = value?.potDiameter === undefined || amount === undefined ? undefined : formatRoundAmountSentence(value.potDiameter, amount);
-
         return (
             <div className={styles.branch}>
                 {renderHint()}
                 <div aria-describedby={describedBy} aria-labelledby={labelId} className={styles.grid} role="radiogroup">
                     {renderOptions()}
                 </div>
-                {renderResult(sentence)}
             </div>
         );
     };
 
     const renderLitres = () => {
         const isLitresInvalid = litresText !== '' && parseSoilVolumeLitres(litresText) === undefined;
-        const sentence = isLitresInvalid || value?.soilVolumeLitres === undefined || amount === undefined ? undefined : formatLitresAmount(amount);
-
-        const renderDosePill = () => {
-            if (sentence === undefined || amount === undefined) {
-                return;
-            }
-
-            return (
-                <span className={styles.dosePill} style={dosePillStyle(value?.soilVolumeLitres)}>{formatWaterAmount(amount)}</span>
-            );
-        };
 
         return (
             <div className={styles.branch}>
@@ -195,9 +167,7 @@ const PotSizePicker: React.FunctionComponent<Props> = ({ value, onChange, hint, 
                     <span className={styles.scaleUnit}>ml</span>
                 </div>
                 <div className={styles.longRow}>
-                    <div aria-hidden className={styles.gutter}>
-                        {renderDosePill()}
-                    </div>
+                    <div aria-hidden className={styles.gutter} />
                     <div aria-hidden className={styles.bar}>
                         {DOSE_MARKS.map((mark) => {
                             return (
@@ -220,7 +190,6 @@ const PotSizePicker: React.FunctionComponent<Props> = ({ value, onChange, hint, 
                                 <Field.Error match={true}>{LITRES_ERROR}</Field.Error>
                             )}
                         </Field.Root>
-                        {renderResult(sentence)}
                     </div>
                 </div>
             </div>

@@ -53,7 +53,16 @@ describe('<TaskRow />', () => {
     it('renders the watering amount on a water row for a sized plant', () => {
         const task: CareTask = {
             plant: makePlant({
-                potDiameter: 12
+                potDiameter: 12,
+                care: {
+                    waterEveryDaysSpring: 7,
+                    waterEveryDaysSummer: 7,
+                    waterEveryDaysAutumn: 7,
+                    waterEveryDaysWinter: 7,
+                    waterAmountMl: 80,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 12
+                }
             }),
             kind: CareKind.Water,
             dueAt: NOW,
@@ -96,7 +105,16 @@ describe('<TaskRow />', () => {
     it('renders the litre-derived amount on a water row for a litre-sized plant', () => {
         const task: CareTask = {
             plant: makePlant({
-                soilVolumeLitres: 12
+                soilVolumeLitres: 12,
+                care: {
+                    waterEveryDaysSpring: 7,
+                    waterEveryDaysSummer: 7,
+                    waterEveryDaysAutumn: 7,
+                    waterEveryDaysWinter: 7,
+                    waterAmountMl: 1200,
+                    fertilizeEveryDays: 30,
+                    repotEveryMonths: 12
+                }
             }),
             kind: CareKind.Water,
             dueAt: NOW,

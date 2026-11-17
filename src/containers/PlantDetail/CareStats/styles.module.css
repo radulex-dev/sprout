@@ -1,0 +1,42 @@
+@reference "../../../app/globals.css";
+
+.root {
+    @apply mt-3.5 grid grid-cols-3 gap-2.5;
+
+    dt,
+    dd {
+        margin: 0;
+    }
+}
+
+.careStat {
+    @apply rounded-btn bg-surface px-2.5 py-3 text-center shadow-card;
+}
+
+.emoji {
+    @apply text-[1.375rem];
+}
+
+.label {
+    @apply ui-field-hint inline-flex items-center gap-1 font-bold tracking-[0.0313rem] uppercase;
+}
+
+.season {
+    @apply inline-flex items-center;
+}
+
+.seasonSpring {
+    @apply text-green-500;
+}
+
+.seasonSummer {
+    @apply text-amber;
+}
+
+.seasonAutumn {
+    @apply text-amber-ink;
+}
+
+.seasonWinter {
+    @apply text-blue-ink;
+}

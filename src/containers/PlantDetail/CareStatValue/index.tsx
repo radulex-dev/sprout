@@ -14,7 +14,7 @@ import Popover from '@/design-system/Popover';
 // Helpers
 import { daysUntilDue } from './helpers';
 import { formatDue, nextDue, toDateValue } from '@/helpers/care';
-import { getWaterAmountMl } from '@/helpers/pot';
+import { hasContainerSize } from '@/helpers/pot';
 
 // Styles
 import styles from './styles.module.css';
@@ -31,7 +31,6 @@ export interface Props extends Omit<React.ComponentPropsWithoutRef<'button'>, 'c
 
 const CareStatValue: React.FunctionComponent<Props> = ({ plant, kind, now, onRequestPotSize, ...props }) => {
     const due = nextDue(plant, kind);
-    const waterAmount = plant.care.waterAmountMl || getWaterAmountMl(plant);
 
     const renderValue = () => {
         if (due === undefined) {
@@ -60,7 +59,7 @@ const CareStatValue: React.FunctionComponent<Props> = ({ plant, kind, now, onReq
             return;
         }
 
-        if (waterAmount === undefined) {
+        if (!hasContainerSize(plant)) {
             return (
                 <Button className={styles.prompt} variant={ButtonVariant.Unstyled} onClick={onRequestPotSize}>
                     {SET_POT_SIZE_LABEL}
@@ -68,7 +67,7 @@ const CareStatValue: React.FunctionComponent<Props> = ({ plant, kind, now, onReq
             );
         }
 
-        return <WaterAmount amount={waterAmount} />;
+        return <WaterAmount amount={plant.care.waterAmountMl} />;
     };
 
     return (

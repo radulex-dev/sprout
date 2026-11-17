@@ -2,15 +2,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { revalidatePath } from 'next/cache';
 
 // Mocks
+import { makePlant } from '@test/vitest/data/plant.mock';
 import { VERIFIED_SESSION } from '@test/vitest/data/session.mock';
 
 // Services
 import { AiCapReachedError, AiRequestError, AiUnavailableError } from '@/services/server/ai';
 import { getCareIntervals, getWaterAmount } from '@/services/server/care-profile';
-import { createPlant as serviceCreatePlant, deletePlant as serviceDeletePlant, markCareDone as serviceMarkCareDone, recordNotified as serviceRecordNotified, updatePlant as serviceUpdatePlant } from '@/services/server/plants';
+import { createPlant as serviceCreatePlant, deletePlant as serviceDeletePlant, findPlant as serviceFindPlant, markCareDone as serviceMarkCareDone, recordNotified as serviceRecordNotified, updateCareAmount as serviceUpdateCareAmount, updatePlant as serviceUpdatePlant } from '@/services/server/plants';
 
 // Database
-import { createPlant, deletePlant, loadCareIntervals, loadWaterAmount, markCareDone, recordNotified, updatePlant } from './index';
+import { createPlant, deletePlant, loadCareIntervals, loadWaterAmount, markCareDone, recalculateCareAmount, recordNotified, updatePlant } from './index';
 
 // Auth
 import { UnverifiedEmailError } from '@/lib/auth/errors';
@@ -29,7 +30,8 @@ vi.mock('@/services/server/plants', () => {
         deletePlant: vi.fn(),
         listPlants: vi.fn(),
         findPlant: vi.fn(),
-        readPlantPhoto: vi.fn()
+        readPlantPhoto: vi.fn(),
+        updateCareAmount: vi.fn()
     };
 });
 
@@ -488,5 +490,92 @@ describe('loadWaterAmount', () => {
             status: CareProfileStatus.Unavailable
         });
         expect(warn).toHaveBeenCalledWith('Water amount request failed', 502);
+    });
+});
+
+describe('recalculateCareAmount', () => {
+    beforeEach(() => {
+        vi.mocked(serviceFindPlant).mockReset();
+        vi.mocked(serviceUpdateCareAmount).mockReset();
+        vi.mocked(getWaterAmount).mockReset();
+        vi.mocked(revalidatePath).mockClear();
+        vi.mocked(serviceFindPlant).mockResolvedValue(makePlant());
+        vi.mocked(getWaterAmount).mockResolvedValue(250);
+        vi.mocked(serviceUpdateCareAmount).mockResolvedValue(undefined);
+    });
+
+    it('stores the recalculated amount and returns it', async () => {
+        const result = await recalculateCareAmount('123e4567-e89b-42d3-a456-426614174000', 1200);
+
+        expect(getWaterAmount).toHaveBeenCalledWith({
+            userId: 'user-1',
+            species: 'Monstera deliciosa',
+            soilVolumeMl: 1200
+        });
+        expect(serviceUpdateCareAmount).toHaveBeenCalledTimes(1);
+        expect(serviceUpdateCareAmount).toHaveBeenCalledWith('user-1', '123e4567-e89b-42d3-a456-426614174000', 250);
+        expect(result).toEqual({
+            status: CareProfileStatus.Ok,
+            waterAmountMl: 250
+        });
+        expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
+    });
+
+    it('answers unavailable without writing when the plant is missing', async () => {
+        vi.mocked(serviceFindPlant).mockResolvedValue(undefined);
+
+        await expect(recalculateCareAmount('123e4567-e89b-42d3-a456-426614174000', 1200)).resolves.toEqual({
+            status: CareProfileStatus.Unavailable
+        });
+        expect(getWaterAmount).not.toHaveBeenCalled();
+        expect(serviceUpdateCareAmount).not.toHaveBeenCalled();
+    });
+
+    it('rejects an invalid id before reading the plant', async () => {
+        await expect(recalculateCareAmount('not-a-uuid', 1200)).rejects.toThrow();
+
+        expect(serviceFindPlant).not.toHaveBeenCalled();
+    });
+
+    it('propagates an unverified session unchanged', async () => {
+        vi.mocked(requireVerifiedUser).mockRejectedValue(new UnverifiedEmailError());
+
+        await expect(recalculateCareAmount('123e4567-e89b-42d3-a456-426614174000', 1200)).rejects.toBeInstanceOf(UnverifiedEmailError);
+
+        expect(serviceFindPlant).not.toHaveBeenCalled();
+    });
+
+    it.each([{
+        error: new AiCapReachedError(),
+        status: CareProfileStatus.Capped
+    }, {
+        error: new AiUnavailableError(),
+        status: CareProfileStatus.Unavailable
+    }])('answers $status without writing when $error.name is thrown', async ({ error, status }) => {
+        vi.mocked(getWaterAmount).mockRejectedValue(error);
+
+        await expect(recalculateCareAmount('123e4567-e89b-42d3-a456-426614174000', 1200)).resolves.toEqual({
+            status
+        });
+        expect(serviceUpdateCareAmount).not.toHaveBeenCalled();
+        expect(revalidatePath).not.toHaveBeenCalled();
+    });
+
+    it('answers unavailable and warns when the request fails', async () => {
+        vi.spyOn(console, 'warn').mockImplementation(vi.fn());
+
+        vi.mocked(getWaterAmount).mockRejectedValue(new AiRequestError('AI request failed.', 502));
+
+        await expect(recalculateCareAmount('123e4567-e89b-42d3-a456-426614174000', 1200)).resolves.toEqual({
+            status: CareProfileStatus.Unavailable
+        });
+        expect(console.warn).toHaveBeenCalledWith('Water amount request failed', 502);
+        expect(serviceUpdateCareAmount).not.toHaveBeenCalled();
+    });
+
+    it('rejects when the amount write fails', async () => {
+        vi.mocked(serviceUpdateCareAmount).mockRejectedValue(new Error('db down'));
+
+        await expect(recalculateCareAmount('123e4567-e89b-42d3-a456-426614174000', 1200)).rejects.toThrow('db down');
     });
 });

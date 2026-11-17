@@ -5,7 +5,7 @@ import { and, eq, sql } from 'drizzle-orm';
 import { STANDARD_POT_ML, UNKNOWN_SOIL_VOLUME_ML } from './constants';
 
 // Helpers
-import { buildCareIntervalPrompt, buildWaterAmountPrompt, normaliseAmountMl, normaliseCareIntervals, normaliseSpeciesKey, toCareIntervals } from './helpers';
+import { buildCareIntervalPrompt, buildWaterAmountPrompt, normaliseCareIntervals, normaliseSpeciesKey, resolveWaterAmountMl, toCareIntervals } from './helpers';
 
 // Services
 import { AiCapReachedError, AiUnavailableError, claimAiUsage, isAiConfigured, readAiEnvironment, requestStructured } from '@/services/server/ai';
@@ -139,11 +139,11 @@ export const getWaterAmount = async (request: WaterAmountRequest): Promise<numbe
     }
 
     const payload = await requestStructured(
-        buildWaterAmountPrompt(species, soilVolumeMl ?? STANDARD_POT_ML),
+        buildWaterAmountPrompt(species),
         WATER_AMOUNT_JSON_SCHEMA,
         WaterAmountSchema
     );
-    const waterAmountMl = normaliseAmountMl(payload.waterAmountMl);
+    const waterAmountMl = resolveWaterAmountMl(soilVolumeMl ?? STANDARD_POT_ML, payload.waterPercent);
 
     await writeWaterAmount(speciesKey, cacheVolume, waterAmountMl);
 

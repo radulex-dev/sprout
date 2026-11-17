@@ -1,7 +1,7 @@
 import * as z from 'zod';
 
 // Constants
-import { MAX_FERTILIZE_DAYS, MAX_REPOT_MONTHS, MAX_WATER_AMOUNT_ML, MAX_WATER_DAYS, MIN_WATER_AMOUNT_ML, MIN_WATER_DAYS } from './constants';
+import { MAX_FERTILIZE_DAYS, MAX_REPOT_MONTHS, MAX_WATER_DAYS, MAX_WATER_PERCENT, MIN_WATER_DAYS, MIN_WATER_PERCENT } from './constants';
 
 // Types
 import { CareProfileConfidence } from '@/types';
@@ -18,7 +18,7 @@ export const CareIntervalsSchema = z.object({
 });
 
 export const WaterAmountSchema = z.object({
-    waterAmountMl: z.int()
+    waterPercent: z.int()
 });
 
 export const CARE_INTERVAL_JSON_SCHEMA: Record<string, unknown> = {
@@ -70,11 +70,11 @@ export const WATER_AMOUNT_JSON_SCHEMA: Record<string, unknown> = {
     type: 'object',
     additionalProperties: false,
     properties: {
-        waterAmountMl: {
+        waterPercent: {
             type: 'integer',
-            minimum: MIN_WATER_AMOUNT_ML,
-            maximum: MAX_WATER_AMOUNT_ML
+            minimum: MIN_WATER_PERCENT,
+            maximum: MAX_WATER_PERCENT
         }
     },
-    required: ['waterAmountMl']
+    required: ['waterPercent']
 };

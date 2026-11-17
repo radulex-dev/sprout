@@ -5,27 +5,51 @@ import { CARE_META, CARE_NOTIFICATION_TAG, DAY_MS, DAYS_PER_MONTH, MAX_LISTED_PL
 
 // Helpers
 import { seasonForTimestamp } from './helpers';
-import { formatWaterAmount, getWaterAmountMl } from '@/helpers/pot';
+import { formatWaterAmount, hasContainerSize } from '@/helpers/pot';
 
 // Types
-import { CareKind, type LastCareDates, type Plant } from '@/types';
+import { CareKind, type CareSeason, type LastCareDates, type Plant } from '@/types';
 import type { CareNotification, CareTask } from './types';
 
-const intervalMs = (plant: Plant, kind: CareKind): number => {
-    const care = plant.care;
+const intervalForSeason = (plant: Plant, season: CareSeason): number => {
+    return plant.care[WATER_SEASON_FIELDS[season]] * DAY_MS;
+};
 
+export const waterSeasonFor = (plant: Plant): CareSeason => {
+    const lastWatered = plant.lastCare[CareKind.Water] ?? plant.acquiredAt;
+    let season = seasonForTimestamp(lastWatered);
+
+    for (let step = 0; step < 4; step += 1) {
+        const interval = intervalForSeason(plant, season);
+
+        if (!Number.isFinite(interval) || interval <= 0) {
+            return season;
+        }
+
+        const dueSeason = seasonForTimestamp(lastWatered + interval);
+
+        if (dueSeason === season) {
+            return season;
+        }
+
+        season = dueSeason;
+    }
+
+    return season;
+};
+
+const intervalMs = (plant: Plant, kind: CareKind): number => {
     if (kind === CareKind.Water) {
-        const season = seasonForTimestamp(plant.lastCare[CareKind.Water] ?? plant.acquiredAt);
-        const interval = care[WATER_SEASON_FIELDS[season]] * DAY_MS;
+        const interval = intervalForSeason(plant, waterSeasonFor(plant));
 
         return Number.isFinite(interval) ? interval : 0;
     }
 
     if (kind === CareKind.Fertilize) {
-        return (care.fertilizeEveryDays ?? 0) * DAY_MS;
+        return (plant.care.fertilizeEveryDays ?? 0) * DAY_MS;
     }
 
-    return (care.repotEveryMonths ?? 0) * DAYS_PER_MONTH * DAY_MS;
+    return (plant.care.repotEveryMonths ?? 0) * DAYS_PER_MONTH * DAY_MS;
 };
 
 export const nextDue = (plant: Plant, kind: CareKind): number | undefined => {
@@ -153,9 +177,9 @@ export const plantDisplayName = (plant: Plant): string => {
 };
 
 const formatWaterSlot = (plant: Plant): string => {
-    const amount = getWaterAmountMl(plant);
+    const amount = plant.care.waterAmountMl;
 
-    if (amount === undefined) {
+    if (!hasContainerSize(plant) || amount === undefined || amount === 0) {
         return POT_SIZE_NUDGE_SLOT;
     }
 
@@ -163,9 +187,9 @@ const formatWaterSlot = (plant: Plant): string => {
 };
 
 const formatWaterFollowUp = (plant: Plant): string => {
-    const amount = getWaterAmountMl(plant);
+    const amount = plant.care.waterAmountMl;
 
-    if (amount === undefined) {
+    if (!hasContainerSize(plant) || amount === undefined || amount === 0) {
         return POT_SIZE_NUDGE_SENTENCE;
     }
 

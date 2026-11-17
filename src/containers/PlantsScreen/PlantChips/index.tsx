@@ -10,7 +10,6 @@ import WaterAmount from '@/components/WaterAmount';
 
 // Helpers
 import { allTasks, formatDue } from '@/helpers/care';
-import { getWaterAmountMl } from '@/helpers/pot';
 
 // Styles
 import styles from './styles.module.css';
@@ -85,7 +84,7 @@ const PlantChips: React.FunctionComponent<Props> = ({ plant, className, ...props
             return;
         }
 
-        return <WaterAmount amount={getWaterAmountMl(plant)} variant={WaterAmountVariant.Flag} />;
+        return <WaterAmount amount={plant.care.waterAmountMl} variant={WaterAmountVariant.Flag} />;
     };
 
     return (

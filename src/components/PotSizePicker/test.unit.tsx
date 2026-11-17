@@ -106,22 +106,6 @@ describe('<PotSizePicker />', () => {
         })).toHaveLength(1);
     });
 
-    it('derives 80 ml for a 12 cm pot', () => {
-        const size: ContainerSize = {
-            potDiameter: 12
-        };
-
-        render(<PotSizePicker {...props} value={size} />);
-
-        expect(screen.getByText('Select 12 cm pot · about 80 ml')).toBeInTheDocument();
-    });
-
-    it('hides the derived amount while no value is set', () => {
-        render(<PotSizePicker {...props} />);
-
-        expect(screen.queryByText(/^about /)).not.toBeInTheDocument();
-    });
-
     it('hides the clear control while no value is set', () => {
         render(<PotSizePicker {...props} />);
 
@@ -239,25 +223,6 @@ describe('<PotSizePicker />', () => {
         expect(screen.getByLabelText('Soil volume in litres')).toHaveValue('12');
     });
 
-    it.each([{
-        litres: 12,
-        sentence: 'about 1.2 L'
-    }, {
-        litres: 60,
-        sentence: 'about 6 L'
-    }, {
-        litres: 86,
-        sentence: 'about 8.6 L'
-    }])('reads back $litres L as $sentence', ({ litres, sentence }) => {
-        const size: ContainerSize = {
-            soilVolumeLitres: litres
-        };
-
-        render(<PotSizePicker {...props} value={size} />);
-
-        expect(screen.getByText(sentence)).toBeInTheDocument();
-    });
-
     it.each(['0', '10.5', '12,5', '1001'])('rejects the litres entry %s without storing it', async (entered) => {
         const user = userEvent.setup();
 
@@ -295,18 +260,12 @@ describe('<PotSizePicker />', () => {
             soilVolumeLitres: 12
         };
 
-        const { rerender } = render(<PotSizePicker {...props} value={size} />);
-
-        expect(screen.getByText('about 1.2 L')).toBeInTheDocument();
+        render(<PotSizePicker {...props} value={size} />);
 
         await user.clear(screen.getByLabelText('Soil volume in litres'));
 
         expect(props.onChange).toHaveBeenLastCalledWith();
-
-        rerender(<PotSizePicker {...props} value={undefined} />);
-
-        expect(screen.queryByText('about 1.2 L')).not.toBeInTheDocument();
-        expect(screen.queryByText('1.2 L')).not.toBeInTheDocument();
+        expect(screen.getByLabelText('Soil volume in litres')).toHaveValue('');
     });
 
     it.each(['1001', '12.5'])('shows a validation message for the invalid litres entry %s', async (entered) => {
@@ -356,25 +315,6 @@ describe('<PotSizePicker />', () => {
         expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     });
 
-    it('hides the amount sentence while the litres entry is invalid', async () => {
-        const user = userEvent.setup();
-        const size: ContainerSize = {
-            soilVolumeLitres: 12
-        };
-
-        render(<PotSizePicker {...props} value={size} />);
-
-        expect(screen.getByText('about 1.2 L')).toBeInTheDocument();
-
-        const entry = screen.getByLabelText('Soil volume in litres');
-
-        await user.clear(entry);
-        await user.type(entry, '1001');
-
-        expect(screen.getByRole('alert')).toBeInTheDocument();
-        expect(screen.queryByText(/^about /)).not.toBeInTheDocument();
-    });
-
     it.each([{
         litres: 1,
         height: '3.2%'
@@ -411,49 +351,6 @@ describe('<PotSizePicker />', () => {
         });
     });
 
-    it('shows the dose in the gutter for a stored volume', () => {
-        const size: ContainerSize = {
-            soilVolumeLitres: 60
-        };
-
-        render(<PotSizePicker {...props} value={size} />);
-
-        expect(screen.getByText('6 L')).toHaveStyle({
-            bottom: '24.5%'
-        });
-    });
-
-    it('renders no dose while the litres entry is empty', async () => {
-        const user = userEvent.setup();
-
-        const { container } = render(<PotSizePicker {...props} />);
-
-        await user.click(screen.getByRole('radio', {
-            name: 'Litres'
-        }));
-
-        expect(container.querySelector(`.${styles.dosePill}`)).not.toBeInTheDocument();
-    });
-
-    it('hides the dose while the litres entry is invalid', async () => {
-        const user = userEvent.setup();
-        const size: ContainerSize = {
-            soilVolumeLitres: 12
-        };
-
-        render(<PotSizePicker {...props} value={size} />);
-
-        expect(screen.getByText('1.2 L')).toBeInTheDocument();
-
-        const entry = screen.getByLabelText('Soil volume in litres');
-
-        await user.clear(entry);
-        await user.type(entry, '1001');
-
-        expect(screen.getByRole('alert')).toBeInTheDocument();
-        expect(screen.queryByText('1.2 L')).not.toBeInTheDocument();
-    });
-
     it('hides the dose scale from assistive technology', () => {
         const size: ContainerSize = {
             soilVolumeLitres: 60
@@ -485,7 +382,7 @@ describe('<PotSizePicker />', () => {
         expect(screen.queryByText(label)).not.toBeInTheDocument();
     });
 
-    it('shows no amount on the litres branch until litres are entered', async () => {
+    it('opens the litres entry empty', async () => {
         const user = userEvent.setup();
 
         render(<PotSizePicker {...props} />);
@@ -495,7 +392,6 @@ describe('<PotSizePicker />', () => {
         }));
 
         expect(screen.getByLabelText('Soil volume in litres')).toHaveValue('');
-        expect(screen.queryByText(/^about /)).not.toBeInTheDocument();
     });
 
     it('renders the hint when one is provided', () => {

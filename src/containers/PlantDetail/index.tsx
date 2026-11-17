@@ -8,35 +8,38 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 
 // Constants
-import { HEADER_STYLE, SUB_STYLE } from './constants';
+import { AMOUNT_STALE_NOTICE, HEADER_STYLE, SUB_STYLE } from './constants';
 import { FREQUENCY_TITLE } from '@/components/CareScheduleFields/constants';
-import { CARE_META } from '@/helpers/care/constants';
 import { ToastVariant } from '@/design-system/Toast/constants';
+import { NoticeTone } from '@/components/Notice/constants';
 
 // Components
 import PlantPhoto from '@/components/PlantPhoto';
 import EditSchedule from '@/components/EditSchedule';
 import CareLogRow from '@/components/CareLogRow';
+import Notice from '@/components/Notice';
 import DeletePlantBlock from './DeletePlantBlock';
 import PlantCommonNameSuffix from './PlantCommonNameSuffix';
-import CareStatValue from './CareStatValue';
+import CareStats from './CareStats';
 import CareScheduleNotice from './CareScheduleNotice';
 
 // Helpers
 import { startOfToday } from '@/helpers/care';
 import { displayName } from '@/helpers/plant';
+import { resolveSoilVolumeMl } from '@/helpers/pot';
 
 // Hooks
 import { useClock } from '@/hooks';
 import { useToast } from '@/design-system/hooks/useToast';
 
 // Database
-import { deletePlant, markCareDone, updatePlant } from '@/lib/db/actions';
+import { deletePlant, markCareDone, recalculateCareAmount, updatePlant } from '@/lib/db/actions';
 
 // Styles
 import styles from './styles.module.css';
 
 // Types
+import { CareProfileStatus } from '@/lib/db/actions/types';
 import { CareKind, type Plant } from '@/types';
 
 export interface Props extends React.ComponentProps<'div'> {
@@ -51,13 +54,12 @@ const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...prop
     const showToast = useToast();
     const [isEditing, setIsEditing] = useState(false);
     const [isConfirmDelete, setIsConfirmDelete] = useState(false);
+    const [isAmountStale, setIsAmountStale] = useState(false);
     const formRef = useRef<HTMLDivElement>(null);
 
     const handleMarkDone = useCallback(async (kind: CareKind) => {
         try {
             await markCareDone(plant.id, kind, startOfToday());
-
-            router.refresh();
         } catch (reason) {
             console.error('Failed to log care', reason);
             showToast({
@@ -66,13 +68,11 @@ const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...prop
                 title: 'Couldn\'t log that care. Please try again.'
             });
         }
-    }, [plant, router, showToast]);
+    }, [plant, showToast]);
 
     const handleSetDate = useCallback(async (kind: CareKind, date: string) => {
         try {
             await markCareDone(plant.id, kind, parseDate(date).toDate(getLocalTimeZone()).getTime());
-
-            router.refresh();
         } catch (reason) {
             console.error('Failed to log care', reason);
             showToast({
@@ -81,13 +81,24 @@ const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...prop
                 title: 'Couldn\'t log that care. Please try again.'
             });
         }
-    }, [plant, router, showToast]);
+    }, [plant, showToast]);
 
     const handleSaveEdited = useCallback(async (edited: Plant) => {
+        const hasSizeChanged = edited.potDiameter !== plant.potDiameter || edited.soilVolumeLitres !== plant.soilVolumeLitres;
+        const nextVolume = resolveSoilVolumeMl({
+            potDiameter: edited.potDiameter,
+            soilVolumeLitres: edited.soilVolumeLitres
+        });
+        const defaultCare = {
+            ...edited.care,
+            waterAmountMl: undefined
+        };
+        const care = hasSizeChanged && nextVolume === undefined ? defaultCare : edited.care;
+
         try {
             await updatePlant(edited.id, {
                 nickname: edited.nickname,
-                care: edited.care,
+                care,
                 potDiameter: edited.potDiameter,
                 soilVolumeLitres: edited.soilVolumeLitres
             });
@@ -99,7 +110,17 @@ const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...prop
             });
 
             setIsEditing(false);
-            router.refresh();
+
+            if (nextVolume !== undefined && hasSizeChanged) {
+                try {
+                    const result = await recalculateCareAmount(edited.id, nextVolume);
+
+                    setIsAmountStale(result.status !== CareProfileStatus.Ok);
+                } catch (reason) {
+                    console.error('Failed to recalculate the watering amount', reason);
+                    setIsAmountStale(true);
+                }
+            }
         } catch (reason) {
             console.error('Failed to save schedule', reason);
             showToast({
@@ -108,7 +129,7 @@ const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...prop
                 title: 'Couldn\'t save the schedule. Please try again.'
             });
         }
-    }, [router, showToast]);
+    }, [plant, showToast]);
 
     const handleRemove = useCallback(async () => {
         try {
@@ -121,7 +142,6 @@ const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...prop
             });
 
             router.push('/');
-            router.refresh();
         } catch (reason) {
             console.error('Failed to delete plant', reason);
             showToast({
@@ -199,25 +219,7 @@ const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...prop
                         </div>
                     </header>
 
-                    <dl className={styles.careStats}>
-                        {[CareKind.Water, CareKind.Fertilize, CareKind.Repot].map((kind) => {
-                            const meta = CARE_META[kind];
-
-                            return (
-                                <div key={kind} className={styles.careStat}>
-                                    <div className={styles.emoji}>
-                                        <meta.icon size="1.375rem" aria-hidden />
-                                    </div>
-                                    <dt className={styles.label}>
-                                        {meta.label}
-                                    </dt>
-                                    <dd>
-                                        <CareStatValue plant={plant} kind={kind} now={now} onRequestPotSize={handleStartEdit} />
-                                    </dd>
-                                </div>
-                            );
-                        })}
-                    </dl>
+                    <CareStats plant={plant} now={now} onRequestPotSize={handleStartEdit} />
 
                     <h2 className={styles.sectionTitle}>
                         Log care
@@ -238,6 +240,11 @@ const PlantDetail: React.FunctionComponent<Props> = ({ plant, className, ...prop
                         </h2>
                     )}
                     {renderSchedule()}
+                    {isAmountStale && (
+                        <Notice className={styles.amountNotice} tone={NoticeTone.Warn}>
+                            {AMOUNT_STALE_NOTICE}
+                        </Notice>
+                    )}
 
                     <DeletePlantBlock plantName={displayName(plant)} isConfirming={isConfirmDelete} onKeep={handleKeepPlant} onRemove={handleRemove} onStartDelete={handleStartDelete} />
                 </div>

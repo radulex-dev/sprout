@@ -12,7 +12,7 @@ import { RESET_PREFILL_COOKIE } from '@/lib/auth/constants';
 import { AiCapReachedError, AiRequestError, AiUnavailableError } from '@/services/server/ai';
 import { getCareIntervals, getWaterAmount } from '@/services/server/care-profile';
 import { toCareSchedule } from '@/services/server/care-profile/helpers';
-import { createPlant as serviceCreatePlant, deletePlant as serviceDeletePlant, markCareDone as serviceMarkCareDone, recordNotified as serviceRecordNotified, updatePlant as serviceUpdatePlant } from '@/services/server/plants';
+import { createPlant as serviceCreatePlant, deletePlant as serviceDeletePlant, findPlant as serviceFindPlant, markCareDone as serviceMarkCareDone, recordNotified as serviceRecordNotified, updateCareAmount as serviceUpdateCareAmount, updatePlant as serviceUpdatePlant } from '@/services/server/plants';
 import { CareKindSchema, LastCareDateSchema, NotifiedAtSchema, parsePlantInput, UpdatePlantSchema, type UpdatePlantInput } from '@/services/server/plants/schema';
 import { captureEvent } from '@/services/server/posthog';
 import { PostHogEvent } from '@/services/server/posthog/types';
@@ -157,6 +157,33 @@ export const loadWaterAmount = async (input: LoadWaterAmountRequest): Promise<Lo
 
         throw reason;
     }
+};
+
+export const recalculateCareAmount = async (id: string, soilVolumeMl: number): Promise<LoadWaterAmountResult> => {
+    const session = await requireVerifiedUser();
+    const parsedId = PLANT_ID_SCHEMA.parse(id);
+    const plant = await serviceFindPlant(session.user.id, parsedId);
+
+    if (!plant) {
+        return {
+            status: CareProfileStatus.Unavailable
+        };
+    }
+
+    const result = await loadWaterAmount({
+        species: plant.species,
+        soilVolumeMl
+    });
+
+    if (result.status !== CareProfileStatus.Ok) {
+        return result;
+    }
+
+    await serviceUpdateCareAmount(session.user.id, parsedId, result.waterAmountMl);
+
+    revalidatePath(ALL_PATH, 'layout');
+
+    return result;
 };
 
 export const rememberResetEmail = async (formData: FormData): Promise<void> => {
