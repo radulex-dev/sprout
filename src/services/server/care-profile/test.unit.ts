@@ -6,7 +6,7 @@ import { MAX_FERTILIZE_DAYS, MAX_REPOT_MONTHS, MAX_WATER_AMOUNT_ML, MIN_FERTILIZ
 
 // Helpers
 import { mockSelectChain } from '@test/vitest/helpers/mockDb';
-import { buildCareIntervalPrompt, buildWaterAmountPrompt, normaliseAmountMl, normaliseCareIntervals, normaliseFertilizeDays, normaliseRepotMonths, normaliseSpeciesKey, normaliseWaterDays, toCareSchedule } from './helpers';
+import { buildCareIntervalPrompt, buildWaterAmountPrompt, normaliseCareIntervals, normaliseFertilizeDays, normaliseRepotMonths, normaliseSpeciesKey, normaliseWaterDays, resolveWaterAmountMl, toCareSchedule } from './helpers';
 
 // Services
 import { AiCapReachedError, AiUnavailableError } from '@/services/server/ai';
@@ -122,18 +122,29 @@ describe('Helpers', () => {
         });
     });
 
-    describe('normaliseAmountMl', () => {
+    describe('resolveWaterAmountMl', () => {
         it.each([{
-            expected: MIN_WATER_AMOUNT_ML,
-            input: 1
+            expected: 120,
+            soilVolumeMl: 1200,
+            waterPercent: 10
         }, {
-            expected: 80,
-            input: 80
+            expected: 1000,
+            soilVolumeMl: 10000,
+            waterPercent: 10
+        }, {
+            expected: 18,
+            soilVolumeMl: 350,
+            waterPercent: 5
         }, {
             expected: MAX_WATER_AMOUNT_ML,
-            input: 99999
-        }])('maps $input to $expected', ({ expected, input }) => {
-            expect(normaliseAmountMl(input)).toBe(expected);
+            soilVolumeMl: 1000000,
+            waterPercent: 30
+        }, {
+            expected: MIN_WATER_AMOUNT_ML,
+            soilVolumeMl: 100,
+            waterPercent: 5
+        }])('resolves $soilVolumeMl ml at $waterPercent percent to $expected', ({ expected, soilVolumeMl, waterPercent }) => {
+            expect(resolveWaterAmountMl(soilVolumeMl, waterPercent)).toBe(expected);
         });
     });
 
@@ -227,17 +238,16 @@ describe('Helpers', () => {
     });
 
     describe('buildWaterAmountPrompt', () => {
-        it('builds a system message and a user message naming the species and the soil volume', () => {
-            const [system, user] = buildWaterAmountPrompt('Monstera deliciosa', 800);
+        it('builds a system message and a user message naming the species only', () => {
+            const [system, user] = buildWaterAmountPrompt('Monstera deliciosa');
 
             expect(system.role).toBe('system');
             expect(user.role).toBe('user');
-            expect(user.content).toContain('Monstera deliciosa');
-            expect(user.content).toContain('800 ml');
+            expect(user.content).toBe('Species: Monstera deliciosa');
         });
 
         it('stays inside the input budget', () => {
-            const messages = buildWaterAmountPrompt('Monstera deliciosa', 800);
+            const messages = buildWaterAmountPrompt('Monstera deliciosa');
 
             expect(messages.reduce((total, message) => {
                 return total + message.content.length;
@@ -495,7 +505,7 @@ describe('getWaterAmount', () => {
         mockSelect.mockReturnValueOnce(mockSelectChain([]));
         mockClaimAiUsage.mockResolvedValueOnce(true);
         mockRequestStructured.mockResolvedValueOnce({
-            waterAmountMl: 99999
+            waterPercent: 30
         });
         mockInsert.mockReturnValueOnce({
             values
@@ -505,19 +515,19 @@ describe('getWaterAmount', () => {
             userId: 'user-1',
             species: 'Monstera deliciosa',
             soilVolumeMl: 800
-        })).resolves.toBe(MAX_WATER_AMOUNT_ML);
+        })).resolves.toBe(240);
 
         expect(mockClaimAiUsage).toHaveBeenCalledWith('user-1');
         expect(values).toHaveBeenCalledWith({
             speciesKey: 'monstera deliciosa',
             soilVolumeMl: 800,
-            waterAmountMl: MAX_WATER_AMOUNT_ML,
+            waterAmountMl: 240,
             model: '',
             createdAt: expect.any(Number)
         });
     });
 
-    it('keys an unknown soil volume as zero and prompts with the standard pot', async () => {
+    it('keys an unknown soil volume as zero and computes from the standard pot', async () => {
         const onConflictDoUpdate = vi.fn(() => {
             return Promise.resolve();
         });
@@ -530,19 +540,19 @@ describe('getWaterAmount', () => {
         mockSelect.mockReturnValueOnce(mockSelectChain([]));
         mockClaimAiUsage.mockResolvedValueOnce(true);
         mockRequestStructured.mockResolvedValueOnce({
-            waterAmountMl: 80
+            waterPercent: 10
         });
         mockInsert.mockReturnValueOnce({
             values
         });
 
-        await getWaterAmount({
+        await expect(getWaterAmount({
             userId: 'user-1',
             species: 'Monstera deliciosa'
-        });
+        })).resolves.toBe(80);
 
         expect(mockRequestStructured).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({
-            content: expect.stringContaining('800 ml')
+            content: 'Species: Monstera deliciosa'
         })]), WATER_AMOUNT_JSON_SCHEMA, WaterAmountSchema);
         expect(values).toHaveBeenCalledWith(expect.objectContaining({
             soilVolumeMl: 0

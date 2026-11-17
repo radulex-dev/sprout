@@ -202,6 +202,7 @@ describe('ai', () => {
 
             const body = readSentBody(fetchMock);
 
+            expect(body.temperature).toBe(0);
             expect(body.response_format).toEqual({
                 type: 'json_schema',
                 json_schema: {

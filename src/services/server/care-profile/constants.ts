@@ -8,7 +8,9 @@ export const MAX_FERTILIZE_DAYS = 90;
 export const MIN_REPOT_MONTHS = 6;
 export const MAX_REPOT_MONTHS = 36;
 export const MIN_WATER_AMOUNT_ML = 10;
-export const MAX_WATER_AMOUNT_ML = 5000;
+export const MAX_WATER_AMOUNT_ML = 100000;
+export const MIN_WATER_PERCENT = 5;
+export const MAX_WATER_PERCENT = 30;
 
 export const CARE_INTERVAL_PROMPT_SYSTEM = [
     'You are a horticultural advisor estimating care for an indoor houseplant.',
@@ -24,10 +26,10 @@ export const CARE_INTERVAL_PROMPT_SYSTEM = [
 export const WATER_AMOUNT_PROMPT_SYSTEM = [
     'You are a horticultural advisor estimating care for an indoor houseplant.',
     'Answer for the species given, not for a lookalike.',
-    'Report waterAmountMl as the volume of one watering for the given soil volume, between 10 and 5000 ml.',
+    'A typical indoor houseplant should be given about 10 percent of its pot soil volume per watering.',
+    'Report waterPercent as the percentage of the soil volume to apply in one watering for the given species, as a whole number between 5 and 30.',
+    'Use a lower number for drought-tolerant species and a higher number for thirsty species.',
     'Return only the JSON object, with no prose and no markdown.'
 ].join(' ');
 
 export const CARE_PROMPT_SPECIES_LABEL = 'Species';
-export const CARE_PROMPT_SOIL_VOLUME_LABEL = 'Soil volume';
-export const CARE_PROMPT_MILLILITRES_UNIT = 'ml';

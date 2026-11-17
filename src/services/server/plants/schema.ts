@@ -16,7 +16,7 @@ export const CareScheduleSchema = z.object({
     waterEveryDaysSummer: z.int().min(MIN_WATER_DAYS).max(MAX_WATER_DAYS),
     waterEveryDaysAutumn: z.int().min(MIN_WATER_DAYS).max(MAX_WATER_DAYS),
     waterEveryDaysWinter: z.int().min(MIN_WATER_DAYS).max(MAX_WATER_DAYS),
-    waterAmountMl: z.int().min(0).max(MAX_WATER_AMOUNT_ML),
+    waterAmountMl: z.int().min(0).max(MAX_WATER_AMOUNT_ML).optional(),
     fertilizeEveryDays: z.int().min(1).max(MAX_DAYS).optional(),
     repotEveryMonths: z.int().min(1).max(MAX_MONTHS).optional()
 });

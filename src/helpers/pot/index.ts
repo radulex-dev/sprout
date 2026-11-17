@@ -1,8 +1,12 @@
 // Constants
-import { ML_PER_LITRE, ML_PER_VOLUME_UNIT, POT_SIZES, WATER_AMOUNT_RATIO } from './constants';
+import { ML_PER_LITRE, ML_PER_VOLUME_UNIT, POT_SIZES } from './constants';
 
 // Types
 import type { ContainerSize } from './types';
+
+export const hasContainerSize = (size?: ContainerSize): boolean => {
+    return size?.potDiameter !== undefined || size?.soilVolumeLitres !== undefined;
+};
 
 export const resolveSoilVolumeMl = (size?: ContainerSize): number | undefined => {
     if (size?.potDiameter !== undefined) {
@@ -22,16 +26,6 @@ export const resolveSoilVolumeMl = (size?: ContainerSize): number | undefined =>
     }
 
     return;
-};
-
-export const getWaterAmountMl = (size?: ContainerSize): number | undefined => {
-    const volumeMl = resolveSoilVolumeMl(size);
-
-    if (volumeMl === undefined) {
-        return;
-    }
-
-    return Math.round(volumeMl * WATER_AMOUNT_RATIO);
 };
 
 const formatMillilitres = (amount: number): string => {

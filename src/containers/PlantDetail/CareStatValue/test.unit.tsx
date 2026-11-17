@@ -127,7 +127,16 @@ describe('<CareStatValue />', () => {
 
     it('renders the watering amount when a pot size is set', () => {
         const plant = makePlant({
-            potDiameter: 12
+            potDiameter: 12,
+            care: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 80,
+                fertilizeEveryDays: undefined,
+                repotEveryMonths: undefined
+            }
         });
 
         render(<CareStatValue {...props} plant={plant} />);
@@ -155,7 +164,7 @@ describe('<CareStatValue />', () => {
         expect(screen.queryByText('80 ml')).not.toBeInTheDocument();
     });
 
-    it('falls back to the pot-derived amount when the stored amount is zero', () => {
+    it('renders no amount when the stored amount is zero', () => {
         const plant = makePlant({
             potDiameter: 12,
             care: {
@@ -171,7 +180,8 @@ describe('<CareStatValue />', () => {
 
         render(<CareStatValue {...props} plant={plant} />);
 
-        expect(screen.getByText('80 ml')).toBeInTheDocument();
+        expect(screen.queryByText('80 ml')).not.toBeInTheDocument();
+        expect(screen.queryByText('0 ml')).not.toBeInTheDocument();
     });
 
     it('renders no amount when the stored amount is zero and no pot size is set', () => {
@@ -194,7 +204,16 @@ describe('<CareStatValue />', () => {
 
     it('renders the watering amount for a litre-sized plant without the prompt', () => {
         const plant = makePlant({
-            soilVolumeLitres: 12
+            soilVolumeLitres: 12,
+            care: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 1200,
+                fertilizeEveryDays: undefined,
+                repotEveryMonths: undefined
+            }
         });
 
         render(<CareStatValue {...props} plant={plant} />);

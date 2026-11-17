@@ -6,7 +6,7 @@ import { DAY_MS, DAYS_PER_MONTH, FALLBACK_CARE } from './constants';
 
 // Helpers
 import { seasonForTimestamp } from './helpers';
-import { allTasks, buildCareNotification, dueTasks, formatDue, isNotificationHour, isNotifiedToday, nextDue, resolveLastCare, startOfToday, toDateValue } from './index';
+import { allTasks, buildCareNotification, dueTasks, formatDue, isNotificationHour, isNotifiedToday, nextDue, resolveLastCare, startOfToday, toDateValue, waterSeasonFor } from './index';
 import { resolveCare } from './resolve';
 
 // Mocks
@@ -141,44 +141,82 @@ describe('nextDue', () => {
             }
         });
 
-        expect(nextDue(januaryWatered, CareKind.Water)).toBe(january + 14 * DAY_MS);
-        expect(nextDue(julyWatered, CareKind.Water)).toBe(july + 10 * DAY_MS);
+        expect(nextDue(januaryWatered, CareKind.Water)).toBe(january + 21 * DAY_MS);
+        expect(nextDue(julyWatered, CareKind.Water)).toBe(july + 7 * DAY_MS);
+    });
+});
+
+describe('waterSeasonFor', () => {
+    it('moves to the next season when the due date crosses into it', () => {
+        const plant = makePlant({
+            care: {
+                waterEveryDaysSpring: 14,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 10,
+                waterEveryDaysWinter: 21,
+                waterAmountMl: 0
+            },
+            lastCare: {
+                [CareKind.Water]: Date.UTC(2026, 10, 25, 12)
+            }
+        });
+
+        expect(waterSeasonFor(plant)).toBe(CareSeason.Winter);
+        expect(nextDue(plant, CareKind.Water)).toBe(Date.UTC(2026, 10, 25, 12) + 21 * DAY_MS);
+    });
+
+    it('stays in the last season when the due date does', () => {
+        const plant = makePlant({
+            care: {
+                waterEveryDaysSpring: 14,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 10,
+                waterEveryDaysWinter: 21,
+                waterAmountMl: 0
+            },
+            lastCare: {
+                [CareKind.Water]: Date.UTC(2026, 10, 5, 12)
+            }
+        });
+
+        expect(waterSeasonFor(plant)).toBe(CareSeason.Autumn);
+        expect(nextDue(plant, CareKind.Water)).toBe(Date.UTC(2026, 10, 5, 12) + 10 * DAY_MS);
     });
 });
 
 describe('seasonForTimestamp', () => {
     it.each([{
-        expected: CareSeason.Spring,
+        expected: CareSeason.Winter,
         iso: '2026-01-01T12:00:00Z'
     }, {
-        expected: CareSeason.Spring,
+        expected: CareSeason.Winter,
         iso: '2026-02-01T12:00:00Z'
     }, {
         expected: CareSeason.Spring,
         iso: '2026-03-01T12:00:00Z'
     }, {
-        expected: CareSeason.Summer,
+        expected: CareSeason.Spring,
         iso: '2026-04-01T12:00:00Z'
     }, {
-        expected: CareSeason.Summer,
+        expected: CareSeason.Spring,
         iso: '2026-05-01T12:00:00Z'
     }, {
         expected: CareSeason.Summer,
         iso: '2026-06-01T12:00:00Z'
     }, {
-        expected: CareSeason.Autumn,
+        expected: CareSeason.Summer,
         iso: '2026-07-01T12:00:00Z'
     }, {
-        expected: CareSeason.Autumn,
+        expected: CareSeason.Summer,
         iso: '2026-08-01T12:00:00Z'
     }, {
         expected: CareSeason.Autumn,
         iso: '2026-09-01T12:00:00Z'
     }, {
-        expected: CareSeason.Winter,
+        expected: CareSeason.Autumn,
         iso: '2026-10-01T12:00:00Z'
     }, {
-        expected: CareSeason.Winter,
+        expected: CareSeason.Autumn,
         iso: '2026-11-01T12:00:00Z'
     }, {
         expected: CareSeason.Winter,
@@ -812,7 +850,16 @@ describe('buildCareNotification', () => {
         const plant = makePlant({
             id: 'plant-fern',
             nickname: 'Fern',
-            potDiameter: 12
+            potDiameter: 12,
+            care: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 80,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
+            }
         });
 
         const notification = buildCareNotification([{
@@ -833,7 +880,16 @@ describe('buildCareNotification', () => {
         const plant = makePlant({
             id: 'plant-fern',
             nickname: 'Fern',
-            potDiameter: 12
+            potDiameter: 12,
+            care: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 80,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
+            }
         });
 
         const notification = buildCareNotification([{
@@ -850,7 +906,16 @@ describe('buildCareNotification', () => {
         const plant = makePlant({
             id: 'plant-fern',
             nickname: 'Fern',
-            potDiameter: 12
+            potDiameter: 12,
+            care: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 80,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
+            }
         });
 
         const notification = buildCareNotification([{
@@ -922,7 +987,16 @@ describe('buildCareNotification', () => {
         const plant = makePlant({
             id: 'plant-fern',
             nickname: 'Fern',
-            soilVolumeLitres: 12
+            soilVolumeLitres: 12,
+            care: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 1200,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
+            }
         });
 
         const notification = buildCareNotification([{
@@ -943,7 +1017,16 @@ describe('buildCareNotification', () => {
         const plant = makePlant({
             id: 'plant-fern',
             nickname: 'Fern',
-            soilVolumeLitres: 12
+            soilVolumeLitres: 12,
+            care: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 1200,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
+            }
         });
 
         const notification = buildCareNotification([{

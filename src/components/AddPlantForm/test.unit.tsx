@@ -224,18 +224,13 @@ describe('<AddPlantForm />', () => {
         await waitFor(() => {
             expect(props.onSave).toHaveBeenCalledTimes(1);
         });
-        expect(loadWaterAmount).toHaveBeenCalledTimes(1);
-        expect(loadWaterAmount).toHaveBeenCalledWith({
-            species: 'Monstera deliciosa',
-            soilVolumeMl: undefined
-        });
+        expect(loadWaterAmount).not.toHaveBeenCalled();
         expect(props.onSave).toHaveBeenCalledWith(expect.objectContaining({
             care: {
                 waterEveryDaysSpring: 5,
                 waterEveryDaysSummer: 5,
                 waterEveryDaysAutumn: 5,
                 waterEveryDaysWinter: 5,
-                waterAmountMl: 80,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
@@ -281,6 +276,9 @@ describe('<AddPlantForm />', () => {
         render(<AddPlantForm {...props} />);
 
         await screen.findAllByRole('combobox');
+        await user.click(screen.getByRole('radio', {
+            name: 'Select 14 cm pot'
+        }));
         await user.click(screen.getByRole('button', {
             name: 'Add to my plants'
         }));
@@ -299,6 +297,9 @@ describe('<AddPlantForm />', () => {
         render(<AddPlantForm {...props} />);
 
         await screen.findAllByRole('combobox');
+        await user.click(screen.getByRole('radio', {
+            name: 'Select 14 cm pot'
+        }));
         await user.click(screen.getByRole('button', {
             name: 'Add to my plants'
         }));
@@ -315,6 +316,9 @@ describe('<AddPlantForm />', () => {
         render(<AddPlantForm {...props} />);
 
         await screen.findAllByRole('combobox');
+        await user.click(screen.getByRole('radio', {
+            name: 'Select 14 cm pot'
+        }));
         await user.click(screen.getByRole('button', {
             name: 'Add to my plants'
         }));

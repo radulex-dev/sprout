@@ -6,7 +6,7 @@ import type { UpdatePlantInput } from './schema';
 // Database
 import { database } from '@/lib/db';
 import { plants } from '@/lib/db/schema';
-import { getPlantPhoto, getPlantsForUser } from '@/lib/db/queries';
+import { getPlantForUser, getPlantPhoto, getPlantsForUser } from '@/lib/db/queries';
 
 // Types
 import type { CareKind, Plant, PlantInput } from '@/types';
@@ -17,6 +17,10 @@ export const listPlants = async (userId: string): Promise<Plant[]> => {
 
 export const readPlantPhoto = async (userId: string, id: string): Promise<Buffer | undefined> => {
     return getPlantPhoto(userId, id);
+};
+
+export const findPlant = async (userId: string, id: string): Promise<Plant | undefined> => {
+    return getPlantForUser(userId, id);
 };
 
 export const createPlant = async (userId: string, input: PlantInput): Promise<string> => {
@@ -52,6 +56,15 @@ export const updatePlant = async (userId: string, id: string, input: UpdatePlant
             care: input.care,
             potDiameter: input.potDiameter ?? sql`null`,
             soilVolumeLitres: input.soilVolumeLitres ?? sql`null`
+        })
+        .where(and(eq(plants.id, id), eq(plants.userId, userId)));
+};
+
+export const updateCareAmount = async (userId: string, id: string, waterAmountMl: number): Promise<void> => {
+    await database
+        .update(plants)
+        .set({
+            care: sql`jsonb_set(${plants.care}, '{waterAmountMl}', to_jsonb(${waterAmountMl}::int))`
         })
         .where(and(eq(plants.id, id), eq(plants.userId, userId)));
 };

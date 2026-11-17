@@ -11,9 +11,10 @@ import PlantDetail from './index';
 import { makePlant } from '@test/vitest/data/plant.mock';
 
 // Database
-import { deletePlant, markCareDone, updatePlant } from '@/lib/db/actions';
+import { deletePlant, markCareDone, recalculateCareAmount, updatePlant } from '@/lib/db/actions';
 
 // Types
+import { CareProfileStatus } from '@/lib/db/actions/types';
 import { CareKind } from '@/types';
 
 vi.mock('next/navigation', () => {
@@ -31,6 +32,7 @@ vi.mock('@/lib/db/actions', () => {
     return {
         deletePlant: vi.fn(),
         markCareDone: vi.fn(),
+        recalculateCareAmount: vi.fn(),
         updatePlant: vi.fn()
     };
 });
@@ -43,6 +45,11 @@ describe('<PlantDetail />', () => {
     beforeEach(() => {
         vi.mocked(deletePlant).mockResolvedValue(undefined);
         vi.mocked(markCareDone).mockResolvedValue(undefined);
+        vi.mocked(recalculateCareAmount).mockReset();
+        vi.mocked(recalculateCareAmount).mockResolvedValue({
+            status: CareProfileStatus.Ok,
+            waterAmountMl: 1200
+        });
         vi.mocked(updatePlant).mockResolvedValue(undefined);
     });
 
@@ -370,6 +377,179 @@ describe('<PlantDetail />', () => {
             soilVolumeLitres: undefined
         });
         expect(vi.mocked(markCareDone)).not.toHaveBeenCalled();
+    });
+
+    it('recalculates the amount when the pot size changes', async () => {
+        const user = userEvent.setup();
+        const plant = makePlant({
+            potDiameter: 12
+        });
+
+        render(
+            <ToastProvider>
+                <PlantDetail {...props} plant={plant} />
+            </ToastProvider>
+        );
+
+        await user.click(screen.getByRole('button', {
+            name: 'Edit'
+        }));
+        await user.click(screen.getByRole('radio', {
+            name: 'Select 14 cm pot'
+        }));
+        await user.click(screen.getByRole('button', {
+            name: 'Save changes'
+        }));
+
+        expect(vi.mocked(recalculateCareAmount)).toHaveBeenCalledTimes(1);
+        expect(vi.mocked(recalculateCareAmount)).toHaveBeenCalledWith('plant-1', 1200);
+        expect(vi.mocked(markCareDone)).not.toHaveBeenCalled();
+    });
+
+    it('does not recalculate the amount when only the nickname changes', async () => {
+        const user = userEvent.setup();
+        const plant = makePlant({
+            potDiameter: 12
+        });
+
+        render(
+            <ToastProvider>
+                <PlantDetail {...props} plant={plant} />
+            </ToastProvider>
+        );
+
+        await user.click(screen.getByRole('button', {
+            name: 'Edit'
+        }));
+        await user.type(screen.getByLabelText('Nickname'), 'Fern');
+        await user.click(screen.getByRole('button', {
+            name: 'Save changes'
+        }));
+
+        expect(vi.mocked(recalculateCareAmount)).not.toHaveBeenCalled();
+        expect(vi.mocked(markCareDone)).not.toHaveBeenCalled();
+    });
+
+    it('resets the amount and does not recalculate when the pot is cleared', async () => {
+        const user = userEvent.setup();
+        const plant = makePlant({
+            potDiameter: 12,
+            care: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 250,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
+            }
+        });
+
+        render(
+            <ToastProvider>
+                <PlantDetail {...props} plant={plant} />
+            </ToastProvider>
+        );
+
+        await user.click(screen.getByRole('button', {
+            name: 'Edit'
+        }));
+        await user.click(screen.getByRole('button', {
+            name: 'Clear pot size'
+        }));
+        await user.click(screen.getByRole('button', {
+            name: 'Save changes'
+        }));
+
+        expect(vi.mocked(updatePlant)).toHaveBeenCalledWith('plant-1', {
+            nickname: '',
+            care: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
+            },
+            potDiameter: undefined,
+            soilVolumeLitres: undefined
+        });
+        expect(vi.mocked(recalculateCareAmount)).not.toHaveBeenCalled();
+        expect(vi.mocked(markCareDone)).not.toHaveBeenCalled();
+    });
+
+    it('keeps the pot change and shows a notice when the amount is capped', async () => {
+        const user = userEvent.setup();
+        const plant = makePlant({
+            potDiameter: 12
+        });
+
+        vi.mocked(recalculateCareAmount).mockResolvedValue({
+            status: CareProfileStatus.Capped
+        });
+
+        render(
+            <ToastProvider>
+                <PlantDetail {...props} plant={plant} />
+            </ToastProvider>
+        );
+
+        await user.click(screen.getByRole('button', {
+            name: 'Edit'
+        }));
+        await user.click(screen.getByRole('radio', {
+            name: 'Select 14 cm pot'
+        }));
+        await user.click(screen.getByRole('button', {
+            name: 'Save changes'
+        }));
+
+        expect(vi.mocked(updatePlant)).toHaveBeenCalledWith('plant-1', {
+            nickname: '',
+            care: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
+            },
+            potDiameter: 14,
+            soilVolumeLitres: undefined
+        });
+        expect(await screen.findByText('Pot updated. We couldn\'t recalculate the watering amount — the previous figure is kept.')).toBeInTheDocument();
+        expect(vi.mocked(markCareDone)).not.toHaveBeenCalled();
+    });
+
+    it('shows a notice when the recalculation fails', async () => {
+        const user = userEvent.setup();
+        const plant = makePlant({
+            potDiameter: 12
+        });
+
+        vi.mocked(recalculateCareAmount).mockResolvedValue({
+            status: CareProfileStatus.Unavailable
+        });
+
+        render(
+            <ToastProvider>
+                <PlantDetail {...props} plant={plant} />
+            </ToastProvider>
+        );
+
+        await user.click(screen.getByRole('button', {
+            name: 'Edit'
+        }));
+        await user.click(screen.getByRole('radio', {
+            name: 'Select 14 cm pot'
+        }));
+        await user.click(screen.getByRole('button', {
+            name: 'Save changes'
+        }));
+
+        expect(vi.mocked(updatePlant)).toHaveBeenCalledTimes(1);
+        expect(await screen.findByText('Pot updated. We couldn\'t recalculate the watering amount — the previous figure is kept.')).toBeInTheDocument();
     });
 
     it('shows a notice when the schedule cannot be saved', async () => {

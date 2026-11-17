@@ -34,6 +34,12 @@ describe('<WaterAmount />', () => {
         expect(container).toBeEmptyDOMElement();
     });
 
+    it('renders nothing when the amount is zero', () => {
+        const { container } = render(<WaterAmount {...props} amount={0} />);
+
+        expect(container).toBeEmptyDOMElement();
+    });
+
     it('renders the flag treatment for the flag variant', () => {
         render(<WaterAmount {...props} variant={WaterAmountVariant.Flag} />);
 

@@ -117,7 +117,7 @@ describe('<PlantChips />', () => {
                 waterEveryDaysSummer: 2,
                 waterEveryDaysAutumn: 2,
                 waterEveryDaysWinter: 2,
-                waterAmountMl: 0,
+                waterAmountMl: 80,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 12
             },
@@ -182,7 +182,7 @@ describe('<PlantChips />', () => {
                 waterEveryDaysSummer: 2,
                 waterEveryDaysAutumn: 2,
                 waterEveryDaysWinter: 2,
-                waterAmountMl: 0,
+                waterAmountMl: 1200,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 12
             },

@@ -437,7 +437,7 @@ describe('<IdentifyScreen />', () => {
         });
     });
 
-    it('asks for the amount without a volume on submit', async () => {
+    it('does not ask for the amount without a volume on submit', async () => {
         const user = userEvent.setup();
         vi.mocked(compressPhoto).mockResolvedValue(new Blob(['leaf']));
         vi.mocked(identifyPlant).mockResolvedValue([{
@@ -466,11 +466,9 @@ describe('<IdentifyScreen />', () => {
         }));
 
         await waitFor(() => {
-            expect(loadWaterAmount).toHaveBeenCalledWith({
-                species: 'Dracaena trifasciata',
-                soilVolumeMl: undefined
-            });
+            expect(createPlant).toHaveBeenCalled();
         });
+        expect(loadWaterAmount).not.toHaveBeenCalled();
     });
 
     it('keeps the form open with the capped sentence and does not navigate when the limit is reached', async () => {

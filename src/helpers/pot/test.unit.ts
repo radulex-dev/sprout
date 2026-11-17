@@ -1,68 +1,102 @@
 import { describe, expect, it } from 'vitest';
 
 // Constants
-import { ML_PER_LITRE, POT_SIZES, WATER_AMOUNT_RATIO } from './constants';
+import { ML_PER_LITRE, POT_SIZES } from './constants';
 
 // Helpers
-import { formatWaterAmount, getWaterAmountMl } from './index';
+import { formatWaterAmount, resolveSoilVolumeMl } from './index';
 
 // Types
 import { PotDiameterUnit, PotVolumeUnit } from './types';
 
-describe('getWaterAmountMl', () => {
-    it.each([
-        [9, 35],
-        [10.5, 45],
-        [12, 80],
-        [13, 100],
-        [14, 120],
-        [15, 150],
-        [17, 200],
-        [19, 300],
-        [21, 400],
-        [24, 500],
-        [27, 750],
-        [30, 1000]
-    ])('maps a %s cm pot to %s ml', (diameter, ml) => {
-        expect(getWaterAmountMl({
+describe('resolveSoilVolumeMl', () => {
+    it.each([{
+        diameter: 9,
+        millilitres: 350
+    }, {
+        diameter: 10.5,
+        millilitres: 450
+    }, {
+        diameter: 12,
+        millilitres: 800
+    }, {
+        diameter: 13,
+        millilitres: 1000
+    }, {
+        diameter: 14,
+        millilitres: 1200
+    }, {
+        diameter: 15,
+        millilitres: 1500
+    }, {
+        diameter: 17,
+        millilitres: 2000
+    }, {
+        diameter: 19,
+        millilitres: 3000
+    }, {
+        diameter: 21,
+        millilitres: 4000
+    }, {
+        diameter: 24,
+        millilitres: 5000
+    }, {
+        diameter: 27,
+        millilitres: 7500
+    }, {
+        diameter: 30,
+        millilitres: 10000
+    }])('maps a $diameter cm pot to $millilitres ml', ({ diameter, millilitres }) => {
+        expect(resolveSoilVolumeMl({
             potDiameter: diameter
-        })).toBe(ml);
+        })).toBe(millilitres);
     });
 
-    it.each([
-        [1, 100],
-        [12, 1200],
-        [60, 6000],
-        [86, 8600],
-        [100, 10000],
-        [1000, 100000]
-    ])('maps a %s L container to %s ml', (litres, ml) => {
-        expect(getWaterAmountMl({
+    it.each([{
+        litres: 1,
+        millilitres: 1000
+    }, {
+        litres: 12,
+        millilitres: 12000
+    }, {
+        litres: 60,
+        millilitres: 60000
+    }, {
+        litres: 86,
+        millilitres: 86000
+    }, {
+        litres: 100,
+        millilitres: 100000
+    }, {
+        litres: 1000,
+        millilitres: 1000000
+    }])('maps a $litres L container to $millilitres ml', ({ litres, millilitres }) => {
+        expect(resolveSoilVolumeMl({
             soilVolumeLitres: litres
-        })).toBe(ml);
+        })).toBe(millilitres);
     });
 
-    it('derives no amount when the size is unset', () => {
-        expect(getWaterAmountMl({})).toBeUndefined();
+    it('derives no volume when the size is unset', () => {
+        expect(resolveSoilVolumeMl({})).toBeUndefined();
     });
 
-    it('derives no amount for an unrecognised diameter', () => {
-        expect(getWaterAmountMl({
+    it('derives no volume for an unrecognised diameter', () => {
+        expect(resolveSoilVolumeMl({
             potDiameter: 11
         })).toBeUndefined();
     });
 
-    it('derives the amount from a litre size when no diameter is set', () => {
-        expect(getWaterAmountMl({
+    it('derives the volume from a litre size when no diameter is set', () => {
+        expect(resolveSoilVolumeMl({
             soilVolumeLitres: 1000
-        })).toBe(100000);
+        })).toBe(1000000);
     });
 
     it('prefers the diameter when a size carries both', () => {
-        expect(getWaterAmountMl({
+        expect(resolveSoilVolumeMl({
             potDiameter: 12,
             soilVolumeLitres: 60
-        })).toBe(80);
+        })).toBe(800);
     });
 });
 
@@ -94,13 +128,10 @@ describe('formatWaterAmount', () => {
 });
 
 describe('POT_SIZES', () => {
-    it.each(POT_SIZES)('derives a whole number of millilitres for a $diameter cm pot', ({ diameter, volume }) => {
-        const amount = getWaterAmountMl({
+    it.each(POT_SIZES)('converts a $diameter cm pot to whole millilitres', ({ diameter, volume }) => {
+        expect(resolveSoilVolumeMl({
             potDiameter: diameter
-        });
-
-        expect(amount).toBe(Math.round(volume * ML_PER_LITRE * WATER_AMOUNT_RATIO));
-        expect(Number.isSafeInteger(amount)).toBe(true);
+        })).toBe(volume * ML_PER_LITRE);
     });
 
     it('lists twelve sizes in ascending order', () => {

@@ -12,7 +12,7 @@ import PlantChips from '../PlantChips';
 
 // Helpers
 import { displayName } from '@/helpers/plant';
-import { hasContainerSize } from '@/components/PotSizePicker/helpers';
+import { hasContainerSize } from '@/helpers/pot';
 
 // Styles
 import styles from './styles.module.css';

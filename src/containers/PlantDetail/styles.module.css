@@ -42,23 +42,6 @@
     ;
 }
 
-.careStats {
-    @apply mt-3.5 grid grid-cols-3 gap-2.5;
-
-    dt,
-    dd {
-        margin: 0;
-    }
-}
-
-.careStat {
-    @apply rounded-btn bg-surface px-2.5 py-3 text-center shadow-card;
-}
-
-.emoji {
-    @apply text-[1.375rem];
-}
-
-.label {
-    @apply ui-field-hint font-bold tracking-[0.0313rem] uppercase;
+.amountNotice {
+    @apply mt-2;
 }

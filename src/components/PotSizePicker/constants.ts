@@ -18,9 +18,7 @@ export const POT_DIAMETER_INFO_LABEL = 'About measuring the pot diameter';
 
 export const LITRES_ERROR = `Enter a whole number of litres between ${MIN_SOIL_VOLUME_LITRES} and ${MAX_SOIL_VOLUME_LITRES}.`;
 
-export const LITRE_BAR_HEIGHT_REM = 8.5;
 export const DOSE_MARKS: readonly number[] = [20, 40, 60, 80];
-export const DOSE_PILL_MIN_BOTTOM_REM = 0.75;
 
 export const POT_WIDTH_REM_PER_CM = 0.09167;
 
