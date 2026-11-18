@@ -62,7 +62,7 @@
       "idx": 8,
       "version": "7",
       "when": 1794341513277,
-      "tag": "0008_added_ai_usage",
+      "tag": "0008_ai_care_schema",
       "breakpoints": true
     },
     {
@@ -70,27 +70,6 @@
       "version": "7",
       "when": 1794419907279,
       "tag": "0009_seasonal_care_intervals",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "7",
-      "when": 1794865059725,
-      "tag": "0010_added_ai_care_tables",
-      "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "7",
-      "when": 1795024856722,
-      "tag": "0011_removed_care_reference",
-      "breakpoints": true
-    },
-    {
-      "idx": 12,
-      "version": "7",
-      "when": 1795039436913,
-      "tag": "0012_water_percent_per_species",
       "breakpoints": true
     }
   ]
