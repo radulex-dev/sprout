@@ -1,6 +1,6 @@
 {
-  "id": "158f8dff-b842-43f7-9e6e-15633a529f1c",
-  "prevId": "34746ed5-5334-4444-bb96-548767e9fc5d",
+  "id": "895bc5ec-25ce-406f-af6c-719151155bb7",
+  "prevId": "0ceb27c3-c6c7-44f6-b630-1f4ed7dc86d8",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -100,26 +100,122 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "account_user_id_user_id_fk": {
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
+          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ai_care_interval": {
+      "name": "ai_care_interval",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "species_key": {
+          "name": "species_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "water_spring": {
+          "name": "water_spring",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "water_summer": {
+          "name": "water_summer",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "water_autumn": {
+          "name": "water_autumn",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "water_winter": {
+          "name": "water_winter",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fertilize_every_days": {
+          "name": "fertilize_every_days",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "repot_every_months": {
+          "name": "repot_every_months",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "confidence": {
+          "name": "confidence",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "model": {
+          "name": "model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "ai_care_interval_species_idx": {
+          "name": "ai_care_interval_species_idx",
+          "columns": [
+            {
+              "expression": "species_key",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -181,24 +277,24 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "ai_usage_user_id_user_id_fk": {
           "name": "ai_usage_user_id_user_id_fk",
           "tableFrom": "ai_usage",
+          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -207,8 +303,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.care_reference": {
-      "name": "care_reference",
+    "public.ai_water_amount": {
+      "name": "ai_water_amount",
       "schema": "",
       "columns": {
         "id": {
@@ -218,114 +314,53 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "match_type": {
-          "name": "match_type",
+        "species_key": {
+          "name": "species_key",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "match_key": {
-          "name": "match_key",
+        "water_percent": {
+          "name": "water_percent",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "model": {
+          "name": "model",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "alias_target": {
-          "name": "alias_target",
-          "type": "text",
+        "created_at": {
+          "name": "created_at",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": false
-        },
-        "water_interval": {
-          "name": "water_interval",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "water_unit": {
-          "name": "water_unit",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "fertilize_interval": {
-          "name": "fertilize_interval",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "fertilize_unit": {
-          "name": "fertilize_unit",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "repot_interval": {
-          "name": "repot_interval",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "repot_unit": {
-          "name": "repot_unit",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "family": {
-          "name": "family",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "source_url": {
-          "name": "source_url",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": true
         }
       },
       "indexes": {
-        "care_reference_match_idx": {
-          "name": "care_reference_match_idx",
+        "ai_water_amount_species_idx": {
+          "name": "ai_water_amount_species_idx",
           "columns": [
             {
-              "expression": "match_type",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "match_key",
+              "expression": "species_key",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
-      "checkConstraints": {
-        "care_reference_water_range": {
-          "name": "care_reference_water_range",
-          "value": "(\"care_reference\".\"water_interval\" is null and \"care_reference\".\"water_unit\" is null) or (\"care_reference\".\"water_interval\" is not null and \"care_reference\".\"water_unit\" is not null and \"care_reference\".\"water_unit\" in ('D', 'M', 'Y') and \"care_reference\".\"water_interval\" * case \"care_reference\".\"water_unit\" when 'D' then 1 when 'M' then 30 else 365 end between 2 and 28)"
-        },
-        "care_reference_fertilize_range": {
-          "name": "care_reference_fertilize_range",
-          "value": "(\"care_reference\".\"fertilize_interval\" is null and \"care_reference\".\"fertilize_unit\" is null) or (\"care_reference\".\"fertilize_interval\" is not null and \"care_reference\".\"fertilize_unit\" is not null and \"care_reference\".\"fertilize_unit\" in ('D', 'M', 'Y') and \"care_reference\".\"fertilize_interval\" * case \"care_reference\".\"fertilize_unit\" when 'D' then 1 when 'M' then 30 else 365 end between 14 and 90)"
-        },
-        "care_reference_repot_range": {
-          "name": "care_reference_repot_range",
-          "value": "(\"care_reference\".\"repot_interval\" is null and \"care_reference\".\"repot_unit\" is null) or (\"care_reference\".\"repot_interval\" is not null and \"care_reference\".\"repot_unit\" is not null and \"care_reference\".\"repot_unit\" in ('D', 'M', 'Y') and \"care_reference\".\"repot_interval\" * case \"care_reference\".\"repot_unit\" when 'D' then 1 when 'M' then 30 else 365 end between 180 and 1095)"
-        }
-      },
+      "checkConstraints": {},
       "isRLSEnabled": false
     },
     "public.plants": {
@@ -427,24 +462,24 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "plants_user_id_user_id_fk": {
           "name": "plants_user_id_user_id_fk",
           "tableFrom": "plants",
+          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -514,9 +549,9 @@
             }
           ],
           "isUnique": true,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "push_subscriptions_user_id_idx": {
           "name": "push_subscriptions_user_id_idx",
@@ -529,24 +564,24 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "push_subscriptions_user_id_user_id_fk": {
           "name": "push_subscriptions_user_id_user_id_fk",
           "tableFrom": "push_subscriptions",
+          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -621,34 +656,34 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "session_user_id_user_id_fk": {
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
+          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "session_token_unique": {
           "name": "session_token_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "token"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       },
       "policies": {},
@@ -711,10 +746,10 @@
       "uniqueConstraints": {
         "user_email_unique": {
           "name": "user_email_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "email"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       },
       "policies": {},
@@ -776,9 +811,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -791,10 +826,10 @@
   },
   "enums": {},
   "schemas": {},
-  "views": {},
   "sequences": {},
   "roles": {},
   "policies": {},
+  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},
