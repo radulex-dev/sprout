@@ -1,5 +1,4 @@
 export const STANDARD_POT_ML = 800;
-export const UNKNOWN_SOIL_VOLUME_ML = 0;
 
 export const MIN_WATER_DAYS = 2;
 export const MAX_WATER_DAYS = 28;

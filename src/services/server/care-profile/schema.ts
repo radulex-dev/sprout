@@ -18,7 +18,7 @@ export const CareIntervalsSchema = z.object({
 });
 
 export const WaterAmountSchema = z.object({
-    waterPercent: z.int()
+    waterPercent: z.int().min(MIN_WATER_PERCENT).max(MAX_WATER_PERCENT)
 });
 
 export const CARE_INTERVAL_JSON_SCHEMA: Record<string, unknown> = {

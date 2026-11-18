@@ -7,11 +7,12 @@ import { redirect } from 'next/navigation';
 // Constants
 import { ALL_PATH, LOAD_CARE_INTERVALS_SCHEMA, LOAD_WATER_AMOUNT_SCHEMA, PLANT_ID_SCHEMA } from '@/lib/db/constants';
 import { RESET_PREFILL_COOKIE } from '@/lib/auth/constants';
+import { STANDARD_POT_ML } from '@/services/server/care-profile/constants';
 
 // Services
 import { AiCapReachedError, AiRequestError, AiUnavailableError } from '@/services/server/ai';
-import { getCareIntervals, getWaterAmount } from '@/services/server/care-profile';
-import { toCareSchedule } from '@/services/server/care-profile/helpers';
+import { getCareIntervals, getWaterPercent } from '@/services/server/care-profile';
+import { resolveWaterAmountMl, toCareSchedule } from '@/services/server/care-profile/helpers';
 import { createPlant as serviceCreatePlant, deletePlant as serviceDeletePlant, findPlant as serviceFindPlant, markCareDone as serviceMarkCareDone, recordNotified as serviceRecordNotified, updateCareAmount as serviceUpdateCareAmount, updatePlant as serviceUpdatePlant } from '@/services/server/plants';
 import { CareKindSchema, LastCareDateSchema, NotifiedAtSchema, parsePlantInput, UpdatePlantSchema, type UpdatePlantInput } from '@/services/server/plants/schema';
 import { captureEvent } from '@/services/server/posthog';
@@ -124,15 +125,14 @@ export const loadWaterAmount = async (input: LoadWaterAmountRequest): Promise<Lo
     const parsed = LOAD_WATER_AMOUNT_SCHEMA.parse(input);
 
     try {
-        const waterAmountMl = await getWaterAmount({
+        const waterPercent = await getWaterPercent({
             userId: session.user.id,
-            species: parsed.species,
-            soilVolumeMl: parsed.soilVolumeMl
+            species: parsed.species
         });
 
         return {
             status: CareProfileStatus.Ok,
-            waterAmountMl
+            waterAmountMl: resolveWaterAmountMl(parsed.soilVolumeMl ?? STANDARD_POT_ML, waterPercent)
         };
     } catch (reason) {
         if (reason instanceof AiCapReachedError) {
