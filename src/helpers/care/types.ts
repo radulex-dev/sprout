@@ -1,5 +1,3 @@
-import type { LucideIcon } from 'lucide-react';
-
 // Types
 import type { CareKind, Plant } from '@/types';
 
@@ -15,7 +13,6 @@ export interface CareMeta {
     label: string;
     verb: string;
     gerund: string;
-    icon: LucideIcon;
 }
 
 export interface CareNotification {

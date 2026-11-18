@@ -17,6 +17,7 @@ import Popover from '@/design-system/Popover';
 // Helpers
 import { formatDaysAgo } from './helpers';
 import { toDateValue } from '@/helpers/care';
+import { CARE_ICONS } from '@/helpers/care/icons';
 
 // Styles
 import styles from './styles.module.css';
@@ -36,6 +37,7 @@ const CareLogRow: React.FunctionComponent<Props> = ({ plant, label, now, onDone,
     const classes = classNames(styles.root, className);
 
     const meta = CARE_META[label];
+    const TaskIcon = CARE_ICONS[label];
     const last = plant.lastCare[label];
     const maxDate = useMemo(() => {
         return today(getLocalTimeZone()).toString();
@@ -72,7 +74,7 @@ const CareLogRow: React.FunctionComponent<Props> = ({ plant, label, now, onDone,
     return (
         <div className={classes} {...props}>
             <div className={styles.thumb}>
-                <meta.icon size="1.125rem" aria-hidden />
+                <TaskIcon size="1.125rem" aria-hidden />
             </div>
             <div className={styles.info}>
                 <div className={styles.title}>

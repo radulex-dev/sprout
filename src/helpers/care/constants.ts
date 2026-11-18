@@ -1,5 +1,3 @@
-import { Droplets, Flower2, Leaf } from 'lucide-react';
-
 // Types
 import { CareKind, CareSeason, type CareSchedule } from '@/types';
 import type { CareMeta } from './types';
@@ -24,20 +22,17 @@ export const CARE_META: Record<CareKind, CareMeta> = {
     [CareKind.Water]: {
         label: 'Water',
         verb: 'watered',
-        gerund: 'watering',
-        icon: Droplets
+        gerund: 'watering'
     },
     [CareKind.Fertilize]: {
         label: 'Fertilise',
         verb: 'fertilised',
-        gerund: 'fertilising',
-        icon: Leaf
+        gerund: 'fertilising'
     },
     [CareKind.Repot]: {
         label: 'Repot',
         verb: 'repotted',
-        gerund: 'repotting',
-        icon: Flower2
+        gerund: 'repotting'
     }
 };
 

@@ -15,6 +15,7 @@ import WaterAmount from '@/components/WaterAmount';
 
 // Helpers
 import { displayName } from '@/helpers/plant';
+import { CARE_ICONS } from '@/helpers/care/icons';
 import { formatDue } from '@/helpers/care';
 import type { CareTask } from '@/helpers/care/types';
 
@@ -31,6 +32,7 @@ export interface Props extends Omit<React.ComponentProps<'div'>, 'onSelect'> {
 
 const TaskRow: React.FunctionComponent<Props> = ({ task, onSelect, className, ...props }) => {
     const meta = CARE_META[task.kind];
+    const TaskIcon = CARE_ICONS[task.kind];
     const classes = classNames(styles.root, className);
     const whenClasses = classNames(styles.when, {
         [styles.overdue]: task.daysUntil < 0,
@@ -56,7 +58,7 @@ const TaskRow: React.FunctionComponent<Props> = ({ task, onSelect, className, ..
                     <PlantPhoto photo={task.plant.photo} alt={displayName(task.plant)} className={styles.thumb} />
                     <span className={styles.info}>
                         <span className={styles.title}>
-                            <meta.icon size="0.875rem" aria-hidden />
+                            <TaskIcon size="0.875rem" aria-hidden />
                             <span>
                                 {meta.label}
                             </span>
