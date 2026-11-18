@@ -6,11 +6,11 @@ import { PLANT_ID_SCHEMA } from './constants';
 
 // Database
 import { database } from '@/lib/db';
-import { careReference, plants, pushSubscriptions } from '@/lib/db/schema';
+import { plants, pushSubscriptions } from '@/lib/db/schema';
 
 // Types
 import type { Plant } from '@/types';
-import type { CareReferenceRow, PlantListRow, PushSubscriptionRow } from './types';
+import type { PlantListRow, PushSubscriptionRow } from './types';
 
 const plantColumns = {
     id: plants.id,
@@ -85,10 +85,6 @@ export const getPlantPhoto = async (userId: string, id: string): Promise<Buffer 
     const row = rows.at(0);
 
     return row?.photo ?? undefined;
-};
-
-export const getCareReferenceRows = async (): Promise<CareReferenceRow[]> => {
-    return database.select().from(careReference);
 };
 
 export const getAllPushSubscriptions = async (): Promise<PushSubscriptionRow[]> => {

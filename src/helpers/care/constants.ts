@@ -47,13 +47,3 @@ export const WATER_SEASON_FIELDS: Record<CareSeason, keyof Pick<CareSchedule, 'w
     [CareSeason.Autumn]: 'waterEveryDaysAutumn',
     [CareSeason.Winter]: 'waterEveryDaysWinter'
 };
-
-export const FALLBACK_CARE: CareSchedule = {
-    waterEveryDaysSpring: 7,
-    waterEveryDaysSummer: 7,
-    waterEveryDaysAutumn: 7,
-    waterEveryDaysWinter: 7,
-    waterAmountMl: 0,
-    fertilizeEveryDays: 30,
-    repotEveryMonths: 18
-};

@@ -2,19 +2,17 @@ import { getLocalTimeZone, parseDate } from '@internationalized/date';
 import { describe, expect, it, vi } from 'vitest';
 
 // Constants
-import { DAY_MS, DAYS_PER_MONTH, FALLBACK_CARE } from './constants';
+import { DAY_MS, DAYS_PER_MONTH } from './constants';
 
 // Helpers
 import { seasonForTimestamp } from './helpers';
 import { allTasks, buildCareNotification, dueTasks, formatDue, isNotificationHour, isNotifiedToday, nextDue, resolveLastCare, startOfToday, toDateValue, waterSeasonFor } from './index';
-import { resolveCare } from './resolve';
 
 // Mocks
-import { careReference } from '@test/vitest/data/care-reference.mock';
 import { makePlant, NOW } from '@test/vitest/data/plant.mock';
 
 // Types
-import { CareKind, CareSeason, CareSource } from '@/types';
+import { CareKind, CareSeason } from '@/types';
 
 const startOfLocalDay = (timestamp: number): number => {
     const date = new Date(timestamp);
@@ -539,156 +537,6 @@ describe('startOfToday', () => {
         const evening = new Date(2026, 8, 6, 21, 34).getTime();
 
         expect(toDateValue(startOfToday(evening))).toBe('2026-09-06');
-    });
-});
-
-describe('resolveCare', () => {
-    it('resolves a genus case-insensitively', () => {
-        const resolved = resolveCare(careReference, {
-            species: 'Monstera deliciosa',
-            genus: 'Monstera'
-        });
-
-        expect(resolved.source).toBe(CareSource.Genus);
-        expect(resolved.care).toEqual({
-            waterEveryDaysSpring: 5,
-            waterEveryDaysSummer: 5,
-            waterEveryDaysAutumn: 5,
-            waterEveryDaysWinter: 5,
-            waterAmountMl: 0,
-            fertilizeEveryDays: 30,
-            repotEveryMonths: 18
-        });
-    });
-
-    it('resolves the family case-insensitively when the genus is unknown', () => {
-        const resolved = resolveCare(careReference, {
-            genus: 'Soleirolia',
-            family: 'Urticaceae'
-        });
-
-        expect(resolved.source).toBe(CareSource.Family);
-        expect(resolved.care).toEqual({
-            waterEveryDaysSpring: 6,
-            waterEveryDaysSummer: 6,
-            waterEveryDaysAutumn: 6,
-            waterEveryDaysWinter: 6,
-            waterAmountMl: 0,
-            fertilizeEveryDays: 30,
-            repotEveryMonths: 18
-        });
-    });
-
-    it('prefers the genus over the family when both match', () => {
-        const resolved = resolveCare(careReference, {
-            genus: 'Monstera',
-            family: 'Urticaceae'
-        });
-
-        expect(resolved.source).toBe(CareSource.Genus);
-        expect(resolved.care).toEqual({
-            waterEveryDaysSpring: 5,
-            waterEveryDaysSummer: 5,
-            waterEveryDaysAutumn: 5,
-            waterEveryDaysWinter: 5,
-            waterAmountMl: 0,
-            fertilizeEveryDays: 30,
-            repotEveryMonths: 18
-        });
-    });
-
-    it('falls back to FALLBACK_CARE when neither the genus nor the family is known', () => {
-        const resolved = resolveCare(careReference, {
-            species: 'Ficus unknownia',
-            genus: 'Unknownia',
-            family: 'Unknownaceae'
-        });
-
-        expect(resolved).toEqual({
-            care: FALLBACK_CARE,
-            source: CareSource.None
-        });
-    });
-
-    it('falls back to FALLBACK_CARE for an empty lookup', () => {
-        expect(resolveCare(careReference, {})).toEqual({
-            care: FALLBACK_CARE,
-            source: CareSource.None
-        });
-    });
-});
-
-describe('alias resolution', () => {
-    it('resolves a genus alias to the reclassified genus entry', () => {
-        const resolved = resolveCare(careReference, {
-            species: 'Calathea orbifolia',
-            genus: 'Calathea'
-        });
-
-        expect(resolved.source).toBe(CareSource.Genus);
-        expect(resolved.care).toEqual({
-            waterEveryDaysSpring: 4,
-            waterEveryDaysSummer: 4,
-            waterEveryDaysAutumn: 4,
-            waterEveryDaysWinter: 4,
-            waterAmountMl: 0,
-            fertilizeEveryDays: 21,
-            repotEveryMonths: 12
-        });
-    });
-
-    it('resolves a species alias to the aliased genus entry', () => {
-        const resolved = resolveCare(careReference, {
-            species: 'Dracaena trifasciata',
-            genus: 'Dracaena'
-        });
-
-        expect(resolved.source).toBe(CareSource.Genus);
-        expect(resolved.care).toEqual({
-            waterEveryDaysSpring: 21,
-            waterEveryDaysSummer: 21,
-            waterEveryDaysAutumn: 21,
-            waterEveryDaysWinter: 21,
-            waterAmountMl: 0,
-            fertilizeEveryDays: 90,
-            repotEveryMonths: 30
-        });
-    });
-
-    it('normalises case and surrounding whitespace before alias resolution', () => {
-        const resolved = resolveCare(careReference, {
-            species: '  DRACAENA TRIFASCIATA  ',
-            genus: '  Dracaena  '
-        });
-
-        expect(resolved.source).toBe(CareSource.Genus);
-        expect(resolved.care).toEqual({
-            waterEveryDaysSpring: 21,
-            waterEveryDaysSummer: 21,
-            waterEveryDaysAutumn: 21,
-            waterEveryDaysWinter: 21,
-            waterAmountMl: 0,
-            fertilizeEveryDays: 90,
-            repotEveryMonths: 30
-        });
-    });
-
-    it('keeps Dracaena fragrans on the dracaena entry while aliasing Dracaena trifasciata', () => {
-        const resolved = resolveCare(careReference, {
-            species: 'Dracaena fragrans',
-            genus: 'Dracaena'
-        });
-
-        expect(resolved.source).toBe(CareSource.Genus);
-        expect(resolved.care).toEqual({
-            waterEveryDaysSpring: 10,
-            waterEveryDaysSummer: 10,
-            waterEveryDaysAutumn: 10,
-            waterEveryDaysWinter: 10,
-            waterAmountMl: 0,
-            fertilizeEveryDays: 30,
-            repotEveryMonths: 30
-        });
     });
 });
 

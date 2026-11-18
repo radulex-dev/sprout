@@ -2,9 +2,6 @@ import type React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
-// Constants
-import { FALLBACK_CARE } from '@/helpers/care/constants';
-
 // Components
 import CareScheduleNotice from './index';
 
@@ -19,7 +16,12 @@ const props: React.ComponentProps<typeof CareScheduleNotice> = {
 describe('<CareScheduleNotice />', () => {
     it('renders the four seasonal water intervals', () => {
         const plant = makePlant({
-            care: FALLBACK_CARE
+            care: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7
+            }
         });
 
         render(<CareScheduleNotice {...props} plant={plant} />);
