@@ -7,7 +7,7 @@ import { VERIFIED_SESSION } from '@test/vitest/data/session.mock';
 
 // Services
 import { AiCapReachedError, AiRequestError, AiUnavailableError } from '@/services/server/ai';
-import { getCareIntervals, getWaterAmount } from '@/services/server/care-profile';
+import { getCareIntervals, getWaterPercent } from '@/services/server/care-profile';
 import { createPlant as serviceCreatePlant, deletePlant as serviceDeletePlant, findPlant as serviceFindPlant, markCareDone as serviceMarkCareDone, recordNotified as serviceRecordNotified, updateCareAmount as serviceUpdateCareAmount, updatePlant as serviceUpdatePlant } from '@/services/server/plants';
 
 // Database
@@ -38,7 +38,7 @@ vi.mock('@/services/server/plants', () => {
 vi.mock('@/services/server/care-profile', () => {
     return {
         getCareIntervals: vi.fn(),
-        getWaterAmount: vi.fn()
+        getWaterPercent: vi.fn()
     };
 });
 
@@ -395,36 +395,69 @@ describe('loadCareIntervals', () => {
 
 describe('loadWaterAmount', () => {
     beforeEach(() => {
-        vi.mocked(getWaterAmount).mockResolvedValue(80);
+        vi.mocked(getWaterPercent).mockResolvedValue(8);
     });
 
-    it('returns the amount and forwards the trimmed species and soil volume', async () => {
+    it('derives the amount from the percent and forwards the trimmed species', async () => {
         const result = await loadWaterAmount({
             species: '  Monstera deliciosa  ',
             soilVolumeMl: 1500
         });
 
-        expect(getWaterAmount).toHaveBeenCalledWith({
+        expect(getWaterPercent).toHaveBeenCalledWith({
             userId: 'user-1',
-            species: 'Monstera deliciosa',
-            soilVolumeMl: 1500
+            species: 'Monstera deliciosa'
         });
         expect(result).toEqual({
             status: CareProfileStatus.Ok,
-            waterAmountMl: 80
+            waterAmountMl: 120
         });
         expect(result).not.toHaveProperty('error');
     });
 
-    it('forwards an absent soil volume', async () => {
-        await loadWaterAmount({
+    it('derives an absent soil volume from the standard pot', async () => {
+        vi.mocked(getWaterPercent).mockResolvedValue(10);
+
+        await expect(loadWaterAmount({
             species: 'Monstera deliciosa'
+        })).resolves.toEqual({
+            status: CareProfileStatus.Ok,
+            waterAmountMl: 80
         });
 
-        expect(getWaterAmount).toHaveBeenCalledWith({
+        expect(getWaterPercent).toHaveBeenCalledWith({
             userId: 'user-1',
-            species: 'Monstera deliciosa',
-            soilVolumeMl: undefined
+            species: 'Monstera deliciosa'
+        });
+    });
+
+    it('answers a second volume for a known species from the same species cache entry', async () => {
+        vi.mocked(getWaterPercent).mockResolvedValue(7);
+
+        const first = await loadWaterAmount({
+            species: 'Yucca elephantipes',
+            soilVolumeMl: 1000
+        });
+        const second = await loadWaterAmount({
+            species: 'Yucca elephantipes',
+            soilVolumeMl: 800
+        });
+
+        expect(getWaterPercent).toHaveBeenNthCalledWith(1, {
+            userId: 'user-1',
+            species: 'Yucca elephantipes'
+        });
+        expect(getWaterPercent).toHaveBeenNthCalledWith(2, {
+            userId: 'user-1',
+            species: 'Yucca elephantipes'
+        });
+        expect(first).toEqual({
+            status: CareProfileStatus.Ok,
+            waterAmountMl: 70
+        });
+        expect(second).toEqual({
+            status: CareProfileStatus.Ok,
+            waterAmountMl: 56
         });
     });
 
@@ -433,7 +466,7 @@ describe('loadWaterAmount', () => {
             species: ' '.repeat(3)
         })).rejects.toThrow();
 
-        expect(getWaterAmount).not.toHaveBeenCalled();
+        expect(getWaterPercent).not.toHaveBeenCalled();
     });
 
     it.each([{
@@ -446,7 +479,7 @@ describe('loadWaterAmount', () => {
             soilVolumeMl
         })).rejects.toThrow();
 
-        expect(getWaterAmount).not.toHaveBeenCalled();
+        expect(getWaterPercent).not.toHaveBeenCalled();
     });
 
     it('propagates a redirect from the guard', async () => {
@@ -456,11 +489,11 @@ describe('loadWaterAmount', () => {
             species: 'Monstera deliciosa'
         })).rejects.toThrow('NEXT_REDIRECT');
 
-        expect(getWaterAmount).not.toHaveBeenCalled();
+        expect(getWaterPercent).not.toHaveBeenCalled();
     });
 
     it('answers capped without a message when the daily limit is reached', async () => {
-        vi.mocked(getWaterAmount).mockRejectedValue(new AiCapReachedError());
+        vi.mocked(getWaterPercent).mockRejectedValue(new AiCapReachedError());
 
         await expect(loadWaterAmount({
             species: 'Monstera deliciosa'
@@ -470,7 +503,7 @@ describe('loadWaterAmount', () => {
     });
 
     it('answers unavailable when the provider is not configured', async () => {
-        vi.mocked(getWaterAmount).mockRejectedValue(new AiUnavailableError());
+        vi.mocked(getWaterPercent).mockRejectedValue(new AiUnavailableError());
 
         await expect(loadWaterAmount({
             species: 'Monstera deliciosa'
@@ -482,7 +515,7 @@ describe('loadWaterAmount', () => {
     it('answers unavailable and warns when the request fails', async () => {
         const warn = vi.spyOn(console, 'warn').mockImplementation(vi.fn());
 
-        vi.mocked(getWaterAmount).mockRejectedValue(new AiRequestError('AI request failed.', 502));
+        vi.mocked(getWaterPercent).mockRejectedValue(new AiRequestError('AI request failed.', 502));
 
         await expect(loadWaterAmount({
             species: 'Monstera deliciosa'
@@ -497,26 +530,25 @@ describe('recalculateCareAmount', () => {
     beforeEach(() => {
         vi.mocked(serviceFindPlant).mockReset();
         vi.mocked(serviceUpdateCareAmount).mockReset();
-        vi.mocked(getWaterAmount).mockReset();
+        vi.mocked(getWaterPercent).mockReset();
         vi.mocked(revalidatePath).mockClear();
         vi.mocked(serviceFindPlant).mockResolvedValue(makePlant());
-        vi.mocked(getWaterAmount).mockResolvedValue(250);
+        vi.mocked(getWaterPercent).mockResolvedValue(20);
         vi.mocked(serviceUpdateCareAmount).mockResolvedValue(undefined);
     });
 
     it('stores the recalculated amount and returns it', async () => {
         const result = await recalculateCareAmount('123e4567-e89b-42d3-a456-426614174000', 1200);
 
-        expect(getWaterAmount).toHaveBeenCalledWith({
+        expect(getWaterPercent).toHaveBeenCalledWith({
             userId: 'user-1',
-            species: 'Monstera deliciosa',
-            soilVolumeMl: 1200
+            species: 'Monstera deliciosa'
         });
         expect(serviceUpdateCareAmount).toHaveBeenCalledTimes(1);
-        expect(serviceUpdateCareAmount).toHaveBeenCalledWith('user-1', '123e4567-e89b-42d3-a456-426614174000', 250);
+        expect(serviceUpdateCareAmount).toHaveBeenCalledWith('user-1', '123e4567-e89b-42d3-a456-426614174000', 240);
         expect(result).toEqual({
             status: CareProfileStatus.Ok,
-            waterAmountMl: 250
+            waterAmountMl: 240
         });
         expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
     });
@@ -527,7 +559,7 @@ describe('recalculateCareAmount', () => {
         await expect(recalculateCareAmount('123e4567-e89b-42d3-a456-426614174000', 1200)).resolves.toEqual({
             status: CareProfileStatus.Unavailable
         });
-        expect(getWaterAmount).not.toHaveBeenCalled();
+        expect(getWaterPercent).not.toHaveBeenCalled();
         expect(serviceUpdateCareAmount).not.toHaveBeenCalled();
     });
 
@@ -552,7 +584,7 @@ describe('recalculateCareAmount', () => {
         error: new AiUnavailableError(),
         status: CareProfileStatus.Unavailable
     }])('answers $status without writing when $error.name is thrown', async ({ error, status }) => {
-        vi.mocked(getWaterAmount).mockRejectedValue(error);
+        vi.mocked(getWaterPercent).mockRejectedValue(error);
 
         await expect(recalculateCareAmount('123e4567-e89b-42d3-a456-426614174000', 1200)).resolves.toEqual({
             status
@@ -564,7 +596,7 @@ describe('recalculateCareAmount', () => {
     it('answers unavailable and warns when the request fails', async () => {
         vi.spyOn(console, 'warn').mockImplementation(vi.fn());
 
-        vi.mocked(getWaterAmount).mockRejectedValue(new AiRequestError('AI request failed.', 502));
+        vi.mocked(getWaterPercent).mockRejectedValue(new AiRequestError('AI request failed.', 502));
 
         await expect(recalculateCareAmount('123e4567-e89b-42d3-a456-426614174000', 1200)).resolves.toEqual({
             status: CareProfileStatus.Unavailable

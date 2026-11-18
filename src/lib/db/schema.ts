@@ -98,15 +98,14 @@ export const aiWaterAmount = pgTable(
     {
         id: uuid('id').primaryKey().defaultRandom(),
         speciesKey: text('species_key').notNull(),
-        soilVolumeMl: integer('soil_volume_ml').notNull(),
-        waterAmountMl: integer('water_amount_ml').notNull(),
+        waterPercent: integer('water_percent').notNull(),
         model: text('model').notNull(),
         createdAt: bigint('created_at', {
             mode: 'number'
         }).notNull()
     },
     (table) => {
-        return [uniqueIndex('ai_water_amount_lookup_idx').on(table.speciesKey, table.soilVolumeMl)];
+        return [uniqueIndex('ai_water_amount_species_idx').on(table.speciesKey)];
     }
 );
 

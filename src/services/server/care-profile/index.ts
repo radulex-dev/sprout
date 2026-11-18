@@ -1,11 +1,8 @@
 import 'server-only';
-import { and, eq, sql } from 'drizzle-orm';
-
-// Constants
-import { STANDARD_POT_ML, UNKNOWN_SOIL_VOLUME_ML } from './constants';
+import { eq, sql } from 'drizzle-orm';
 
 // Helpers
-import { buildCareIntervalPrompt, buildWaterAmountPrompt, normaliseCareIntervals, normaliseSpeciesKey, resolveWaterAmountMl, toCareIntervals } from './helpers';
+import { buildCareIntervalPrompt, buildWaterAmountPrompt, normaliseCareIntervals, normaliseSpeciesKey, toCareIntervals } from './helpers';
 
 // Services
 import { AiCapReachedError, AiUnavailableError, claimAiUsage, isAiConfigured, readAiEnvironment, requestStructured } from '@/services/server/ai';
@@ -16,7 +13,7 @@ import { database } from '@/lib/db';
 import { aiCareInterval, aiWaterAmount } from '@/lib/db/schema';
 
 // Types
-import type { CareIntervals, CareIntervalsRequest, WaterAmountRequest } from './types';
+import type { CareIntervals, CareIntervalsRequest, WaterPercentRequest } from './types';
 
 const readCachedIntervals = async (speciesKey: string): Promise<CareIntervals | undefined> => {
     const rows = await database
@@ -88,25 +85,24 @@ export const getCareIntervals = async (request: CareIntervalsRequest): Promise<C
     return intervals;
 };
 
-const readCachedWaterAmount = async (speciesKey: string, soilVolumeMl: number): Promise<number | undefined> => {
+const readCachedWaterPercent = async (speciesKey: string): Promise<number | undefined> => {
     const rows = await database
         .select()
         .from(aiWaterAmount)
-        .where(and(eq(aiWaterAmount.speciesKey, speciesKey), eq(aiWaterAmount.soilVolumeMl, soilVolumeMl)));
+        .where(eq(aiWaterAmount.speciesKey, speciesKey));
     const row = rows.at(0);
 
     if (!row) {
         return;
     }
 
-    return row.waterAmountMl;
+    return row.waterPercent;
 };
 
-const writeWaterAmount = async (speciesKey: string, soilVolumeMl: number, waterAmountMl: number): Promise<void> => {
+const writeCachedWaterPercent = async (speciesKey: string, waterPercent: number): Promise<void> => {
     const values = {
         speciesKey,
-        soilVolumeMl,
-        waterAmountMl,
+        waterPercent,
         model: readAiEnvironment().model,
         createdAt: Date.now()
     };
@@ -115,16 +111,15 @@ const writeWaterAmount = async (speciesKey: string, soilVolumeMl: number, waterA
         .insert(aiWaterAmount)
         .values(values)
         .onConflictDoUpdate({
-            target: [aiWaterAmount.speciesKey, aiWaterAmount.soilVolumeMl],
+            target: [aiWaterAmount.speciesKey],
             set: values
         });
 };
 
-export const getWaterAmount = async (request: WaterAmountRequest): Promise<number> => {
-    const { userId, species, soilVolumeMl } = request;
+export const getWaterPercent = async (request: WaterPercentRequest): Promise<number> => {
+    const { userId, species } = request;
     const speciesKey = normaliseSpeciesKey(species);
-    const cacheVolume = soilVolumeMl ?? UNKNOWN_SOIL_VOLUME_ML;
-    const cached = await readCachedWaterAmount(speciesKey, cacheVolume);
+    const cached = await readCachedWaterPercent(speciesKey);
 
     if (cached !== undefined) {
         return cached;
@@ -143,9 +138,8 @@ export const getWaterAmount = async (request: WaterAmountRequest): Promise<numbe
         WATER_AMOUNT_JSON_SCHEMA,
         WaterAmountSchema
     );
-    const waterAmountMl = resolveWaterAmountMl(soilVolumeMl ?? STANDARD_POT_ML, payload.waterPercent);
 
-    await writeWaterAmount(speciesKey, cacheVolume, waterAmountMl);
+    await writeCachedWaterPercent(speciesKey, payload.waterPercent);
 
-    return waterAmountMl;
+    return payload.waterPercent;
 };

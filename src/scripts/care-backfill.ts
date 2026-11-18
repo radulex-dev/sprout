@@ -2,10 +2,10 @@ import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 
 // Helpers
 import { resolveSoilVolumeMl } from '@/helpers/pot';
-import { toCareSchedule } from '@/services/server/care-profile/helpers';
+import { resolveWaterAmountMl, toCareSchedule } from '@/services/server/care-profile/helpers';
 
 // Services
-import { getCareIntervals, getWaterAmount } from '@/services/server/care-profile';
+import { getCareIntervals, getWaterPercent } from '@/services/server/care-profile';
 
 // Database
 import { database } from '@/lib/db';
@@ -19,11 +19,12 @@ const loadWaterAmountMl = async (userId: string, species: string, soilVolumeMl: 
         return 0;
     }
 
-    return getWaterAmount({
+    const waterPercent = await getWaterPercent({
         userId,
-        species,
-        soilVolumeMl
+        species
     });
+
+    return resolveWaterAmountMl(soilVolumeMl, waterPercent);
 };
 
 const pairs = await database

@@ -10,7 +10,7 @@ import { buildCareIntervalPrompt, buildWaterAmountPrompt, normaliseCareIntervals
 
 // Services
 import { AiCapReachedError, AiUnavailableError } from '@/services/server/ai';
-import { getCareIntervals, getWaterAmount } from './index';
+import { getCareIntervals, getWaterPercent } from './index';
 import { CARE_INTERVAL_JSON_SCHEMA, CareIntervalsSchema, WATER_AMOUNT_JSON_SCHEMA, WaterAmountSchema } from './schema';
 
 // Database
@@ -468,7 +468,7 @@ describe('getCareIntervals', () => {
     });
 });
 
-describe('getWaterAmount', () => {
+describe('getWaterPercent', () => {
     beforeEach(() => {
         mockClaimAiUsage.mockReset();
         mockInsert.mockReset();
@@ -478,22 +478,21 @@ describe('getWaterAmount', () => {
         mockSelect.mockReset();
     });
 
-    it('returns the stored amount without claiming a unit or calling the model', async () => {
+    it('returns the stored percent without claiming a unit or calling the model', async () => {
         mockSelect.mockReturnValueOnce(mockSelectChain([{
-            waterAmountMl: 80
+            waterPercent: 7
         }]));
 
-        await expect(getWaterAmount({
+        await expect(getWaterPercent({
             userId: 'user-1',
-            species: 'Monstera deliciosa',
-            soilVolumeMl: 800
-        })).resolves.toBe(80);
+            species: 'Monstera deliciosa'
+        })).resolves.toBe(7);
 
         expect(mockClaimAiUsage).not.toHaveBeenCalled();
         expect(mockRequestStructured).not.toHaveBeenCalled();
     });
 
-    it('claims a unit, calls the model and upserts on a miss', async () => {
+    it('claims a unit, calls the model and upserts the percent on a miss', async () => {
         const values = vi.fn(() => {
             return {
                 onConflictDoUpdate: vi.fn(() => {
@@ -511,67 +510,62 @@ describe('getWaterAmount', () => {
             values
         });
 
-        await expect(getWaterAmount({
+        await expect(getWaterPercent({
             userId: 'user-1',
-            species: 'Monstera deliciosa',
-            soilVolumeMl: 800
-        })).resolves.toBe(240);
+            species: 'Monstera deliciosa'
+        })).resolves.toBe(30);
 
         expect(mockClaimAiUsage).toHaveBeenCalledWith('user-1');
         expect(values).toHaveBeenCalledWith({
             speciesKey: 'monstera deliciosa',
-            soilVolumeMl: 800,
-            waterAmountMl: 240,
+            waterPercent: 30,
             model: '',
             createdAt: expect.any(Number)
         });
     });
 
-    it('keys an unknown soil volume as zero and computes from the standard pot', async () => {
-        const onConflictDoUpdate = vi.fn(() => {
-            return Promise.resolve();
-        });
+    it('serves a second lookup for the same species from the cache without a second model call', async () => {
         const values = vi.fn(() => {
             return {
-                onConflictDoUpdate
+                onConflictDoUpdate: vi.fn(() => {
+                    return Promise.resolve();
+                })
             };
         });
 
         mockSelect.mockReturnValueOnce(mockSelectChain([]));
-        mockClaimAiUsage.mockResolvedValueOnce(true);
+        mockSelect.mockReturnValueOnce(mockSelectChain([{
+            waterPercent: 7
+        }]));
+        mockClaimAiUsage.mockResolvedValue(true);
         mockRequestStructured.mockResolvedValueOnce({
-            waterPercent: 10
+            waterPercent: 7
         });
         mockInsert.mockReturnValueOnce({
             values
         });
 
-        await expect(getWaterAmount({
+        await expect(getWaterPercent({
             userId: 'user-1',
-            species: 'Monstera deliciosa'
-        })).resolves.toBe(80);
+            species: 'Yucca elephantipes'
+        })).resolves.toBe(7);
+        await expect(getWaterPercent({
+            userId: 'user-1',
+            species: 'Yucca elephantipes'
+        })).resolves.toBe(7);
 
-        expect(mockRequestStructured).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({
-            content: 'Species: Monstera deliciosa'
-        })]), WATER_AMOUNT_JSON_SCHEMA, WaterAmountSchema);
-        expect(values).toHaveBeenCalledWith(expect.objectContaining({
-            soilVolumeMl: 0
-        }));
-        expect(onConflictDoUpdate).toHaveBeenCalledWith(expect.objectContaining({
-            set: expect.objectContaining({
-                soilVolumeMl: 0
-            })
-        }));
+        expect(mockClaimAiUsage).toHaveBeenCalledTimes(1);
+        expect(mockRequestStructured).toHaveBeenCalledTimes(1);
+        expect(values).toHaveBeenCalledTimes(1);
     });
 
     it('throws when AI is not configured without claiming a unit', async () => {
         mockIsAiConfigured.mockReturnValueOnce(false);
         mockSelect.mockReturnValueOnce(mockSelectChain([]));
 
-        await expect(getWaterAmount({
+        await expect(getWaterPercent({
             userId: 'user-1',
-            species: 'Monstera deliciosa',
-            soilVolumeMl: 800
+            species: 'Monstera deliciosa'
         })).rejects.toBeInstanceOf(AiUnavailableError);
 
         expect(mockClaimAiUsage).not.toHaveBeenCalled();
@@ -582,10 +576,9 @@ describe('getWaterAmount', () => {
         mockSelect.mockReturnValueOnce(mockSelectChain([]));
         mockClaimAiUsage.mockResolvedValueOnce(false);
 
-        await expect(getWaterAmount({
+        await expect(getWaterPercent({
             userId: 'user-1',
-            species: 'Monstera deliciosa',
-            soilVolumeMl: 800
+            species: 'Monstera deliciosa'
         })).rejects.toBeInstanceOf(AiCapReachedError);
 
         expect(mockRequestStructured).not.toHaveBeenCalled();

@@ -21,11 +21,10 @@ export interface CareIntervalsRequest {
     species: string;
 }
 
-export interface WaterAmountRequest {
+export interface WaterPercentRequest {
     userId: string;
     species: string;
-    soilVolumeMl?: number;
 }
 
 export type CareIntervalsPayload = z.infer<typeof CareIntervalsSchema>;
-export type WaterAmountPayload = z.infer<typeof WaterAmountSchema>;
+export type WaterPercentPayload = z.infer<typeof WaterAmountSchema>;

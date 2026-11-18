@@ -85,6 +85,13 @@
       "when": 1795024856722,
       "tag": "0011_removed_care_reference",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1795039436913,
+      "tag": "0012_water_percent_per_species",
+      "breakpoints": true
     }
   ]
 }
