@@ -78,6 +78,13 @@
       "when": 1794865059725,
       "tag": "0010_added_ai_care_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1795024856722,
+      "tag": "0011_removed_care_reference",
+      "breakpoints": true
     }
   ]
 }

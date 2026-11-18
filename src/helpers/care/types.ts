@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 
 // Types
-import type { CareKind, CareSchedule, CareSource, Plant } from '@/types';
+import type { CareKind, Plant } from '@/types';
 
 export interface CareTask {
     plant: Plant;
@@ -22,21 +22,4 @@ export interface CareNotification {
     title: string;
     body: string;
     tag: string;
-}
-
-export interface CareReference {
-    alias: Record<string, string>;
-    family: Record<string, CareSchedule>;
-    genus: Record<string, CareSchedule>;
-}
-
-export interface CareLookup {
-    genus?: string;
-    species?: string;
-    family?: string;
-}
-
-export interface ResolvedCare {
-    care: CareSchedule;
-    source: CareSource;
 }

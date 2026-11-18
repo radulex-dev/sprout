@@ -28,7 +28,7 @@ export const RichContent: Story = {
         trigger: 'Why these defaults?',
         children: (
             <div>
-                <p>Defaults come from PlantSolve reference data for this genus.</p>
+                <p>Defaults come from the AI care profile for this species.</p>
                 <p>You can edit every interval per plant.</p>
             </div>
         )
