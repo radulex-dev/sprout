@@ -137,8 +137,12 @@ describe('Helpers', () => {
             waterPercent: 5
         }, {
             expected: MAX_WATER_AMOUNT_ML,
-            soilVolumeMl: 1000000,
+            soilVolumeMl: 2000000,
             waterPercent: 30
+        }, {
+            expected: 120000,
+            soilVolumeMl: 600000,
+            waterPercent: 20
         }, {
             expected: MIN_WATER_AMOUNT_ML,
             soilVolumeMl: 100,

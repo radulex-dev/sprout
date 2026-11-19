@@ -1,3 +1,6 @@
+// Constants
+import { MAX_SOIL_VOLUME_LITRES, ML_PER_LITRE } from '@/helpers/pot/constants';
+
 export const STANDARD_POT_ML = 800;
 
 export const MIN_WATER_DAYS = 2;
@@ -7,9 +10,9 @@ export const MAX_FERTILIZE_DAYS = 90;
 export const MIN_REPOT_MONTHS = 6;
 export const MAX_REPOT_MONTHS = 36;
 export const MIN_WATER_AMOUNT_ML = 10;
-export const MAX_WATER_AMOUNT_ML = 100000;
 export const MIN_WATER_PERCENT = 5;
 export const MAX_WATER_PERCENT = 30;
+export const MAX_WATER_AMOUNT_ML = MAX_SOIL_VOLUME_LITRES * ML_PER_LITRE * MAX_WATER_PERCENT / 100;
 
 export const CARE_INTERVAL_PROMPT_SYSTEM = [
     'You are a horticultural advisor estimating care for an indoor houseplant.',

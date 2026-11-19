@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Constants
 import { PLANT_ID_SCHEMA } from '@/lib/db/constants';
+import { MAX_WATER_AMOUNT_ML } from '@/services/server/care-profile/constants';
 
 // Helpers
 import { mockDeleteChain, mockInsertChain, mockSelectChain } from '@test/vitest/helpers/mockDb';
@@ -253,7 +254,7 @@ describe('seasonal water schedule', () => {
                 waterEveryDaysSummer: 7,
                 waterEveryDaysAutumn: 10,
                 waterEveryDaysWinter: 21,
-                waterAmountMl: 100001,
+                waterAmountMl: MAX_WATER_AMOUNT_ML + 1,
                 fertilizeEveryDays: 30,
                 repotEveryMonths: 18
             },
