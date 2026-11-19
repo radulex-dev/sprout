@@ -176,21 +176,29 @@ export const plantDisplayName = (plant: Plant): string => {
     return plant.nickname || plant.commonName || plant.species;
 };
 
-const formatWaterSlot = (plant: Plant): string => {
+const formatWaterSlot = (plant: Plant): string | undefined => {
     const amount = plant.care.waterAmountMl;
 
-    if (!hasContainerSize(plant) || amount === undefined || amount === 0) {
+    if (!hasContainerSize(plant)) {
         return POT_SIZE_NUDGE_SLOT;
+    }
+
+    if (amount === undefined || amount === 0) {
+        return;
     }
 
     return `about ${formatWaterAmount(amount)}`;
 };
 
-const formatWaterFollowUp = (plant: Plant): string => {
+const formatWaterFollowUp = (plant: Plant): string | undefined => {
     const amount = plant.care.waterAmountMl;
 
-    if (!hasContainerSize(plant) || amount === undefined || amount === 0) {
+    if (!hasContainerSize(plant)) {
         return POT_SIZE_NUDGE_SENTENCE;
+    }
+
+    if (amount === undefined || amount === 0) {
+        return;
     }
 
     return `Give it about ${formatWaterAmount(amount)}.`;
@@ -202,9 +210,8 @@ const buildOneTaskCareNotification = (task: CareTask): CareNotification => {
     const dueSentence = task.daysUntil < 0
         ? `${name} is ${formatDue(task.daysUntil)} for ${meta.gerund}.`
         : `${name} is due for ${meta.gerund} today.`;
-    const body = task.kind === CareKind.Water
-        ? `${dueSentence} ${formatWaterFollowUp(task.plant)}`
-        : dueSentence;
+    const followUp = task.kind === CareKind.Water ? formatWaterFollowUp(task.plant) : undefined;
+    const body = followUp === undefined ? dueSentence : `${dueSentence} ${followUp}`;
 
     return {
         title: `Time to ${meta.label.toLowerCase()} ${name}`,
@@ -217,8 +224,9 @@ const buildLessThanMaxTasksCareNotification = (tasks: CareTask[], title: string)
     const kindsByPlantId = tasks.reduce<Map<string, string[]>>((accumulator, task) => {
         const kinds = accumulator.get(task.plant.id) ?? [];
         const label = CARE_META[task.kind].label.toLowerCase();
+        const slot = task.kind === CareKind.Water ? formatWaterSlot(task.plant) : undefined;
 
-        kinds.push(task.kind === CareKind.Water ? `${label} (${formatWaterSlot(task.plant)})` : label);
+        kinds.push(slot === undefined ? label : `${label} (${slot})`);
         accumulator.set(task.plant.id, kinds);
 
         return accumulator;

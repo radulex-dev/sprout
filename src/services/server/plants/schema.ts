@@ -1,9 +1,10 @@
 import * as z from 'zod';
 
 // Constants
-import { MAX_DAYS, MAX_MONTHS, MAX_TEXT_LENGTH, MAX_WATER_AMOUNT_ML, MAX_WATER_DAYS, MIN_WATER_DAYS } from './constants';
+import { MAX_DAYS, MAX_MONTHS, MAX_TEXT_LENGTH, MAX_WATER_DAYS, MIN_WATER_DAYS } from './constants';
 import { MAX_PHOTO_BYTES } from '@/helpers/image/constants';
 import { MAX_SOIL_VOLUME_LITRES, MIN_SOIL_VOLUME_LITRES, POT_SIZES } from '@/helpers/pot/constants';
+import { MAX_WATER_AMOUNT_ML } from '@/services/server/care-profile/constants';
 
 // Types
 import { CareKind, type PlantInput } from '@/types';

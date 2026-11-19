@@ -891,4 +891,63 @@ describe('buildCareNotification', () => {
 
         expect(notification.body).toBe('Fern: water (about 1.2 L), fertilise');
     });
+
+    it('omits the amount sentence on a sized plant whose amount has not been filled in', () => {
+        const plant = makePlant({
+            id: 'plant-fern',
+            nickname: 'Fern',
+            potDiameter: 12,
+            care: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
+            }
+        });
+
+        const notification = buildCareNotification([{
+            plant,
+            kind: CareKind.Water,
+            dueAt: NOW,
+            daysUntil: 0
+        }]);
+
+        expect(notification.body).toBe('Fern is due for watering today.');
+        expect(notification.body).not.toContain('set a pot size');
+    });
+
+    it('omits the amount slot on a sized plant whose amount has not been filled in', () => {
+        const plant = makePlant({
+            id: 'plant-fern',
+            nickname: 'Fern',
+            potDiameter: 12,
+            care: {
+                waterEveryDaysSpring: 7,
+                waterEveryDaysSummer: 7,
+                waterEveryDaysAutumn: 7,
+                waterEveryDaysWinter: 7,
+                waterAmountMl: 0,
+                fertilizeEveryDays: 30,
+                repotEveryMonths: 12
+            }
+        });
+
+        const notification = buildCareNotification([{
+            plant,
+            kind: CareKind.Water,
+            dueAt: NOW,
+            daysUntil: 0
+        }, {
+            plant,
+            kind: CareKind.Fertilize,
+            dueAt: NOW,
+            daysUntil: 0
+        }]);
+
+        expect(notification.body).toBe('Fern: water, fertilise');
+        expect(notification.body).not.toContain('()');
+    });
 });
