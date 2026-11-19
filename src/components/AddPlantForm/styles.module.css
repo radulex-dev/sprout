@@ -54,10 +54,6 @@
     @apply ui-shutter-row;
 }
 
-.standardPotWarning {
-    @apply ui-field-hint;
-}
-
 @variant desktop {
     .resultCard {
         flex-direction: column;

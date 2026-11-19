@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Sprout } from 'lucide-react';
 
 // Constants
-import { CARE_HINT, NICKNAME_LABEL, NICKNAME_PLACEHOLDER, PROFILE_CAPPED, PROFILE_LOADING, PROFILE_UNAVAILABLE, STANDARD_POT_WARNING } from './constants';
+import { CARE_HINT, NICKNAME_LABEL, NICKNAME_PLACEHOLDER, PROFILE_CAPPED, PROFILE_LOADING, PROFILE_UNAVAILABLE } from './constants';
 import { FREQUENCY_TITLE } from '@/components/CareScheduleFields/constants';
 import { LAST_CARE_HINT, LAST_CARE_TITLE } from '@/components/LastCareFields/constants';
 import { NoticeTone } from '@/components/Notice/constants';
@@ -142,18 +142,6 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
         }
     }, [isReady, care, nickname, result, photo, size, lastCareDates, onSave]);
 
-    const renderStandardPotWarning = () => {
-        if (hasContainerSize(size) || !isReady) {
-            return;
-        }
-
-        return (
-            <p className={styles.standardPotWarning}>
-                {STANDARD_POT_WARNING}
-            </p>
-        );
-    };
-
     const renderNotice = () => {
         if (status === CareProfileStatus.Unavailable || amountStatus === CareProfileStatus.Unavailable) {
             return (
@@ -218,7 +206,6 @@ const AddPlantForm: React.FunctionComponent<Props> = ({ photo, result, onCancel,
                 <Field className={styles.field} label={NICKNAME_LABEL} value={nickname} onValueChange={handleNicknameChange} placeholder={NICKNAME_PLACEHOLDER} />
 
                 <PotSizePicker className={styles.potField} value={size} onChange={handleSizeChange} hint={POT_SIZE_HINT} />
-                {renderStandardPotWarning()}
 
                 <h2 className={styles.sectionTitle}>
                     {LAST_CARE_TITLE}
