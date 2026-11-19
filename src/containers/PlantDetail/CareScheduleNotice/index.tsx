@@ -5,13 +5,13 @@ import { Ruler } from 'lucide-react';
 // Constants
 import { NOT_SET_LABEL } from './constants';
 import { ButtonVariant } from '@/design-system/Button/constants';
+import { CARE_META } from '@/helpers/care/constants';
 
 // Components
 import Button from '@/design-system/Button';
 
 // Helpers
 import { formatContainerSize } from '@/components/PotSizePicker/helpers';
-import { CARE_ICONS } from '@/helpers/care/icons';
 import { formatWaterSchedule } from './helpers';
 
 // Styles
@@ -27,9 +27,9 @@ export interface Props extends React.ComponentProps<'div'> {
 
 const CareScheduleNotice: React.FunctionComponent<Props> = ({ plant, onEdit, className, ...props }) => {
     const classes = classNames(styles.root, className);
-    const WaterIcon = CARE_ICONS[CareKind.Water];
-    const FertilizeIcon = CARE_ICONS[CareKind.Fertilize];
-    const RepotIcon = CARE_ICONS[CareKind.Repot];
+    const WaterIcon = CARE_META[CareKind.Water].icon;
+    const FertilizeIcon = CARE_META[CareKind.Fertilize].icon;
+    const RepotIcon = CARE_META[CareKind.Repot].icon;
     const potSize = formatContainerSize(plant) ?? NOT_SET_LABEL;
 
     return (
