@@ -10,7 +10,6 @@ import WaterAmount from '@/components/WaterAmount';
 
 // Helpers
 import { allTasks, formatDue } from '@/helpers/care';
-import { CARE_ICONS } from '@/helpers/care/icons';
 
 // Styles
 import styles from './styles.module.css';
@@ -37,7 +36,7 @@ const PlantChips: React.FunctionComponent<Props> = ({ plant, className, ...props
                 [styles.overdue]: task.daysUntil < 0,
                 [styles.due]: task.daysUntil >= 0
             });
-            const TaskIcon = CARE_ICONS[task.kind];
+            const TaskIcon = CARE_META[task.kind].icon;
 
             return (
                 <span key={task.kind} className={chipClasses}>
@@ -55,11 +54,9 @@ const PlantChips: React.FunctionComponent<Props> = ({ plant, className, ...props
             return;
         }
 
-        const NextIcon = CARE_ICONS[next.kind];
-
         return (
             <span className={styles.chip}>
-                <NextIcon size="0.75rem" aria-hidden />
+                <NextMeta.icon size="0.75rem" aria-hidden />
                 <span>
                     {NextMeta.label}
                 </span>

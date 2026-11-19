@@ -10,7 +10,6 @@ import CareStatValue from '../CareStatValue';
 
 // Helpers
 import { waterSeasonFor } from '@/helpers/care';
-import { CARE_ICONS } from '@/helpers/care/icons';
 
 // Styles
 import styles from './styles.module.css';
@@ -40,12 +39,11 @@ const CareStats: React.FunctionComponent<Props> = ({ plant, now, onRequestPotSiz
         <dl className={classes} {...props}>
             {[CareKind.Water, CareKind.Fertilize, CareKind.Repot].map((kind) => {
                 const meta = CARE_META[kind];
-                const CareIcon = CARE_ICONS[kind];
 
                 return (
                     <div key={kind} className={styles.careStat}>
                         <div className={styles.emoji}>
-                            <CareIcon size="1.375rem" aria-hidden />
+                            <meta.icon size="1.375rem" aria-hidden />
                         </div>
                         <dt className={styles.label}>
                             {meta.label}

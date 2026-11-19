@@ -51,8 +51,6 @@ COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
 COPY --from=build /app/drizzle.config.ts ./drizzle.config.ts
 COPY --from=build /app/drizzle ./drizzle
-COPY --from=build /app/src ./src
-COPY --from=build /app/tsconfig.json ./tsconfig.json
 RUN printf '%s' '{"name":"@radulex-dev/sprout","private":true,"type":"module","dependencies":{"drizzle-orm":"0.45.2"},"scripts":{"db:migrate":"drizzle-kit migrate"}}' > package.json \
     && bun add --no-save drizzle-kit@0.31.10
 EXPOSE 3000
