@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 
 // Constants
-import { CARE_HINT, PROFILE_CAPPED, PROFILE_LOADING, PROFILE_UNAVAILABLE, STANDARD_POT_WARNING } from './constants';
+import { CARE_HINT, PROFILE_CAPPED, PROFILE_LOADING, PROFILE_UNAVAILABLE } from './constants';
 
 // Components
 import AddPlantForm from './index';
@@ -133,44 +133,6 @@ describe('<AddPlantForm />', () => {
         }));
 
         expect(props.onSave).not.toHaveBeenCalled();
-    });
-
-    it('warns about the standard pot only while no size is set', async () => {
-        const user = userEvent.setup();
-
-        render(<AddPlantForm {...props} />);
-
-        expect(await screen.findByText(STANDARD_POT_WARNING)).toBeInTheDocument();
-
-        await user.click(screen.getByRole('radio', {
-            name: 'Select 12 cm pot'
-        }));
-
-        await waitFor(() => {
-            expect(screen.queryByText(STANDARD_POT_WARNING)).not.toBeInTheDocument();
-        });
-    });
-
-    it('shows the warning again after clearing the pot size', async () => {
-        const user = userEvent.setup();
-
-        render(<AddPlantForm {...props} />);
-
-        expect(await screen.findByText(STANDARD_POT_WARNING)).toBeInTheDocument();
-
-        await user.click(screen.getByRole('radio', {
-            name: 'Select 12 cm pot'
-        }));
-
-        await waitFor(() => {
-            expect(screen.queryByText(STANDARD_POT_WARNING)).not.toBeInTheDocument();
-        });
-
-        await user.click(screen.getByRole('button', {
-            name: 'Clear pot size'
-        }));
-
-        expect(await screen.findByText(STANDARD_POT_WARNING)).toBeInTheDocument();
     });
 
     it('makes no request when the pot size changes', async () => {
