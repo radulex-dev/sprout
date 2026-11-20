@@ -128,8 +128,11 @@ describe('captureException', () => {
 
         captureException(error, 'user-1');
 
-        expect(captureExceptionMock).toHaveBeenCalledWith(error, 'user-1', {
-            environment: 'local'
+        expect(captureExceptionMock).toHaveBeenCalledWith(error, {
+            distinctId: 'user-1',
+            properties: {
+                environment: 'local'
+            }
         });
     });
 });
