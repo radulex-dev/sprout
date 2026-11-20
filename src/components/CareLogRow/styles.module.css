@@ -1,4 +1,4 @@
-@reference "../../app/globals.css";
+@reference '../../app/globals.css';
 
 .root {
     @apply ui-task-row;
@@ -24,10 +24,9 @@
     @apply ui-when flex self-start;
 }
 
-.when::after {
+.when:after {
     @apply absolute inset-x-0 -inset-y-3.5;
-
-    content: "";
+    content: '';
 }
 
 .done {

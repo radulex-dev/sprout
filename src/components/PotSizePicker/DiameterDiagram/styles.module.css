@@ -1,4 +1,4 @@
-@reference "../../../app/globals.css";
+@reference '../../../app/globals.css';
 
 .root {
     @apply w-72 max-w-full;

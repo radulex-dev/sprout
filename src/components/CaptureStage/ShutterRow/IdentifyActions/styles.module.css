@@ -1,9 +1,8 @@
-@reference "../../../../app/globals.css";
+@reference '../../../../app/globals.css';
 
 .spinner {
     @apply size-5.5 rounded-full;
-
-    border: 3px solid rgb(255 255 255 / 35%);
+    border: 3px solid rgb(255 255 255 / 0.35);
     border-top-color: #fff;
     animation: spin 0.7s linear infinite;
 }

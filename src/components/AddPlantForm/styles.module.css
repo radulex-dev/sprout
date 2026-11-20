@@ -1,11 +1,11 @@
-@reference "../../app/globals.css";
+@reference '../../app/globals.css';
 
 .root {
     @variant desktop {
         display: grid;
         grid-template-columns: minmax(0, 17rem) minmax(0, 1fr);
-        column-gap: 2rem;
         align-items: start;
+        column-gap: 2rem;
     }
 }
 

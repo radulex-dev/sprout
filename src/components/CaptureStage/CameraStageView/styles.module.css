@@ -1,8 +1,7 @@
-@reference "../../../app/globals.css";
+@reference '../../../app/globals.css';
 
 .root {
     @apply relative aspect-3/4 w-full overflow-hidden rounded-card shadow-card;
-
     background: #10180f;
 
     video,
@@ -13,7 +12,6 @@
 
 .placeholder {
     @apply absolute inset-0 ui-task-list items-center justify-center p-6 text-center text-sm;
-
     color: #cfe0cb;
 
     @variant desktop {

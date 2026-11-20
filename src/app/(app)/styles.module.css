@@ -1,4 +1,4 @@
-@reference "../globals.css";
+@reference '../globals.css';
 
 .root {
     @apply
@@ -6,7 +6,6 @@
         md:max-w-2xl
         lg:max-w-4xl
     ;
-
     padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom));
 
     @variant desktop {
@@ -19,7 +18,6 @@
         absolute left-4 z-50 rounded-btn bg-green-700 px-4 py-2 text-sm font-semibold text-white
         no-underline
     ;
-
     top: -100%;
 
     &:focus {

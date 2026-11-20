@@ -1,9 +1,8 @@
-@reference "../../../../app/globals.css";
+@reference '../../../../app/globals.css';
 
 .root {
     @apply flex flex-col rounded-2xl bg-bg p-2.5;
-
-    border: 1px solid rgb(28 37 32 / 10%);
+    border: 1px solid rgb(28 37 32 / 0.1);
 }
 
 .row {
@@ -16,14 +15,12 @@
 
 .field {
     @apply min-w-20 rounded-md bg-surface px-2 py-1 text-right text-xs font-semibold text-ink;
-
-    border: 1px solid rgb(28 37 32 / 18%);
+    border: 1px solid rgb(28 37 32 / 0.18);
 }
 
 .actions {
     @apply flex justify-end pt-1.5;
-
-    border-top: 1px solid rgb(28 37 32 / 8%);
+    border-top: 1px solid rgb(28 37 32 / 0.08);
 }
 
 .button {

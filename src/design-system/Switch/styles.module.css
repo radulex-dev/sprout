@@ -1,4 +1,4 @@
-@reference "../../app/globals.css";
+@reference '../../app/globals.css';
 
 .root {
     @apply
@@ -15,8 +15,7 @@
         relative inline-flex h-7 w-12 shrink-0 items-center rounded-full p-0.5 transition-colors
         duration-150
     ;
-
-    background: rgb(28 37 32 / 14%);
+    background: rgb(28 37 32 / 0.14);
 }
 
 .root[data-checked] .track {
@@ -30,8 +29,7 @@
 
 .thumb {
     @apply size-6 rounded-full bg-surface transition-transform duration-150;
-
-    box-shadow: 0 0.0625rem 0.125rem rgb(28 37 32 / 24%);
+    box-shadow: 0 0.0625rem 0.125rem rgb(28 37 32 / 0.24);
 }
 
 .root[data-checked] .thumb {

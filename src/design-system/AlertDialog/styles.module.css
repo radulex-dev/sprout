@@ -1,4 +1,4 @@
-@reference "../../app/globals.css";
+@reference '../../app/globals.css';
 
 .backdrop {
     @apply fixed inset-0 z-40 bg-black/40 transition-opacity duration-150;

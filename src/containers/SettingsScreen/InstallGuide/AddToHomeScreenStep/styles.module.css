@@ -1,4 +1,4 @@
-@reference "../../../../app/globals.css";
+@reference '../../../../app/globals.css';
 
 .root {
     @apply ui-field-row items-center rounded-xl bg-bg px-3 py-2;
@@ -6,8 +6,7 @@
 
 .icon {
     @apply flex size-7 shrink-0 items-center justify-center rounded-lg bg-surface text-green-700;
-
-    border: 1px solid rgb(28 37 32 / 12%);
+    border: 1px solid rgb(28 37 32 / 0.12);
 }
 
 .label {

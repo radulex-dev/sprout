@@ -10,7 +10,6 @@
         md:px-6 md:pt-6
         lg:px-8
     ;
-
     padding-top: calc(1rem + env(safe-area-inset-top));
     padding-bottom: 1.5rem;
     animation: fade-in var(--dur-base) var(--ease-out);
@@ -25,7 +24,6 @@
 
     h1 {
         @apply m-0 text-h1 tracking-[-0.0313rem] wrap-anywhere text-green-900;
-
         text-wrap: balance;
     }
 }
@@ -46,8 +44,7 @@
     select,
     textarea {
         @apply w-full rounded-xl bg-surface px-3 py-2.75 text-base text-ink;
-
-        border: 1.5px solid rgb(28 37 32 / 14%);
+        border: 1.5px solid rgb(28 37 32 / 0.14);
 
         &:focus {
             @apply border-green-500 outline-none;
@@ -74,7 +71,6 @@
 
 @utility ui-task-row {
     @apply flex items-center gap-3 rounded-card bg-surface p-3 shadow-card;
-
     transition:
         background-color var(--dur-base) var(--ease-out),
         box-shadow var(--dur-base) var(--ease-out);
@@ -116,7 +112,6 @@
 
 @utility ui-result-card {
     @apply mb-2.5 flex w-full items-center gap-3 rounded-card bg-surface p-3.5 text-left shadow-card;
-
     border: 2px solid transparent;
     transition:
         transform var(--dur-base) var(--ease-out),
@@ -125,8 +120,8 @@
 
     @media (hover: hover) {
         &:where(:hover) {
+            border-color: rgb(28 37 32 / 0.16);
             transform: translateY(-0.0625rem);
-            border-color: rgb(28 37 32 / 16%);
             box-shadow: var(--shadow-card-hover);
         }
     }
@@ -190,7 +185,6 @@
 
     p {
         @apply mt-0 mb-5 text-sm/normal;
-
         text-wrap: pretty;
     }
 }
@@ -215,10 +209,10 @@
     position: absolute;
     width: 1px;
     height: 1px;
-    margin: -1px;
     padding: 0;
+    margin: -1px;
+    border: 0;
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
-    border: 0;
 }
