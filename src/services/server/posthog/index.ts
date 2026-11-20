@@ -70,8 +70,11 @@ export const captureException = (error: unknown, distinctId?: string): void => {
         return;
     }
 
-    posthog.captureException(error, distinctId, {
-        environment: readPostHogEnvironment().environment
+    posthog.captureException(error, {
+        distinctId,
+        properties: {
+            environment: readPostHogEnvironment().environment
+        }
     });
 };
 
