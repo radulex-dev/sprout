@@ -1,4 +1,4 @@
-@reference "../../../app/globals.css";
+@reference '../../../app/globals.css';
 
 .root {
     @apply mt-3.5 grid grid-cols-3 gap-2.5;

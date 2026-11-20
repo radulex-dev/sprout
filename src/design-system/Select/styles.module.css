@@ -1,4 +1,4 @@
-@reference "../../app/globals.css";
+@reference '../../app/globals.css';
 
 .root {
     @apply ui-field;
@@ -13,8 +13,7 @@
         flex w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-surface px-3 py-2.75
         text-left text-[0.9375rem] text-ink
     ;
-
-    border: 1.5px solid rgb(28 37 32 / 14%);
+    border: 1.5px solid rgb(28 37 32 / 0.14);
 
     &:focus-visible {
         @apply border-green-500 outline-none;
@@ -51,9 +50,8 @@
 
 .popup {
     @apply max-h-60 overflow-y-auto rounded-xl bg-surface p-1 shadow-card;
-
     min-width: var(--anchor-width);
-    border: 1.5px solid rgb(28 37 32 / 14%);
+    border: 1.5px solid rgb(28 37 32 / 0.14);
 }
 
 .list {

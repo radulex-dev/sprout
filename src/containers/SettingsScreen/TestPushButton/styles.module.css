@@ -1,4 +1,4 @@
-@reference "../../../app/globals.css";
+@reference '../../../app/globals.css';
 
 .root {
     @apply
@@ -26,7 +26,6 @@
 
 .ringCircle {
     @apply fill-none stroke-2;
-
     stroke: var(--color-green-500);
     stroke-linecap: round;
     transition: stroke-dashoffset 1s linear;

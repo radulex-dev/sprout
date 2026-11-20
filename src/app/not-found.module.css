@@ -1,4 +1,4 @@
-@reference "./globals.css";
+@reference './globals.css';
 
 .root {
     @apply mx-auto ui-empty max-w-120;

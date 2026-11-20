@@ -1,4 +1,4 @@
-@reference "../../../app/globals.css";
+@reference '../../../app/globals.css';
 
 .root {
     @apply block h-auto;
@@ -6,7 +6,6 @@
 
 .body {
     @apply fill-green-100 stroke-green-500;
-
     stroke-linejoin: round;
     stroke-width: 3;
 }

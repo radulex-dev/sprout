@@ -1,4 +1,4 @@
-@reference "../../../app/globals.css";
+@reference '../../../app/globals.css';
 
 .root {
     @apply flex flex-col;
@@ -21,7 +21,6 @@
 
 .steps {
     @apply m-0 ui-task-list list-none;
-
     max-height: 50dvh;
     overflow-y: auto;
 }

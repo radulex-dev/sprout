@@ -1,4 +1,4 @@
-@reference "../../app/globals.css";
+@reference '../../app/globals.css';
 
 .root {
     @apply inline-flex;
@@ -10,7 +10,6 @@
 
 .popup {
     @apply rounded-card border border-solid border-ink-soft/20 bg-surface p-2.5 shadow-card;
-
     transition:
         opacity var(--dur-base) var(--ease-out),
         transform var(--dur-base) var(--ease-out);
@@ -58,11 +57,10 @@
     @apply bg-green-700 text-white;
 }
 
-.today::after {
+.today:after {
     @apply absolute bottom-1.25 left-1/2 size-1 -translate-x-1/2 rounded-full;
-
+    content: '';
     background-color: currentcolor;
-    content: "";
 }
 
 .blank {

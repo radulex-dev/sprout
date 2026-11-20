@@ -1,4 +1,4 @@
-@reference "../../app/globals.css";
+@reference '../../app/globals.css';
 
 .positioner {
     @apply z-50;
@@ -6,7 +6,6 @@
 
 .popup {
     @apply rounded-card bg-green-900 px-3 py-2 text-note text-white shadow-card;
-
     transition:
         opacity var(--dur-base) var(--ease-out),
         transform var(--dur-base) var(--ease-out);

@@ -1,4 +1,4 @@
-@reference "../../../app/globals.css";
+@reference '../../../app/globals.css';
 
 .root {
     @apply
@@ -6,10 +6,9 @@
         md:grid-cols-3 md:gap-4
         lg:grid-cols-4
     ;
-
-    list-style: none;
-    margin: 0;
     padding: 0;
+    margin: 0;
+    list-style: none;
 }
 
 .plantCardItem {
@@ -21,7 +20,6 @@
         flex cursor-pointer flex-col overflow-hidden rounded-card border-none bg-surface p-0 text-left
         text-inherit no-underline shadow-card
     ;
-
     transition:
         transform var(--dur-base) var(--ease-out),
         box-shadow var(--dur-base) var(--ease-out);
@@ -35,7 +33,6 @@
     @apply
         flex aspect-square w-full items-center justify-center bg-green-100 object-cover text-[2.75rem]
     ;
-
     transition: transform var(--dur-base) var(--ease-out);
 }
 

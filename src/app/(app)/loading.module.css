@@ -1,4 +1,4 @@
-@reference "../globals.css";
+@reference '../globals.css';
 
 .root {
     @apply ui-screen;
@@ -33,7 +33,6 @@
 .lineTitle,
 .lineMeta {
     @apply rounded-full bg-surface-2;
-
     animation: skeleton-pulse 1.4s ease-in-out infinite;
 }
 

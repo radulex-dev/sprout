@@ -1,16 +1,14 @@
-@reference "../../app/globals.css";
+@reference '../../app/globals.css';
 
 .root {
     @apply fixed inset-0 z-30 flex;
-
-    background-color: var(--color-bg);
     overflow-y: auto;
+    background-color: var(--color-bg);
     animation: fade-in var(--dur-base) var(--ease-out);
 }
 
 .content {
     @apply m-auto flex w-full max-w-sm flex-col items-center gap-3 text-center;
-
     padding-block: calc(1rem + env(safe-area-inset-top)) calc(1rem + env(safe-area-inset-bottom));
     padding-inline: calc(1.5rem + env(safe-area-inset-left)) calc(1.5rem + env(safe-area-inset-right));
 }
@@ -29,7 +27,6 @@
 
 .steps {
     @apply m-0 flex w-full flex-col gap-3 rounded-card bg-surface px-4.5 py-4 text-left shadow-card;
-
     list-style: none;
 }
 
@@ -39,7 +36,6 @@
 
 .stepNumber {
     @apply size-5.5 shrink-0 rounded-full bg-green-100 text-center text-xs font-bold text-green-900;
-
     line-height: 1.375rem;
 }
 
